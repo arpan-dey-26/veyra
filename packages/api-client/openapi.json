@@ -32,6 +32,572 @@
         "title": "AcceptInviteRequest",
         "type": "object"
       },
+      "AllocatedBag": {
+        "properties": {
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "public_id",
+          "component",
+          "blood_group",
+          "expires_at",
+          "status"
+        ],
+        "title": "AllocatedBag",
+        "type": "object"
+      },
+      "AvailabilityItem": {
+        "properties": {
+          "band": {
+            "description": "Banded availability: exact stock of other facilities is never disclosed",
+            "enum": [
+              "sufficient",
+              "limited",
+              "none"
+            ],
+            "title": "Band",
+            "type": "string"
+          },
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "target_ref": {
+            "title": "Target Ref",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "target_ref",
+          "name",
+          "city",
+          "state",
+          "band",
+          "source"
+        ],
+        "title": "AvailabilityItem",
+        "type": "object"
+      },
+      "AvailabilityResponse": {
+        "properties": {
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityItem"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "units": {
+            "title": "Units",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "blood_group",
+          "component",
+          "units",
+          "results"
+        ],
+        "title": "AvailabilityResponse",
+        "type": "object"
+      },
+      "BagEventOut": {
+        "properties": {
+          "event_type": {
+            "title": "Event Type",
+            "type": "string"
+          },
+          "from_facility": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Facility"
+          },
+          "meta": {
+            "additionalProperties": true,
+            "title": "Meta",
+            "type": "object"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "prev_hash": {
+            "title": "Prev Hash",
+            "type": "string"
+          },
+          "row_hash": {
+            "title": "Row Hash",
+            "type": "string"
+          },
+          "seq": {
+            "title": "Seq",
+            "type": "integer"
+          },
+          "to_facility": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Facility"
+          }
+        },
+        "required": [
+          "seq",
+          "event_type",
+          "occurred_at",
+          "from_facility",
+          "to_facility",
+          "meta",
+          "prev_hash",
+          "row_hash"
+        ],
+        "title": "BagEventOut",
+        "type": "object"
+      },
+      "BagOut": {
+        "properties": {
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "collected_at": {
+            "format": "date-time",
+            "title": "Collected At",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "current_facility_id": {
+            "format": "uuid",
+            "title": "Current Facility Id",
+            "type": "string"
+          },
+          "current_facility_name": {
+            "title": "Current Facility Name",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_expired": {
+            "title": "Is Expired",
+            "type": "boolean"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "qr_payload": {
+            "title": "Qr Payload",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "volume_ml": {
+            "title": "Volume Ml",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "public_id",
+          "qr_payload",
+          "blood_group",
+          "component",
+          "volume_ml",
+          "collected_at",
+          "expires_at",
+          "status",
+          "is_expired",
+          "current_facility_id",
+          "current_facility_name"
+        ],
+        "title": "BagOut",
+        "type": "object"
+      },
+      "BagTrace": {
+        "properties": {
+          "bag": {
+            "$ref": "#/components/schemas/BagOut"
+          },
+          "chain": {
+            "$ref": "#/components/schemas/ChainStatus"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/BagEventOut"
+            },
+            "title": "Events",
+            "type": "array"
+          }
+        },
+        "required": [
+          "bag",
+          "events",
+          "chain"
+        ],
+        "title": "BagTrace",
+        "type": "object"
+      },
+      "BloodRequestOut": {
+        "properties": {
+          "bags": {
+            "items": {
+              "$ref": "#/components/schemas/AllocatedBag"
+            },
+            "title": "Bags",
+            "type": "array"
+          },
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "hospital_id": {
+            "format": "uuid",
+            "title": "Hospital Id",
+            "type": "string"
+          },
+          "hospital_name": {
+            "title": "Hospital Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "needed_by": {
+            "format": "date-time",
+            "title": "Needed By",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
+          },
+          "response_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Note"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "acknowledged",
+              "dispatched",
+              "fulfilled",
+              "rejected",
+              "cancelled"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "target_facility_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Facility Id"
+          },
+          "target_name": {
+            "title": "Target Name",
+            "type": "string"
+          },
+          "units": {
+            "title": "Units",
+            "type": "integer"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "urgency": {
+            "title": "Urgency",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "hospital_id",
+          "hospital_name",
+          "provider",
+          "target_facility_id",
+          "target_name",
+          "blood_group",
+          "component",
+          "units",
+          "urgency",
+          "needed_by",
+          "status",
+          "notes",
+          "response_note",
+          "created_at",
+          "updated_at",
+          "bags",
+          "source"
+        ],
+        "title": "BloodRequestOut",
+        "type": "object"
+      },
+      "ChainStatus": {
+        "properties": {
+          "head_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Head Hash"
+          },
+          "length": {
+            "title": "Length",
+            "type": "integer"
+          },
+          "note": {
+            "default": "Tamper-evident SHA-256 chain stored in the VEYRA database. It is not anchored on a blockchain yet (planned for Phase 8).",
+            "title": "Note",
+            "type": "string"
+          },
+          "valid": {
+            "title": "Valid",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "valid",
+          "length",
+          "head_hash"
+        ],
+        "title": "ChainStatus",
+        "type": "object"
+      },
+      "Component": {
+        "enum": [
+          "WHOLE_BLOOD",
+          "PRBC",
+          "FFP",
+          "PLATELETS",
+          "CRYO"
+        ],
+        "title": "Component",
+        "type": "string"
+      },
+      "ComponentInfo": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "shelf_life_days": {
+            "title": "Shelf Life Days",
+            "type": "integer"
+          },
+          "storage": {
+            "title": "Storage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "label",
+          "shelf_life_days",
+          "storage"
+        ],
+        "title": "ComponentInfo",
+        "type": "object"
+      },
+      "CreateBloodRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "blood_group": {
+            "enum": [
+              "A+",
+              "A-",
+              "B+",
+              "B-",
+              "AB+",
+              "AB-",
+              "O+",
+              "O-"
+            ],
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "component": {
+            "$ref": "#/components/schemas/Component"
+          },
+          "needed_by": {
+            "format": "date-time",
+            "title": "Needed By",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "provider": {
+            "default": "internal",
+            "enum": [
+              "internal",
+              "mock"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "target_ref": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Target Ref",
+            "type": "string"
+          },
+          "units": {
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Units",
+            "type": "integer"
+          },
+          "urgency": {
+            "default": "routine",
+            "enum": [
+              "routine",
+              "urgent",
+              "emergency"
+            ],
+            "title": "Urgency",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_ref",
+          "blood_group",
+          "component",
+          "units",
+          "needed_by"
+        ],
+        "title": "CreateBloodRequest",
+        "type": "object"
+      },
       "CreateFacilityRequest": {
         "additionalProperties": false,
         "properties": {
@@ -190,6 +756,185 @@
         "title": "DemoDisclosure",
         "type": "object"
       },
+      "DiscardRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "reason": {
+            "enum": [
+              "expired",
+              "damaged",
+              "failed_screening",
+              "other"
+            ],
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "DiscardRequest",
+        "type": "object"
+      },
+      "DonationOut": {
+        "properties": {
+          "bags": {
+            "items": {
+              "$ref": "#/components/schemas/BagOut"
+            },
+            "title": "Bags",
+            "type": "array"
+          },
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "collected_at": {
+            "format": "date-time",
+            "title": "Collected At",
+            "type": "string"
+          },
+          "donor_id": {
+            "format": "uuid",
+            "title": "Donor Id",
+            "type": "string"
+          },
+          "donor_name": {
+            "title": "Donor Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "volume_ml": {
+            "title": "Volume Ml",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "donor_id",
+          "donor_name",
+          "blood_group",
+          "volume_ml",
+          "collected_at",
+          "status",
+          "notes",
+          "bags"
+        ],
+        "title": "DonationOut",
+        "type": "object"
+      },
+      "DonorLookupRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "mobile": {
+            "title": "Mobile",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mobile"
+        ],
+        "title": "DonorLookupRequest",
+        "type": "object"
+      },
+      "DonorLookupResult": {
+        "description": "What a donation desk needs, and nothing more (no address, email or full mobile).",
+        "properties": {
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "blood_group_status": {
+            "title": "Blood Group Status",
+            "type": "string"
+          },
+          "donor_id": {
+            "format": "uuid",
+            "title": "Donor Id",
+            "type": "string"
+          },
+          "eligible_from": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Earliest date the donor may donate again (None: eligible now)",
+            "title": "Eligible From"
+          },
+          "eligible_now": {
+            "title": "Eligible Now",
+            "type": "boolean"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "last_donation_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Donation At"
+          },
+          "mobile_masked": {
+            "title": "Mobile Masked",
+            "type": "string"
+          }
+        },
+        "required": [
+          "donor_id",
+          "full_name",
+          "mobile_masked",
+          "blood_group",
+          "blood_group_status",
+          "last_donation_at",
+          "eligible_from",
+          "eligible_now"
+        ],
+        "title": "DonorLookupResult",
+        "type": "object"
+      },
       "DonorProfile": {
         "description": "The donor's own profile. Only the donor can read it (donor_profile:read:self).",
         "properties": {
@@ -202,7 +947,7 @@
             "type": "string"
           },
           "blood_group_status": {
-            "description": "'self_declared' until a blood bank confirms it at a donation (Phase 2)",
+            "description": "'self_declared' until a blood bank confirms it at a donation, then 'confirmed'",
             "title": "Blood Group Status",
             "type": "string"
           },
@@ -446,6 +1191,106 @@
         "title": "HealthResponse",
         "type": "object"
       },
+      "InventoryRow": {
+        "properties": {
+          "available": {
+            "description": "Usable units on hand (not expired)",
+            "title": "Available",
+            "type": "integer"
+          },
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "expired": {
+            "description": "Past expiry, still on the shelf: discard them",
+            "title": "Expired",
+            "type": "integer"
+          },
+          "expiring_soon": {
+            "description": "Usable units expiring within 72 hours",
+            "title": "Expiring Soon",
+            "type": "integer"
+          },
+          "next_expiry": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Expiry"
+          }
+        },
+        "required": [
+          "blood_group",
+          "component",
+          "available",
+          "expired",
+          "expiring_soon",
+          "next_expiry"
+        ],
+        "title": "InventoryRow",
+        "type": "object"
+      },
+      "InventorySummary": {
+        "properties": {
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentInfo"
+            },
+            "title": "Components",
+            "type": "array"
+          },
+          "facility_id": {
+            "format": "uuid",
+            "title": "Facility Id",
+            "type": "string"
+          },
+          "facility_name": {
+            "title": "Facility Name",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "reference_note": {
+            "title": "Reference Note",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "total_available": {
+            "title": "Total Available",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "facility_id",
+          "facility_name",
+          "generated_at",
+          "total_available",
+          "rows",
+          "components",
+          "reference_note"
+        ],
+        "title": "InventorySummary",
+        "type": "object"
+      },
       "InviteDelivery": {
         "properties": {
           "mode": {
@@ -672,6 +1517,122 @@
         "title": "MetaResponse",
         "type": "object"
       },
+      "MyDonation": {
+        "description": "A donor's view of their own donation: where it was given and how it was used,\nnever which hospital or patient received it.",
+        "properties": {
+          "bags_discarded": {
+            "title": "Bags Discarded",
+            "type": "integer"
+          },
+          "bags_in_stock": {
+            "title": "Bags In Stock",
+            "type": "integer"
+          },
+          "bags_sent_to_hospitals": {
+            "title": "Bags Sent To Hospitals",
+            "type": "integer"
+          },
+          "bags_total": {
+            "title": "Bags Total",
+            "type": "integer"
+          },
+          "collected_at": {
+            "format": "date-time",
+            "title": "Collected At",
+            "type": "string"
+          },
+          "components": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Components",
+            "type": "array"
+          },
+          "facility_city": {
+            "title": "Facility City",
+            "type": "string"
+          },
+          "facility_name": {
+            "title": "Facility Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "volume_ml": {
+            "title": "Volume Ml",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "collected_at",
+          "facility_name",
+          "facility_city",
+          "volume_ml",
+          "components",
+          "bags_total",
+          "bags_in_stock",
+          "bags_sent_to_hospitals",
+          "bags_discarded"
+        ],
+        "title": "MyDonation",
+        "type": "object"
+      },
+      "MyDonations": {
+        "properties": {
+          "donations": {
+            "items": {
+              "$ref": "#/components/schemas/MyDonation"
+            },
+            "title": "Donations",
+            "type": "array"
+          },
+          "eligible_from": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eligible From"
+          },
+          "eligible_now": {
+            "title": "Eligible Now",
+            "type": "boolean"
+          },
+          "interval_days": {
+            "title": "Interval Days",
+            "type": "integer"
+          },
+          "last_donation_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Donation At"
+          }
+        },
+        "required": [
+          "donations",
+          "last_donation_at",
+          "eligible_from",
+          "eligible_now",
+          "interval_days"
+        ],
+        "title": "MyDonations",
+        "type": "object"
+      },
       "PageMeta": {
         "properties": {
           "limit": {
@@ -693,6 +1654,66 @@
           "offset"
         ],
         "title": "PageMeta",
+        "type": "object"
+      },
+      "Page_BagOut_": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/BagOut"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Page[BagOut]",
+        "type": "object"
+      },
+      "Page_BloodRequestOut_": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/BloodRequestOut"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Page[BloodRequestOut]",
+        "type": "object"
+      },
+      "Page_DonationOut_": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DonationOut"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Page[DonationOut]",
         "type": "object"
       },
       "Page_FacilityOut_": {
@@ -762,6 +1783,80 @@
           "checks"
         ],
         "title": "ReadinessResponse",
+        "type": "object"
+      },
+      "RecordDonationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "blood_group": {
+            "description": "Group determined by the blood bank at collection",
+            "enum": [
+              "A+",
+              "A-",
+              "B+",
+              "B-",
+              "AB+",
+              "AB-",
+              "O+",
+              "O-"
+            ],
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "collected_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Defaults to now; may not be in the future or >48 h old",
+            "title": "Collected At"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/Component"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Components",
+            "type": "array"
+          },
+          "donor_id": {
+            "format": "uuid",
+            "title": "Donor Id",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "volume_ml": {
+            "enum": [
+              350,
+              450
+            ],
+            "title": "Volume Ml",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "donor_id",
+          "blood_group",
+          "volume_ml"
+        ],
+        "title": "RecordDonationRequest",
         "type": "object"
       },
       "RegisterDonorRequest": {
@@ -877,6 +1972,100 @@
           "verification_disclaimer"
         ],
         "title": "RegistrationReference",
+        "type": "object"
+      },
+      "RejectRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Note",
+            "type": "string"
+          }
+        },
+        "required": [
+          "note"
+        ],
+        "title": "RejectRequest",
+        "type": "object"
+      },
+      "RespondRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "title": "RespondRequest",
+        "type": "object"
+      },
+      "SourceKind": {
+        "description": "What kind of source produced the data.",
+        "enum": [
+          "internal",
+          "simulated",
+          "synthetic",
+          "external"
+        ],
+        "title": "SourceKind",
+        "type": "string"
+      },
+      "SourceMeta": {
+        "properties": {
+          "fetched_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fetched At"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/SourceKind"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Human-readable disclosure, if any",
+            "title": "Note"
+          },
+          "provider": {
+            "description": "Provider identifier, e.g. 'mock_blood_bank'",
+            "title": "Provider",
+            "type": "string"
+          },
+          "simulated": {
+            "readOnly": true,
+            "title": "Simulated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "provider",
+          "kind",
+          "simulated"
+        ],
+        "title": "SourceMeta",
         "type": "object"
       },
       "UpdateDonorProfileRequest": {
@@ -1714,6 +2903,246 @@
         ]
       }
     },
+    "/api/v1/bags/{public_id}": {
+      "get": {
+        "operationId": "bag_trace_api_v1_bags__public_id__get",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BagTrace"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Bag details and its tamper-evident custody trail",
+        "tags": [
+          "inventory",
+          "trace"
+        ]
+      }
+    },
+    "/api/v1/bags/{public_id}/discard": {
+      "post": {
+        "operationId": "discard_bag_api_v1_bags__public_id__discard_post",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscardRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BagOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Discard a bag held by my facility",
+        "tags": [
+          "inventory",
+          "trace"
+        ]
+      }
+    },
+    "/api/v1/donations": {
+      "get": {
+        "operationId": "list_donations_api_v1_donations_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 100000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_DonationOut_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Donations at my facility",
+        "tags": [
+          "donations"
+        ]
+      },
+      "post": {
+        "operationId": "record_donation_api_v1_donations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordDonationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record a donation and create its labelled bags",
+        "tags": [
+          "donations"
+        ]
+      }
+    },
+    "/api/v1/donors/lookup": {
+      "post": {
+        "description": "POST so the mobile number never appears in URLs or access logs.",
+        "operationId": "lookup_donor_api_v1_donors_lookup_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DonorLookupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonorLookupResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Find a verified donor by mobile at the donation desk",
+        "tags": [
+          "donations"
+        ]
+      }
+    },
     "/api/v1/donors/me": {
       "get": {
         "operationId": "get_my_profile_api_v1_donors_me_get",
@@ -1774,6 +3203,28 @@
         ]
       }
     },
+    "/api/v1/donors/me/donations": {
+      "get": {
+        "operationId": "my_donations_api_v1_donors_me_donations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyDonations"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My donation history and next eligible date",
+        "tags": [
+          "donations",
+          "donors"
+        ]
+      }
+    },
     "/api/v1/facilities/me": {
       "get": {
         "operationId": "my_facility_api_v1_facilities_me_get",
@@ -1792,6 +3243,149 @@
         "summary": "My facility",
         "tags": [
           "facilities"
+        ]
+      }
+    },
+    "/api/v1/inventory/bags": {
+      "get": {
+        "operationId": "inventory_bags_api_v1_inventory_bags_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "available",
+                    "in_transit",
+                    "received",
+                    "discarded"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "blood_group",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "A+",
+                    "A-",
+                    "B+",
+                    "B-",
+                    "AB+",
+                    "AB-",
+                    "O+",
+                    "O-"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Blood Group"
+            }
+          },
+          {
+            "in": "query",
+            "name": "component",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Z_]{2,16}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Component"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 100000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_BagOut_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Bags at my facility",
+        "tags": [
+          "inventory"
+        ]
+      }
+    },
+    "/api/v1/inventory/summary": {
+      "get": {
+        "operationId": "inventory_summary_api_v1_inventory_summary_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventorySummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My facility's stock by group",
+        "tags": [
+          "inventory"
         ]
       }
     },
@@ -1816,6 +3410,78 @@
         ]
       }
     },
+    "/api/v1/network/availability": {
+      "get": {
+        "operationId": "availability_api_v1_network_availability_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "blood_group",
+            "required": true,
+            "schema": {
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-"
+              ],
+              "title": "Blood Group",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "component",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Component"
+            }
+          },
+          {
+            "in": "query",
+            "name": "units",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "maximum": 20,
+              "minimum": 1,
+              "title": "Units",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Which blood banks can supply this (banded, never exact stock)",
+        "tags": [
+          "requests"
+        ]
+      }
+    },
     "/api/v1/reference/registration": {
       "get": {
         "operationId": "registration_reference_api_v1_reference_registration_get",
@@ -1835,6 +3501,461 @@
         "tags": [
           "donors",
           "reference"
+        ]
+      }
+    },
+    "/api/v1/requests": {
+      "get": {
+        "operationId": "list_requests_api_v1_requests_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "acknowledged",
+                    "dispatched",
+                    "fulfilled",
+                    "rejected",
+                    "cancelled"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 100000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_BloodRequestOut_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Outgoing (hospital) or incoming (blood bank) requests",
+        "tags": [
+          "requests"
+        ]
+      },
+      "post": {
+        "operationId": "create_request_api_v1_requests_post",
+        "parameters": [
+          {
+            "description": "Retry-safe key: the same key returns the original request instead of a copy.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Za-z0-9_.:-]{8,64}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Retry-safe key: the same key returns the original request instead of a copy.",
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBloodRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Replay of an earlier request with the same key"
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BloodRequestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Request blood from a blood bank",
+        "tags": [
+          "requests"
+        ]
+      }
+    },
+    "/api/v1/requests/{request_id}": {
+      "get": {
+        "operationId": "get_request_api_v1_requests__request_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BloodRequestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "One request",
+        "tags": [
+          "requests"
+        ]
+      }
+    },
+    "/api/v1/requests/{request_id}/cancel": {
+      "post": {
+        "operationId": "cancel_request_api_v1_requests__request_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BloodRequestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel my hospital's request",
+        "tags": [
+          "requests"
+        ]
+      }
+    },
+    "/api/v1/requests/{request_id}/fulfil": {
+      "post": {
+        "operationId": "fulfil_request_api_v1_requests__request_id__fulfil_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespondRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BloodRequestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dispatch bags (first-expiry-first-out) against a request",
+        "tags": [
+          "requests"
+        ]
+      }
+    },
+    "/api/v1/requests/{request_id}/receive": {
+      "post": {
+        "operationId": "receive_request_api_v1_requests__request_id__receive_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BloodRequestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm the dispatched bags arrived",
+        "tags": [
+          "requests"
+        ]
+      }
+    },
+    "/api/v1/requests/{request_id}/reject": {
+      "post": {
+        "operationId": "reject_request_api_v1_requests__request_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BloodRequestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decline a request",
+        "tags": [
+          "requests"
+        ]
+      }
+    },
+    "/api/v1/stream": {
+      "get": {
+        "operationId": "stream_api_v1_stream_get",
+        "parameters": [
+          {
+            "description": "Replay events after this id",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Replay events after this id",
+              "title": "After"
+            }
+          },
+          {
+            "description": "Replay then close (smoke tests, polling)",
+            "in": "query",
+            "name": "once",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Replay then close (smoke tests, polling)",
+              "title": "Once",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Last-Event-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last-Event-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Live events (Server-Sent Events)",
+        "tags": [
+          "events"
         ]
       }
     },

@@ -4,6 +4,7 @@ import type { DonorProfile, RegistrationReference } from "@veyra/api-client";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { ComingInPhase, PageHeader } from "@/components/app/page-header";
+import { DonorDonations } from "@/components/donor/donor-donations";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardLabel } from "@/components/ui/card";
@@ -67,7 +68,7 @@ export function DonorDashboard() {
       <PageHeader
         eyebrow="Donor"
         title={`Hello, ${firstName}`}
-        description="Your donor profile. Donation history and eligibility arrive in later phases."
+        description="Your donor profile, donations and eligibility."
       />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <Card className="relative overflow-hidden">
@@ -140,11 +141,7 @@ export function DonorDashboard() {
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <ComingInPhase
-          phase={2}
-          title="Donation history"
-          description="Each donation, the blood bags it produced and where they went."
-        />
+        <DonorDonations />
         <ComingInPhase
           phase={10}
           title="Private eligibility check"

@@ -78,6 +78,18 @@ def test_access_token_roundtrip_expiry_and_tamper() -> None:
         codec.decode("garbage", now=NOW)
 
 
+def test_access_token_time_checks_use_the_injected_clock() -> None:
+    """exp AND iat are judged by the service clock, never the wall clock."""
+    codec = AccessTokenCodec(key=b"k" * 32, ttl_seconds=900)
+    later = NOW + timedelta(days=400)  # far from the wall clock in either direction
+    token = codec.encode(user_id=uuid4(), session_id=uuid4(), role="DONOR", now=later)
+    assert codec.decode(token, now=later + timedelta(minutes=1)).role == "DONOR"
+    with pytest.raises(TokenError):  # issued "in the future" relative to the caller's clock
+        codec.decode(token, now=later - timedelta(minutes=5))
+    with pytest.raises(TokenError):
+        codec.decode(token, now=later + timedelta(minutes=15))
+
+
 def test_token_hash_is_sha256_hex() -> None:
     assert len(hash_token("abc")) == 64 and hash_token("abc") != hash_token("abd")
 

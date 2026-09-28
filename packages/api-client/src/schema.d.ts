@@ -210,6 +210,78 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/bags/{public_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bag details and its tamper-evident custody trail */
+        get: operations["bag_trace_api_v1_bags__public_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bags/{public_id}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Discard a bag held by my facility */
+        post: operations["discard_bag_api_v1_bags__public_id__discard_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/donations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Donations at my facility */
+        get: operations["list_donations_api_v1_donations_get"];
+        put?: never;
+        /** Record a donation and create its labelled bags */
+        post: operations["record_donation_api_v1_donations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/donors/lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Find a verified donor by mobile at the donation desk
+         * @description POST so the mobile number never appears in URLs or access logs.
+         */
+        post: operations["lookup_donor_api_v1_donors_lookup_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/donors/me": {
         parameters: {
             query?: never;
@@ -228,6 +300,23 @@ export interface paths {
         patch: operations["update_my_profile_api_v1_donors_me_patch"];
         trace?: never;
     };
+    "/api/v1/donors/me/donations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My donation history and next eligible date */
+        get: operations["my_donations_api_v1_donors_me_donations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facilities/me": {
         parameters: {
             query?: never;
@@ -237,6 +326,40 @@ export interface paths {
         };
         /** My facility */
         get: operations["my_facility_api_v1_facilities_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/bags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bags at my facility */
+        get: operations["inventory_bags_api_v1_inventory_bags_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My facility's stock by group */
+        get: operations["inventory_summary_api_v1_inventory_summary_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -262,6 +385,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/network/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Which blood banks can supply this (banded, never exact stock) */
+        get: operations["availability_api_v1_network_availability_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/reference/registration": {
         parameters: {
             query?: never;
@@ -271,6 +411,126 @@ export interface paths {
         };
         /** Allowed values for donor registration */
         get: operations["registration_reference_api_v1_reference_registration_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Outgoing (hospital) or incoming (blood bank) requests */
+        get: operations["list_requests_api_v1_requests_get"];
+        put?: never;
+        /** Request blood from a blood bank */
+        post: operations["create_request_api_v1_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/requests/{request_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One request */
+        get: operations["get_request_api_v1_requests__request_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/requests/{request_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel my hospital's request */
+        post: operations["cancel_request_api_v1_requests__request_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/requests/{request_id}/fulfil": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dispatch bags (first-expiry-first-out) against a request */
+        post: operations["fulfil_request_api_v1_requests__request_id__fulfil_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/requests/{request_id}/receive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm the dispatched bags arrived */
+        post: operations["receive_request_api_v1_requests__request_id__receive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/requests/{request_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decline a request */
+        post: operations["reject_request_api_v1_requests__request_id__reject_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Live events (Server-Sent Events) */
+        get: operations["stream_api_v1_stream_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -327,6 +587,243 @@ export interface components {
             password: string;
             /** Token */
             token: string;
+        };
+        /** AllocatedBag */
+        AllocatedBag: {
+            /** Blood Group */
+            blood_group: string;
+            /** Component */
+            component: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Public Id */
+            public_id: string;
+            /** Status */
+            status: string;
+        };
+        /** AvailabilityItem */
+        AvailabilityItem: {
+            /**
+             * Band
+             * @description Banded availability: exact stock of other facilities is never disclosed
+             * @enum {string}
+             */
+            band: "sufficient" | "limited" | "none";
+            /** City */
+            city: string;
+            /** Name */
+            name: string;
+            /** Provider */
+            provider: string;
+            source: components["schemas"]["SourceMeta"];
+            /** State */
+            state: string;
+            /** Target Ref */
+            target_ref: string;
+        };
+        /** AvailabilityResponse */
+        AvailabilityResponse: {
+            /** Blood Group */
+            blood_group: string;
+            /** Component */
+            component: string;
+            /** Results */
+            results: components["schemas"]["AvailabilityItem"][];
+            /** Units */
+            units: number;
+        };
+        /** BagEventOut */
+        BagEventOut: {
+            /** Event Type */
+            event_type: string;
+            /** From Facility */
+            from_facility: string | null;
+            /** Meta */
+            meta: {
+                [key: string]: unknown;
+            };
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /** Prev Hash */
+            prev_hash: string;
+            /** Row Hash */
+            row_hash: string;
+            /** Seq */
+            seq: number;
+            /** To Facility */
+            to_facility: string | null;
+        };
+        /** BagOut */
+        BagOut: {
+            /** Blood Group */
+            blood_group: string;
+            /**
+             * Collected At
+             * Format: date-time
+             */
+            collected_at: string;
+            /** Component */
+            component: string;
+            /**
+             * Current Facility Id
+             * Format: uuid
+             */
+            current_facility_id: string;
+            /** Current Facility Name */
+            current_facility_name: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Expired */
+            is_expired: boolean;
+            /** Public Id */
+            public_id: string;
+            /** Qr Payload */
+            qr_payload: string;
+            /** Status */
+            status: string;
+            /** Volume Ml */
+            volume_ml: number;
+        };
+        /** BagTrace */
+        BagTrace: {
+            bag: components["schemas"]["BagOut"];
+            chain: components["schemas"]["ChainStatus"];
+            /** Events */
+            events: components["schemas"]["BagEventOut"][];
+        };
+        /** BloodRequestOut */
+        BloodRequestOut: {
+            /** Bags */
+            bags: components["schemas"]["AllocatedBag"][];
+            /** Blood Group */
+            blood_group: string;
+            /** Component */
+            component: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Hospital Id
+             * Format: uuid
+             */
+            hospital_id: string;
+            /** Hospital Name */
+            hospital_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Needed By
+             * Format: date-time
+             */
+            needed_by: string;
+            /** Notes */
+            notes: string | null;
+            /** Provider */
+            provider: string;
+            /** Reference */
+            reference: string;
+            /** Response Note */
+            response_note: string | null;
+            source: components["schemas"]["SourceMeta"];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "acknowledged" | "dispatched" | "fulfilled" | "rejected" | "cancelled";
+            /** Target Facility Id */
+            target_facility_id: string | null;
+            /** Target Name */
+            target_name: string;
+            /** Units */
+            units: number;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Urgency */
+            urgency: string;
+        };
+        /** ChainStatus */
+        ChainStatus: {
+            /** Head Hash */
+            head_hash: string | null;
+            /** Length */
+            length: number;
+            /**
+             * Note
+             * @default Tamper-evident SHA-256 chain stored in the VEYRA database. It is not anchored on a blockchain yet (planned for Phase 8).
+             */
+            note: string;
+            /** Valid */
+            valid: boolean;
+        };
+        /**
+         * Component
+         * @enum {string}
+         */
+        Component: "WHOLE_BLOOD" | "PRBC" | "FFP" | "PLATELETS" | "CRYO";
+        /** ComponentInfo */
+        ComponentInfo: {
+            /** Code */
+            code: string;
+            /** Label */
+            label: string;
+            /** Shelf Life Days */
+            shelf_life_days: number;
+            /** Storage */
+            storage: string;
+        };
+        /** CreateBloodRequest */
+        CreateBloodRequest: {
+            /**
+             * Blood Group
+             * @enum {string}
+             */
+            blood_group: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+            component: components["schemas"]["Component"];
+            /**
+             * Needed By
+             * Format: date-time
+             */
+            needed_by: string;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Provider
+             * @default internal
+             * @enum {string}
+             */
+            provider: "internal" | "mock";
+            /** Target Ref */
+            target_ref: string;
+            /** Units */
+            units: number;
+            /**
+             * Urgency
+             * @default routine
+             * @enum {string}
+             */
+            urgency: "routine" | "urgent" | "emergency";
         };
         /** CreateFacilityRequest */
         CreateFacilityRequest: {
@@ -403,6 +900,79 @@ export interface components {
              */
             label: string;
         };
+        /** DiscardRequest */
+        DiscardRequest: {
+            /** Note */
+            note?: string | null;
+            /**
+             * Reason
+             * @enum {string}
+             */
+            reason: "expired" | "damaged" | "failed_screening" | "other";
+        };
+        /** DonationOut */
+        DonationOut: {
+            /** Bags */
+            bags: components["schemas"]["BagOut"][];
+            /** Blood Group */
+            blood_group: string;
+            /**
+             * Collected At
+             * Format: date-time
+             */
+            collected_at: string;
+            /**
+             * Donor Id
+             * Format: uuid
+             */
+            donor_id: string;
+            /** Donor Name */
+            donor_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Notes */
+            notes: string | null;
+            /** Status */
+            status: string;
+            /** Volume Ml */
+            volume_ml: number;
+        };
+        /** DonorLookupRequest */
+        DonorLookupRequest: {
+            /** Mobile */
+            mobile: string;
+        };
+        /**
+         * DonorLookupResult
+         * @description What a donation desk needs, and nothing more (no address, email or full mobile).
+         */
+        DonorLookupResult: {
+            /** Blood Group */
+            blood_group: string;
+            /** Blood Group Status */
+            blood_group_status: string;
+            /**
+             * Donor Id
+             * Format: uuid
+             */
+            donor_id: string;
+            /**
+             * Eligible From
+             * @description Earliest date the donor may donate again (None: eligible now)
+             */
+            eligible_from: string | null;
+            /** Eligible Now */
+            eligible_now: boolean;
+            /** Full Name */
+            full_name: string;
+            /** Last Donation At */
+            last_donation_at: string | null;
+            /** Mobile Masked */
+            mobile_masked: string;
+        };
         /**
          * DonorProfile
          * @description The donor's own profile. Only the donor can read it (donor_profile:read:self).
@@ -414,7 +984,7 @@ export interface components {
             blood_group: string;
             /**
              * Blood Group Status
-             * @description 'self_declared' until a blood bank confirms it at a donation (Phase 2)
+             * @description 'self_declared' until a blood bank confirms it at a donation, then 'confirmed'
              */
             blood_group_status: string;
             /** City */
@@ -525,6 +1095,53 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /** InventoryRow */
+        InventoryRow: {
+            /**
+             * Available
+             * @description Usable units on hand (not expired)
+             */
+            available: number;
+            /** Blood Group */
+            blood_group: string;
+            /** Component */
+            component: string;
+            /**
+             * Expired
+             * @description Past expiry, still on the shelf: discard them
+             */
+            expired: number;
+            /**
+             * Expiring Soon
+             * @description Usable units expiring within 72 hours
+             */
+            expiring_soon: number;
+            /** Next Expiry */
+            next_expiry: string | null;
+        };
+        /** InventorySummary */
+        InventorySummary: {
+            /** Components */
+            components: components["schemas"]["ComponentInfo"][];
+            /**
+             * Facility Id
+             * Format: uuid
+             */
+            facility_id: string;
+            /** Facility Name */
+            facility_name: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Reference Note */
+            reference_note: string;
+            /** Rows */
+            rows: components["schemas"]["InventoryRow"][];
+            /** Total Available */
+            total_available: number;
         };
         /** InviteDelivery */
         InviteDelivery: {
@@ -637,6 +1254,52 @@ export interface components {
             /** Version */
             version: string;
         };
+        /**
+         * MyDonation
+         * @description A donor's view of their own donation: where it was given and how it was used,
+         *     never which hospital or patient received it.
+         */
+        MyDonation: {
+            /** Bags Discarded */
+            bags_discarded: number;
+            /** Bags In Stock */
+            bags_in_stock: number;
+            /** Bags Sent To Hospitals */
+            bags_sent_to_hospitals: number;
+            /** Bags Total */
+            bags_total: number;
+            /**
+             * Collected At
+             * Format: date-time
+             */
+            collected_at: string;
+            /** Components */
+            components: string[];
+            /** Facility City */
+            facility_city: string;
+            /** Facility Name */
+            facility_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Volume Ml */
+            volume_ml: number;
+        };
+        /** MyDonations */
+        MyDonations: {
+            /** Donations */
+            donations: components["schemas"]["MyDonation"][];
+            /** Eligible From */
+            eligible_from: string | null;
+            /** Eligible Now */
+            eligible_now: boolean;
+            /** Interval Days */
+            interval_days: number;
+            /** Last Donation At */
+            last_donation_at: string | null;
+        };
         /** PageMeta */
         PageMeta: {
             /** Limit */
@@ -645,6 +1308,24 @@ export interface components {
             offset: number;
             /** Total */
             total: number;
+        };
+        /** Page[BagOut] */
+        Page_BagOut_: {
+            /** Data */
+            data: components["schemas"]["BagOut"][];
+            meta: components["schemas"]["PageMeta"];
+        };
+        /** Page[BloodRequestOut] */
+        Page_BloodRequestOut_: {
+            /** Data */
+            data: components["schemas"]["BloodRequestOut"][];
+            meta: components["schemas"]["PageMeta"];
+        };
+        /** Page[DonationOut] */
+        Page_DonationOut_: {
+            /** Data */
+            data: components["schemas"]["DonationOut"][];
+            meta: components["schemas"]["PageMeta"];
         };
         /** Page[FacilityOut] */
         Page_FacilityOut_: {
@@ -669,6 +1350,34 @@ export interface components {
              * @enum {string}
              */
             status: "ready" | "degraded";
+        };
+        /** RecordDonationRequest */
+        RecordDonationRequest: {
+            /**
+             * Blood Group
+             * @description Group determined by the blood bank at collection
+             * @enum {string}
+             */
+            blood_group: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+            /**
+             * Collected At
+             * @description Defaults to now; may not be in the future or >48 h old
+             */
+            collected_at?: string | null;
+            /** Components */
+            components?: components["schemas"]["Component"][];
+            /**
+             * Donor Id
+             * Format: uuid
+             */
+            donor_id: string;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Volume Ml
+             * @enum {integer}
+             */
+            volume_ml: 350 | 450;
         };
         /** RegisterDonorRequest */
         RegisterDonorRequest: {
@@ -718,6 +1427,40 @@ export interface components {
             verification_disclaimer: string | null;
             /** Verification Mode */
             verification_mode: string;
+        };
+        /** RejectRequest */
+        RejectRequest: {
+            /** Note */
+            note: string;
+        };
+        /** RespondRequest */
+        RespondRequest: {
+            /** Note */
+            note?: string | null;
+        };
+        /**
+         * SourceKind
+         * @description What kind of source produced the data.
+         * @enum {string}
+         */
+        SourceKind: "internal" | "simulated" | "synthetic" | "external";
+        /** SourceMeta */
+        SourceMeta: {
+            /** Fetched At */
+            fetched_at?: string | null;
+            kind: components["schemas"]["SourceKind"];
+            /**
+             * Note
+             * @description Human-readable disclosure, if any
+             */
+            note?: string | null;
+            /**
+             * Provider
+             * @description Provider identifier, e.g. 'mock_blood_bank'
+             */
+            provider: string;
+            /** Simulated */
+            readonly simulated: boolean;
         };
         /**
          * UpdateDonorProfileRequest
@@ -1245,6 +1988,172 @@ export interface operations {
             };
         };
     };
+    bag_trace_api_v1_bags__public_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BagTrace"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    discard_bag_api_v1_bags__public_id__discard_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscardRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BagOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_donations_api_v1_donations_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_DonationOut_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_donation_api_v1_donations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordDonationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DonationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    lookup_donor_api_v1_donors_lookup_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DonorLookupRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DonorLookupResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_my_profile_api_v1_donors_me_get: {
         parameters: {
             query?: never;
@@ -1298,6 +2207,26 @@ export interface operations {
             };
         };
     };
+    my_donations_api_v1_donors_me_donations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyDonations"];
+                };
+            };
+        };
+    };
     my_facility_api_v1_facilities_me_get: {
         parameters: {
             query?: never;
@@ -1314,6 +2243,61 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FacilityOut"];
+                };
+            };
+        };
+    };
+    inventory_bags_api_v1_inventory_bags_get: {
+        parameters: {
+            query?: {
+                status?: ("available" | "in_transit" | "received" | "discarded") | null;
+                blood_group?: ("A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-") | null;
+                component?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_BagOut_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    inventory_summary_api_v1_inventory_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InventorySummary"];
                 };
             };
         };
@@ -1338,6 +2322,39 @@ export interface operations {
             };
         };
     };
+    availability_api_v1_network_availability_get: {
+        parameters: {
+            query: {
+                blood_group: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+                component: components["schemas"]["Component"];
+                units?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvailabilityResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     registration_reference_api_v1_reference_registration_get: {
         parameters: {
             query?: never;
@@ -1354,6 +2371,281 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RegistrationReference"];
+                };
+            };
+        };
+    };
+    list_requests_api_v1_requests_get: {
+        parameters: {
+            query?: {
+                status?: ("pending" | "acknowledged" | "dispatched" | "fulfilled" | "rejected" | "cancelled") | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_BloodRequestOut_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_request_api_v1_requests_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Retry-safe key: the same key returns the original request instead of a copy. */
+                "Idempotency-Key"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBloodRequest"];
+            };
+        };
+        responses: {
+            /** @description Replay of an earlier request with the same key */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BloodRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_request_api_v1_requests__request_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BloodRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_request_api_v1_requests__request_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BloodRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    fulfil_request_api_v1_requests__request_id__fulfil_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RespondRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BloodRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    receive_request_api_v1_requests__request_id__receive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BloodRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reject_request_api_v1_requests__request_id__reject_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BloodRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stream_api_v1_stream_get: {
+        parameters: {
+            query?: {
+                /** @description Replay events after this id */
+                after?: number | null;
+                /** @description Replay then close (smoke tests, polling) */
+                once?: boolean;
+            };
+            header?: {
+                "Last-Event-ID"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

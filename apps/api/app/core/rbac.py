@@ -36,12 +36,18 @@ class Permission(StrEnum):
     INVENTORY_UPDATE_OWN = "inventory:update:own_facility"
     FORECAST_READ_OWN = "forecast:read:own_facility"
     REPORT_READ_OWN = "report:read:own_facility"
+    BLOOD_REQUEST_READ_OWN = "blood_request:read:own_facility"
+    BAG_TRACE_READ = "bag_trace:read:scoped"  # bags the caller's facility holds or has held
+    EVENTS_SUBSCRIBE = "events:subscribe:scoped"
     # Hospital
     BLOOD_REQUEST_CREATE = "blood_request:create"
     EMERGENCY_CREATE = "emergency:create"
+    BAG_RECEIVE = "bag:receive:own_facility"
+    NETWORK_AVAILABILITY_READ = "availability:read:network"  # banded, never exact stock
     # Blood bank
     BLOOD_REQUEST_RESPOND = "blood_request:respond"
     BAG_TRANSITION = "bag:transition"
+    DONATION_RECORD = "donation:record:own_facility"
     TRANSPORT_READ = "transport:read"
     # Admin
     USER_READ = "user:read"
@@ -72,7 +78,12 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.FORECAST_READ_OWN,
             _P.REPORT_READ_OWN,
             _P.BLOOD_REQUEST_CREATE,
+            _P.BLOOD_REQUEST_READ_OWN,
             _P.EMERGENCY_CREATE,
+            _P.BAG_RECEIVE,
+            _P.BAG_TRACE_READ,
+            _P.NETWORK_AVAILABILITY_READ,
+            _P.EVENTS_SUBSCRIBE,
             _P.NOTIFICATION_READ_SELF,
         }
     ),
@@ -84,8 +95,12 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.FORECAST_READ_OWN,
             _P.REPORT_READ_OWN,
             _P.BLOOD_REQUEST_RESPOND,
+            _P.BLOOD_REQUEST_READ_OWN,
             _P.BAG_TRANSITION,
+            _P.BAG_TRACE_READ,
+            _P.DONATION_RECORD,
             _P.TRANSPORT_READ,
+            _P.EVENTS_SUBSCRIBE,
             _P.NOTIFICATION_READ_SELF,
         }
     ),
@@ -97,6 +112,8 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.AUDIT_READ,
             _P.CONFIG_MANAGE,
             _P.NETWORK_READ,
+            _P.BAG_TRACE_READ,
+            _P.EVENTS_SUBSCRIBE,
             _P.NOTIFICATION_READ_SELF,
         }
     ),

@@ -206,10 +206,12 @@ if ($SkipDocker) {
       throw
     }
   }
-  Step "docker: seed demo admin" {
+  Step "docker: seed demo admin + demo facilities" {
     $env:VEYRA_DEMO_ADMIN_PASSWORD = "veyra-demo-console-2026"
     Invoke-Native docker ($compose + @("exec", "-T", "-e", "VEYRA_DEMO_ADMIN_PASSWORD", "api", "uv", "run", "--no-sync", "python", "-m", "app.scripts.seed_demo"))
-    Log "   demo admin: admin@veyra.demo / veyra-demo-console-2026  (DEMO ONLY)"
+    Log "   demo admin:    admin@veyra.demo    / veyra-demo-console-2026  (DEMO ONLY)"
+    Log "   demo bank:     bank@veyra.demo     / veyra-demo-console-2026  (DEMO ONLY)"
+    Log "   demo hospital: hospital@veyra.demo / veyra-demo-console-2026  (DEMO ONLY)"
   }
   Step "e2e: API /healthz" { Assert-Http "http://localhost:8000/healthz" '"ok"' }
   Step "e2e: API /readyz (db + redis)" { Assert-Http "http://localhost:8000/readyz" '"ready"' }
@@ -245,6 +247,51 @@ if ($SkipDocker) {
     $me = Invoke-Api Post "http://localhost:3000/api/v1/auth/login" @{ email = "admin@veyra.demo"; password = "veyra-demo-console-2026" } $s
     if ($me.user.role -ne "ADMIN") { throw "admin login failed" }
   }
+  Step "e2e: phase 2 donation -> request -> FEFO dispatch -> receive -> trace -> SSE" {
+    $base = "http://localhost:3000/api/v1"
+    $pw = "veyra-demo-console-2026"
+    function Csrf($sess) { ($sess.Cookies.GetCookies("http://localhost:3000") | Where-Object Name -eq "veyra_csrf").Value }
+    # A fresh donor for this run (unique mobile), verified with the DEMO last-4 check.
+    $d = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $tag = [Guid]::NewGuid().ToString("N").Substring(0, 8)
+    $mobile = "9" + ([UInt64]("0x" + [Guid]::NewGuid().ToString("N").Substring(0, 15)) % 1000000000).ToString("000000000")
+    $reg = Invoke-Api Post "$base/auth/register" @{ full_name = "Network Smoke"; email = "net-$tag@example.in"; mobile = $mobile;
+      blood_group = "O+"; address = "1 Smoke Street"; city = "Kolkata"; state = "West Bengal"; pin_code = "700001";
+      password = "smoke-test-passphrase" } $d
+    Invoke-Api Post "$base/auth/verify" @{ challenge_id = $reg.verification.challenge_id; code = $mobile.Substring(6) } $d | Out-Null
+    $bank = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $hosp = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    Invoke-Api Post "$base/auth/login" @{ email = "bank@veyra.demo"; password = $pw } $bank | Out-Null
+    $bankFacility = Invoke-Api Get "$base/facilities/me" $null $bank
+    Invoke-Api Post "$base/auth/login" @{ email = "hospital@veyra.demo"; password = $pw } $hosp | Out-Null
+    # Blood bank: find the donor, record a donation (2 labelled bags).
+    $found = Invoke-Api Post "$base/donors/lookup" @{ mobile = $mobile } $bank @{ "X-CSRF-Token" = (Csrf $bank) }
+    $don = Invoke-Api Post "$base/donations" @{ donor_id = $found.donor_id; blood_group = "O+"; volume_ml = 450; components = @("PRBC", "FFP") } $bank @{ "X-CSRF-Token" = (Csrf $bank) }
+    if (@($don.bags).Count -ne 2) { throw "donation did not create 2 bags" }
+    # Hospital: banded availability (internal + SIMULATED partners), then an idempotent request.
+    $avail = Invoke-Api Get "$base/network/availability?blood_group=O%2B&component=PRBC&units=1" $null $hosp
+    if (-not (@($avail.results) | Where-Object { $_.target_ref -eq $bankFacility.id })) { throw "demo bank missing from availability" }
+    if (-not (@($avail.results) | Where-Object { $_.source.simulated -eq $true })) { throw "simulated partners not labelled" }
+    $key = "e2e-$tag"
+    $body = @{ provider = "internal"; target_ref = $bankFacility.id; blood_group = "O+"; component = "PRBC"; units = 1; urgency = "urgent";
+      needed_by = (Get-Date).ToUniversalTime().AddHours(6).ToString("yyyy-MM-ddTHH:mm:ssZ") }
+    $req = Invoke-Api Post "$base/requests" $body $hosp @{ "X-CSRF-Token" = (Csrf $hosp); "Idempotency-Key" = $key }
+    $again = Invoke-Api Post "$base/requests" $body $hosp @{ "X-CSRF-Token" = (Csrf $hosp); "Idempotency-Key" = $key }
+    if ($again.id -ne $req.id) { throw "Idempotency-Key replay created a second request" }
+    # Blood bank dispatches (FEFO), hospital confirms receipt.
+    $ful = Invoke-Api Post "$base/requests/$($req.id)/fulfil" @{} $bank @{ "X-CSRF-Token" = (Csrf $bank) }
+    if ($ful.status -ne "dispatched" -or @($ful.bags).Count -ne 1) { throw "fulfil failed" }
+    $rec = Invoke-Api Post "$base/requests/$($req.id)/receive" $null $hosp @{ "X-CSRF-Token" = (Csrf $hosp) }
+    if ($rec.status -ne "fulfilled") { throw "receive failed" }
+    # Trace: 3 chained events, verified.
+    $bagId = @($ful.bags)[0].public_id
+    $trace = Invoke-Api Get "$base/bags/$bagId" $null $hosp
+    if (@($trace.events).Count -ne 3 -or -not $trace.chain.valid) { throw "trace chain not valid" }
+    # SSE replay (once=true) through the web proxy carries the request lifecycle.
+    $sse = Invoke-WebRequest -Uri "$base/stream?once=true&after=0" -WebSession $hosp -UseBasicParsing
+    if ($sse.Content -notlike "*event: request.fulfilled*" -or $sse.Content -notlike "*$($req.id)*") { throw "SSE replay missing events" }
+    Log "   network journey OK (request $($req.reference), bag $bagId)"
+  }
 }
 
 # ---------------------------------------------------------------- summary
@@ -255,6 +302,6 @@ $passed = @($results.Values | Where-Object { $_ -eq "PASS" }).Count
 Log ""
 Log ("OVERALL: {0}  ({1}/{2} steps passed)" -f ($(if ($script:anyFail) { "FAIL" } else { "PASS" })), $passed, $results.Count)
 if (-not $SkipDocker) { Log "Stack left running: http://localhost:3000  (stop: docker compose -f infra/docker-compose.yml down)"
-  Log "Demo admin: admin@veyra.demo / veyra-demo-console-2026 (DEMO ONLY)" }
+  Log "Demo logins (DEMO ONLY, password veyra-demo-console-2026): admin@veyra.demo, bank@veyra.demo, hospital@veyra.demo" }
 Log "Log: $log"
 if ($script:anyFail) { exit 1 } else { exit 0 }

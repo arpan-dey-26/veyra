@@ -6,17 +6,28 @@ VEYRA is a prototype of an intelligent blood-supply network. It connects donors,
 
 ## Current phase
 
-**Phase 1: Authentication & RBAC.**
+**Phase 2: Core Blood Network** (on top of Phase 1 authentication & RBAC).
 
-- Donor registration (all 9 fields) with **demo** phone verification (last 4 digits of the mobile, clearly labelled, never presented as OTP).
-- Argon2id passwords, rotating refresh sessions with reuse detection, CSRF protection.
-- Permission + scope RBAC for DONOR / HOSPITAL / BLOOD_BANK / ADMIN.
-- Admin facility onboarding + single-use staff invitations.
-- Donor profile, and role dashboards.
+- Blood-bank donation desk: find a verified donor, record a collection, create labelled bags (`VYR-XXXX-XXXX`, QR payload `veyra:bag:<id>`).
+- Facility inventory by blood group × component, with expiry (72 h warning) and discard.
+- Hospital blood requests: banded network availability (never exact stock), idempotent submission, first-expiry-first-out dispatch, receipt.
+- Append-only, SHA-256 hash-chained custody trail per bag (tamper-evident in the database; **not** a blockchain, on-chain anchoring is Phase 8).
+- Blood-bank provider port: internal banks, plus **simulated** partner banks (`MockBloodBankProvider`, labelled "Simulated", refused in production).
+- Transactional outbox → Server-Sent Events, with a live indicator in the UI.
 
-See [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
+Phase 1 (still in place): donor registration with **demo** phone verification (last 4 digits of the mobile, labelled, never presented as OTP), Argon2id passwords, rotating refresh sessions, CSRF protection, permission + scope RBAC, admin facility onboarding and staff invitations.
 
-Demo sign-in after `scripts\bootstrap.cmd`: `admin@veyra.demo` / `veyra-demo-console-2026` (**demo only**).
+See the [Phase 2 report](docs/phase-reports/phase-2.md), [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
+
+Demo sign-ins after `scripts\bootstrap.cmd` (**DEMO ONLY**, password `veyra-demo-console-2026` for all three):
+
+| Role | Email |
+| --- | --- |
+| Administrator | `admin@veyra.demo` |
+| Blood bank (VEYRA Central Blood Bank, Demo) | `bank@veyra.demo` |
+| Hospital (VEYRA City Hospital, Demo) | `hospital@veyra.demo` |
+
+Donors self-register at `/register`.
 
 ## Repository layout
 

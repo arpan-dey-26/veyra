@@ -7,9 +7,19 @@ export const metadata: Metadata = { title: "Demo disclosures" };
 /** Mirrors docs/demo-disclosures.md. Keep both in sync. */
 const ITEMS = [
   {
-    subject: "Hospitals & blood banks",
+    subject: "Partner blood banks",
     label: "Simulated" as const,
-    body: "Partner blood banks and hospitals in the demo are mock providers with seeded data. VEYRA is not connected to any real hospital or government blood-bank system.",
+    body: "Blood banks marked Simulated are mock providers with generated availability. Requests to them are acknowledged automatically and nothing is dispatched. VEYRA is not connected to any real hospital or government blood-bank system.",
+  },
+  {
+    subject: "Demo facilities",
+    label: "Demo" as const,
+    body: "“VEYRA Central Blood Bank (Demo)” and “VEYRA City Hospital (Demo)” are demo accounts that run the real VEYRA workflows on demo data.",
+  },
+  {
+    subject: "Bag trace chain",
+    label: "Demo" as const,
+    body: "Each bag's custody trail is append-only and SHA-256 hash-chained inside the VEYRA database, so edits are detectable. It is not anchored on any blockchain yet.",
   },
   {
     subject: "Demand forecasts",

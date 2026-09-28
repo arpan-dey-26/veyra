@@ -39,6 +39,8 @@ class Donor(Base):
     )
     # Self-declared at registration; confirmed by a blood bank at first donation (Phase 2).
     blood_group: Mapped[str] = mapped_column(String(3), nullable=False)
+    # Set when a blood bank determines the group at a donation (Phase 2).
+    blood_group_confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     address: Mapped[str] = mapped_column(String(255), nullable=False)
     city: Mapped[str] = mapped_column(String(80), nullable=False)
     state: Mapped[str] = mapped_column(String(64), nullable=False)

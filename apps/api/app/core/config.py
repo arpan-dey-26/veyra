@@ -59,6 +59,12 @@ class Settings(BaseSettings):
     login_max_failures: int = Field(default=5, ge=1)
     login_lockout_seconds: int = Field(default=900, ge=60)
 
+    # Blood network (Phase 2). Prototype defaults; verify against current national guidelines.
+    min_donation_interval_days: int = Field(default=90, ge=1)
+    # Simulated partner blood banks (DEMO). None = enabled exactly when not in production.
+    enable_mock_blood_banks: bool | None = None
+    outbox_relay_interval_seconds: float = Field(default=0.5, gt=0)
+
     @property
     def is_production(self) -> bool:
         return self.env == "production"
@@ -71,6 +77,12 @@ class Settings(BaseSettings):
     @property
     def docs_enabled(self) -> bool:
         return not self.is_production
+
+    @property
+    def mock_blood_banks_enabled(self) -> bool:
+        if self.enable_mock_blood_banks is None:
+            return self.demo_mode
+        return self.enable_mock_blood_banks
 
     @property
     def secure_cookies(self) -> bool:
@@ -94,6 +106,8 @@ class Settings(BaseSettings):
                 "Demo verification (last 4 digits of mobile) is not allowed in production. "
                 "Configure a real OTP provider."
             )
+        if self.enable_mock_blood_banks:
+            raise ValueError("Simulated (mock) blood banks cannot be enabled in production")
         if any("*" in o for o in self.cors_allowed_origins):
             raise ValueError("Wildcard CORS origins are not allowed in production")
         return self

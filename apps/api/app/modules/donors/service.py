@@ -61,7 +61,7 @@ def _profile(user: User, donor: Donor) -> DonorProfile:
         email=user.email,
         mobile=user.mobile,
         blood_group=donor.blood_group,
-        blood_group_status="self_declared",
+        blood_group_status="confirmed" if donor.blood_group_confirmed_at else "self_declared",
         address=donor.address,
         city=donor.city,
         state=donor.state,

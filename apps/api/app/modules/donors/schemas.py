@@ -18,7 +18,7 @@ class DonorProfile(BaseModel):
     mobile: str
     blood_group: str
     blood_group_status: str = Field(
-        description="'self_declared' until a blood bank confirms it at a donation (Phase 2)"
+        description="'self_declared' until a blood bank confirms it at a donation, then 'confirmed'"
     )
     address: str
     city: str

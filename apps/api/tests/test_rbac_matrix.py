@@ -1,4 +1,4 @@
-"""RBAC matrix: every Phase 1 endpoint x every role (+ anonymous) → expected status.
+"""RBAC matrix: every Phase 1 and Phase 2 endpoint x every role (+ anonymous) → expected status.
 
 This is the contract for the security boundary. Adding an endpoint means adding a row.
 """
@@ -25,6 +25,9 @@ FACILITY_BODY = {
     "state": "West Bengal",
     "pin_code": "700002",
 }
+
+_UUID = "0190f5d2-0000-7000-8000-000000000000"
+_BAG = "VYR-0000-0000"
 
 # (method, path, json body, {role: expected status})
 MATRIX: list[tuple[str, str, dict[str, object] | None, dict[str, int]]] = [
@@ -69,6 +72,116 @@ MATRIX: list[tuple[str, str, dict[str, object] | None, dict[str, int]]] = [
         "/api/v1/admin/facilities",
         FACILITY_BODY,
         {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 403, "ADMIN": 201},
+    ),
+    # ---------------------------------------------------------------- Phase 2
+    # Unknown ids give 404 for callers who hold the permission: the scope check runs after it.
+    (
+        "GET",
+        "/api/v1/inventory/summary",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        "/api/v1/inventory/bags",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        f"/api/v1/bags/{_BAG}",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "POST",
+        f"/api/v1/bags/{_BAG}/discard",
+        {"reason": "damaged"},
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        "/api/v1/donors/lookup",
+        {"mobile": "9000000099"},
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        "/api/v1/donations",
+        {"donor_id": _UUID, "blood_group": "O+", "volume_ml": 450},
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        "/api/v1/donations",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 200, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        "/api/v1/donors/me/donations",
+        None,
+        {"ANON": 401, "DONOR": 200, "HOSPITAL": 403, "BLOOD_BANK": 403, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        "/api/v1/network/availability?blood_group=O%2B&component=PRBC&units=2",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 403, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        "/api/v1/requests",
+        {
+            "target_ref": _UUID,
+            "blood_group": "O+",
+            "component": "PRBC",
+            "units": 1,
+            "needed_by": "2026-12-01T00:00:00Z",
+        },
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 422, "BLOOD_BANK": 403, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        "/api/v1/requests",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        f"/api/v1/requests/{_UUID}",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/requests/{_UUID}/fulfil",
+        {},
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/requests/{_UUID}/reject",
+        {"note": "No stock"},
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/requests/{_UUID}/cancel",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 403, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/requests/{_UUID}/receive",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 403, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        "/api/v1/stream?once=true",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
     ),
 ]
 

@@ -31,6 +31,7 @@ _LANES = 4
 _SALT_BYTES = 16
 _HASH_BYTES = 32
 
+IAT_LEEWAY_SECONDS = 60
 JWT_ALGORITHM = "HS256"
 JWT_ISSUER = "veyra"
 
@@ -151,13 +152,20 @@ class AccessTokenCodec:
                 self._key,
                 algorithms=[JWT_ALGORITHM],
                 issuer=JWT_ISSUER,
-                options={"require": ["exp", "iat", "sub", "sid", "iss"], "verify_exp": False},
+                options={
+                    "require": ["exp", "iat", "sub", "sid", "iss"],
+                    "verify_exp": False,
+                    "verify_iat": False,
+                },
             )
         except jwt.PyJWTError as exc:
             raise TokenError("invalid token") from exc
-        # Expiry is checked against the injectable clock, not the wall clock.
-        if payload.get("typ") != "access" or int(payload["exp"]) <= int(now.timestamp()):
+        # Expiry and issued-at are checked against the injectable clock, not the wall clock.
+        ts = int(now.timestamp())
+        if payload.get("typ") != "access" or int(payload["exp"]) <= ts:
             raise TokenError("expired or wrong token type")
+        if int(payload["iat"]) > ts + IAT_LEEWAY_SECONDS:
+            raise TokenError("token issued in the future")
         try:
             return AccessClaims(
                 user_id=UUID(payload["sub"]),

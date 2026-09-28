@@ -22,6 +22,37 @@ export type CreateFacilityRequest = Schemas["CreateFacilityRequest"];
 export type CreatedInvite = Schemas["CreatedInvite"];
 export type InviteOut = Schemas["InviteOut"];
 export type InvitePreview = Schemas["InvitePreview"];
+// Phase 2: core blood network
+export type SourceMeta = Schemas["SourceMeta"];
+export type InventorySummary = Schemas["InventorySummary"];
+export type InventoryRow = Schemas["InventoryRow"];
+export type ComponentInfo = Schemas["ComponentInfo"];
+export type BagOut = Schemas["BagOut"];
+export type BagTrace = Schemas["BagTrace"];
+export type BagEventOut = Schemas["BagEventOut"];
+export type ChainStatus = Schemas["ChainStatus"];
+export type DonorLookupResult = Schemas["DonorLookupResult"];
+export type RecordDonationRequest = Schemas["RecordDonationRequest"];
+export type DonationOut = Schemas["DonationOut"];
+export type MyDonations = Schemas["MyDonations"];
+export type MyDonation = Schemas["MyDonation"];
+export type AvailabilityResponse = Schemas["AvailabilityResponse"];
+export type AvailabilityItem = Schemas["AvailabilityItem"];
+export type CreateBloodRequest = Schemas["CreateBloodRequest"];
+export type BloodRequestOut = Schemas["BloodRequestOut"];
+export type AllocatedBag = Schemas["AllocatedBag"];
+export type BloodComponent = CreateBloodRequest["component"];
+export type BloodGroup = CreateBloodRequest["blood_group"];
+
+/** A live event from `GET /api/v1/stream` (Server-Sent Events, fed by the outbox). */
+export interface NetworkEvent {
+  event_id: string;
+  topic: string;
+  aggregate_type: string;
+  aggregate_id: string;
+  created_at: string;
+  [key: string]: unknown;
+}
 
 export type Role = "DONOR" | "HOSPITAL" | "BLOOD_BANK" | "ADMIN";
 
