@@ -88,3 +88,14 @@ async def test_cors_allows_only_configured_origin(client: AsyncClient) -> None:
     assert ok.headers.get("access-control-allow-origin") == "http://localhost:3000"
     bad = await client.get("/api/v1/meta", headers={"origin": "https://evil.example"})
     assert "access-control-allow-origin" not in bad.headers
+
+
+async def test_unhandled_error_still_carries_the_request_id(
+    app: FastAPI, client: AsyncClient
+) -> None:
+    """Regression: 500s are rendered outside the request-id middleware."""
+    _add_probe_routes(app)
+    r = await client.get("/_probe/boom", headers={"x-request-id": "trace-500-abcdef"})
+    assert r.status_code == 500
+    assert r.json()["request_id"] == "trace-500-abcdef"
+    assert r.headers["x-request-id"] == "trace-500-abcdef"

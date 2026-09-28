@@ -9,14 +9,22 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core import redis as redis_mod
+from app.core.clock import SystemClock
 from app.core.config import PRODUCT_NAME, PRODUCT_TAGLINE, Settings, get_settings
 from app.core.db import Database
 from app.core.errors import register_error_handlers
 from app.core.logging import configure_logging
 from app.core.middleware import RequestIdMiddleware, SecurityHeadersMiddleware
 from app.core.readiness import Check
+from app.core.security import AccessTokenCodec, PasswordHasher
+from app.modules.admin.router import router as admin_router
+from app.modules.donors.router import router as donors_router
+from app.modules.facilities.router import router as facilities_router
+from app.modules.identity.router import router as identity_router
 from app.modules.system.router import api_router as system_api_router
 from app.modules.system.router import ops_router
+from app.persistence.sql import sql_uow_factory
+from app.providers.verification import build_verification_provider
 
 
 def create_app(settings: Settings | None = None, *, with_infra: bool = True) -> FastAPI:
@@ -34,6 +42,9 @@ def create_app(settings: Settings | None = None, *, with_infra: bool = True) -> 
             rds = redis_mod.create_redis(settings.redis_url)
             app.state.db = db
             app.state.redis = rds
+            app.state.uow_factory = sql_uow_factory(db.sessionmaker)
+            # Fail fast at real startup if the verification provider can't be built.
+            app.state.verification = build_verification_provider(settings)
             checks["database"] = db.ping
             checks["redis"] = lambda: redis_mod.ping(rds)
         # Tests may pre-populate readiness_checks before startup.
@@ -65,6 +76,11 @@ def create_app(settings: Settings | None = None, *, with_infra: bool = True) -> 
     # so an app built with explicit settings (tests, OpenAPI export) never reads the global cache.
     app.dependency_overrides[get_settings] = lambda: settings
     app.state.readiness_checks = {}
+    app.state.clock = SystemClock()
+    app.state.hasher = PasswordHasher.from_settings(settings)
+    app.state.tokens = AccessTokenCodec.from_settings(settings)
+    app.state.verification = None  # built lazily (or eagerly at startup when with_infra)
+    app.state.uow_factory = None  # SQL unit of work at startup; tests inject an in-memory one
 
     register_error_handlers(app)
 
@@ -82,6 +98,8 @@ def create_app(settings: Settings | None = None, *, with_infra: bool = True) -> 
 
     app.include_router(ops_router)
     app.include_router(system_api_router, prefix=settings.api_prefix)
+    for router in (identity_router, donors_router, facilities_router, admin_router):
+        app.include_router(router, prefix=settings.api_prefix)
     return app
 
 

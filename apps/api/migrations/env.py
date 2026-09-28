@@ -8,10 +8,13 @@ from alembic import context
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
+# Import every ORM module so Base.metadata is complete (autogenerate / `alembic check`).
+import app.modules.audit.models
+import app.modules.donors.models
+import app.modules.facilities.models
+import app.modules.identity.models  # noqa: F401
 from app.core.config import get_settings
 from app.core.db import Base
-
-# Import ORM models here as modules gain them (Phase 1+), so autogenerate sees them.
 
 target_metadata = Base.metadata
 

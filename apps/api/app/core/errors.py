@@ -55,18 +55,22 @@ def problem(
     title: str,
     detail: str | None = None,
     errors: list[dict[str, Any]] | None = None,
+    *,
+    request_id: str | None = None,
 ) -> JSONResponse:
+    rid = request_id or current_request_id()
     body: dict[str, Any] = {
         "type": PROBLEM_BASE + code,
         "title": title,
         "status": status,
         "code": code,
         "detail": detail or title,
-        "request_id": current_request_id(),
+        "request_id": rid,
     }
     if errors:
         body["errors"] = errors
-    return JSONResponse(body, status_code=status, media_type=PROBLEM_JSON)
+    headers = {"x-request-id": rid} if rid and request_id else None
+    return JSONResponse(body, status_code=status, media_type=PROBLEM_JSON, headers=headers)
 
 
 _HTTP_CODES = {
@@ -100,6 +104,7 @@ def register_error_handlers(app: FastAPI) -> None:
         return problem(exc.status_code, code, title)
 
     @app.exception_handler(Exception)
-    async def _unhandled(_: Request, exc: Exception) -> JSONResponse:
-        logger.exception("unhandled_error", exc_info=exc)
-        return problem(500, "internal_error", "Internal server error")
+    async def _unhandled(request: Request, exc: Exception) -> JSONResponse:
+        rid = request.scope.get("state", {}).get("request_id")
+        logger.exception("unhandled_error", exc_info=exc, extra={"extra_fields": {"rid": rid}})
+        return problem(500, "internal_error", "Internal server error", request_id=rid)

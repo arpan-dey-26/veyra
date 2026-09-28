@@ -40,6 +40,9 @@ class RequestIdMiddleware:
         incoming = dict(scope.get("headers", [])).get(REQUEST_ID_HEADER, b"").decode("latin-1")
         request_id = incoming if _VALID_ID.match(incoming) else uuid.uuid4().hex
         token = request_id_ctx.set(request_id)
+        # Also keep it on the scope: Starlette renders unhandled 500s *outside* this middleware,
+        # after the context variable has been reset.
+        scope.setdefault("state", {})["request_id"] = request_id
 
         async def send_with_id(message: Message) -> None:
             if message["type"] == "http.response.start":

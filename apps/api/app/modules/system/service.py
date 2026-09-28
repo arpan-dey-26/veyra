@@ -4,7 +4,7 @@ from app.core.config import PRODUCT_NAME, PRODUCT_TAGLINE, Settings
 from app.core.readiness import Check, run_checks
 from app.modules.system.schemas import DemoDisclosure, MetaResponse, ReadinessResponse
 
-CURRENT_PHASE = "0 — Architecture & Foundation"
+CURRENT_PHASE = "1 — Authentication & RBAC"
 
 
 class SystemService:
@@ -26,6 +26,15 @@ class SystemService:
                     label="Demo environment",
                     detail="This is a prototype. Simulated and demo components are labelled "
                     "wherever they appear.",
+                )
+            )
+        if self._settings.verification_provider == "demo_last4":
+            disclosures.append(
+                DemoDisclosure(
+                    component="phone_verification",
+                    label="Demo",
+                    detail="Demo verification only. The last 4 digits of your mobile number are "
+                    "used for prototype verification instead of a real OTP.",
                 )
             )
         return MetaResponse(

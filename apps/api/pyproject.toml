@@ -13,6 +13,8 @@ dependencies = [
   "asyncpg>=0.29",
   "alembic>=1.13",
   "redis>=5.0",
+  "pyjwt>=2.8",
+  "cryptography>=46",
 ]
 
 [dependency-groups]
