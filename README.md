@@ -16,7 +16,7 @@ VEYRA is a prototype of an intelligent blood-supply network. It connects donors,
 
 See [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
 
-Demo sign-in after `scripts\bootstrap.cmd`: `admin@veyra.demo` / `veyra-demo-admin-2026` (**demo only**).
+Demo sign-in after `scripts\bootstrap.cmd`: `admin@veyra.demo` / `veyra-demo-console-2026` (**demo only**).
 
 ## Repository layout
 

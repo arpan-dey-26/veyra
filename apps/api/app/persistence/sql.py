@@ -14,7 +14,11 @@ from app.core.errors import AppError, ConflictError
 from app.modules.audit.models import AuditLog
 from app.modules.donors.models import Donor
 from app.modules.facilities.models import Facility, FacilityMembership
-from app.modules.identity.errors import EmailTakenError, MobileTakenError
+from app.modules.identity.errors import (
+    EmailTakenError,
+    MobileTakenError,
+    RegistrationNumberTakenError,
+)
 from app.modules.identity.models import (
     AuthSession,
     FacilityInvite,
@@ -27,17 +31,41 @@ from app.persistence.repositories import UnitOfWork
 _CONSTRAINT_ERRORS: dict[str, type[AppError]] = {
     "uq_users_email": EmailTakenError,
     "uq_users_mobile": MobileTakenError,
+    "uq_facilities_registration_number": RegistrationNumberTakenError,
 }
+
+
+def _domain_error(exc: IntegrityError) -> AppError:
+    message = str(exc.orig)
+    for constraint, error in _CONSTRAINT_ERRORS.items():
+        if constraint in message:
+            return error()
+    return ConflictError()
 
 
 class _Repo:
     def __init__(self, session: AsyncSession) -> None:
         self._s = session
 
+    async def _add(self, row: object) -> None:
+        """Add a row and flush it immediately (INSERT order == call order).
+
+        The models declare column-level FKs without ORM ``relationship()``s, so SQLAlchemy
+        does not order INSERTs by dependency: a donor/session/membership row could be sent
+        before its user row and fail PostgreSQL's (immediate) FK check. Flushing the parent
+        right away guarantees it exists first; constraint errors are mapped as at commit.
+        """
+        self._s.add(row)
+        try:
+            await self._s.flush()
+        except IntegrityError as exc:
+            await self._s.rollback()
+            raise _domain_error(exc) from exc
+
 
 class SqlUserRepository(_Repo):
     async def add(self, user: User) -> None:
-        self._s.add(user)
+        await self._add(user)
 
     async def get(self, user_id: UUID) -> User | None:
         return await self._s.get(User, user_id)
@@ -65,7 +93,7 @@ class SqlUserRepository(_Repo):
 
 class SqlSessionRepository(_Repo):
     async def add(self, session: AuthSession) -> None:
-        self._s.add(session)
+        await self._add(session)
 
     async def get(self, session_id: UUID) -> AuthSession | None:
         return await self._s.get(AuthSession, session_id)
@@ -82,7 +110,7 @@ class SqlSessionRepository(_Repo):
 
 class SqlChallengeRepository(_Repo):
     async def add(self, challenge: VerificationChallenge) -> None:
-        self._s.add(challenge)
+        await self._add(challenge)
 
     async def get(self, challenge_id: UUID) -> VerificationChallenge | None:
         return await self._s.get(VerificationChallenge, challenge_id)
@@ -90,7 +118,7 @@ class SqlChallengeRepository(_Repo):
 
 class SqlDonorRepository(_Repo):
     async def add(self, donor: Donor) -> None:
-        self._s.add(donor)
+        await self._add(donor)
 
     async def get_by_user_id(self, user_id: UUID) -> Donor | None:
         return await self._s.scalar(select(Donor).where(Donor.user_id == user_id))
@@ -98,7 +126,7 @@ class SqlDonorRepository(_Repo):
 
 class SqlFacilityRepository(_Repo):
     async def add(self, facility: Facility) -> None:
-        self._s.add(facility)
+        await self._add(facility)
 
     async def get(self, facility_id: UUID) -> Facility | None:
         return await self._s.get(Facility, facility_id)
@@ -114,7 +142,7 @@ class SqlFacilityRepository(_Repo):
         return list(rows), int(total or 0)
 
     async def add_membership(self, membership: FacilityMembership) -> None:
-        self._s.add(membership)
+        await self._add(membership)
 
     async def get_membership(self, user_id: UUID) -> FacilityMembership | None:
         return await self._s.get(FacilityMembership, user_id)
@@ -122,7 +150,7 @@ class SqlFacilityRepository(_Repo):
 
 class SqlInviteRepository(_Repo):
     async def add(self, invite: FacilityInvite) -> None:
-        self._s.add(invite)
+        await self._add(invite)
 
     async def get_by_token_hash(self, token_hash: str) -> FacilityInvite | None:
         return await self._s.scalar(
@@ -140,7 +168,7 @@ class SqlInviteRepository(_Repo):
 
 class SqlAuditRepository(_Repo):
     async def add(self, entry: AuditLog) -> None:
-        self._s.add(entry)
+        await self._add(entry)
 
 
 class SqlUnitOfWork:
@@ -159,11 +187,7 @@ class SqlUnitOfWork:
             await self._session.commit()
         except IntegrityError as exc:
             await self._session.rollback()
-            message = str(exc.orig)
-            for constraint, error in _CONSTRAINT_ERRORS.items():
-                if constraint in message:
-                    raise error() from exc
-            raise ConflictError() from exc
+            raise _domain_error(exc) from exc
 
     async def rollback(self) -> None:
         await self._session.rollback()

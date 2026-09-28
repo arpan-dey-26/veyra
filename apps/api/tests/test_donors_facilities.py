@@ -222,3 +222,12 @@ async def test_seed_demo_admin_is_idempotent_and_flagged(
     assert user.is_demo and user.role == "ADMIN" and user.status == "active"
     await login(api, "admin@veyra.demo", "demo-admin-passphrase")
     assert (await api.get("/api/v1/admin/users")).status_code == 200
+
+
+def test_documented_demo_admin_password_satisfies_the_password_policy() -> None:
+    """Regression: the old demo password contained the email name ("admin") and the seed
+    step failed. The documented DEMO credentials must pass the unchanged policy."""
+    from app.core.validation import validate_new_password
+    from app.scripts.seed_demo import DEMO_ADMIN_EMAIL, DEMO_ADMIN_PASSWORD
+
+    assert validate_new_password(DEMO_ADMIN_PASSWORD, email=DEMO_ADMIN_EMAIL)

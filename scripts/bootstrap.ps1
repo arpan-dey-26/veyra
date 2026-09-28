@@ -86,6 +86,25 @@ function Assert-Http([string]$Url, [string]$MustContain = "") {
   throw "GET $Url failed: $last"
 }
 
+# JSON call that surfaces the API's RFC 9457 problem body on failure (code, detail, request id).
+function Invoke-Api {
+  param([string]$Method, [string]$Uri, $Body = $null, $Session, [hashtable]$Headers = @{})
+  $args2 = @{ Uri = $Uri; Method = $Method; WebSession = $Session; Headers = $Headers; UseBasicParsing = $true }
+  if ($null -ne $Body) { $args2.Body = ($Body | ConvertTo-Json -Compress); $args2.ContentType = "application/json" }
+  try {
+    $r = Invoke-WebRequest @args2
+    if ($r.Content) { return ($r.Content | ConvertFrom-Json) } else { return $null }
+  } catch {
+    $detail = ""
+    $resp = $_.Exception.Response
+    if ($resp) {
+      try { $detail = (New-Object IO.StreamReader($resp.GetResponseStream())).ReadToEnd() } catch { }
+      throw "$Method $Uri -> $([int]$resp.StatusCode): $detail"
+    }
+    throw
+  }
+}
+
 # pnpm without admin rights: `corepack enable` writes shims next to node.exe
 # (C:\Program Files\nodejs), which fails with EPERM. Install shims into a
 # user-writable folder instead and put it on PATH (process + user).
@@ -188,9 +207,9 @@ if ($SkipDocker) {
     }
   }
   Step "docker: seed demo admin" {
-    $env:VEYRA_DEMO_ADMIN_PASSWORD = "veyra-demo-admin-2026"
+    $env:VEYRA_DEMO_ADMIN_PASSWORD = "veyra-demo-console-2026"
     Invoke-Native docker ($compose + @("exec", "-T", "-e", "VEYRA_DEMO_ADMIN_PASSWORD", "api", "uv", "run", "--no-sync", "python", "-m", "app.scripts.seed_demo"))
-    Log "   demo admin: admin@veyra.demo / veyra-demo-admin-2026  (DEMO ONLY)"
+    Log "   demo admin: admin@veyra.demo / veyra-demo-console-2026  (DEMO ONLY)"
   }
   Step "e2e: API /healthz" { Assert-Http "http://localhost:8000/healthz" '"ok"' }
   Step "e2e: API /readyz (db + redis)" { Assert-Http "http://localhost:8000/readyz" '"ready"' }
@@ -205,29 +224,25 @@ if ($SkipDocker) {
     $base = "http://localhost:3000/api/v1"
     $s = New-Object Microsoft.PowerShell.Commands.WebRequestSession
     $tag = [Guid]::NewGuid().ToString("N").Substring(0, 8)
-    $mobile = "9" + (Get-Random -Minimum 100000000 -Maximum 999999999)
-    $body = @{ full_name = "Smoke Test"; email = "smoke-$tag@example.in"; mobile = $mobile; blood_group = "B+";
-               address = "1 Smoke Street"; city = "Kolkata"; state = "West Bengal"; pin_code = "700001";
-               password = "smoke-test-passphrase" } | ConvertTo-Json
-    $reg = Invoke-RestMethod -Uri "$base/auth/register" -Method Post -Body $body -ContentType "application/json" -WebSession $s
+    $mobile = "9" + ([UInt64]("0x" + [Guid]::NewGuid().ToString("N").Substring(0, 15)) % 1000000000).ToString("000000000")
+    $reg = Invoke-Api Post "$base/auth/register" @{ full_name = "Smoke Test"; email = "smoke-$tag@example.in"; mobile = $mobile;
+      blood_group = "B+"; address = "1 Smoke Street"; city = "Kolkata"; state = "West Bengal"; pin_code = "700001";
+      password = "smoke-test-passphrase" } $s
     if ($reg.verification.mode -ne "demo" -or -not $reg.verification.disclaimer) { throw "demo verification not labelled" }
-    $code = $mobile.Substring($mobile.Length - 4)
-    $me = Invoke-RestMethod -Uri "$base/auth/verify" -Method Post -ContentType "application/json" -WebSession $s `
-      -Body (@{ challenge_id = $reg.verification.challenge_id; code = $code } | ConvertTo-Json)
+    $me = Invoke-Api Post "$base/auth/verify" @{ challenge_id = $reg.verification.challenge_id; code = $mobile.Substring(6) } $s
     if ($me.user.status -ne "active") { throw "verify did not activate the account" }
     $csrf = ($s.Cookies.GetCookies("http://localhost:3000") | Where-Object Name -eq "veyra_csrf").Value
-    $upd = Invoke-RestMethod -Uri "$base/donors/me" -Method Patch -ContentType "application/json" -WebSession $s `
-      -Headers @{ "X-CSRF-Token" = $csrf } -Body (@{ city = "Durgapur" } | ConvertTo-Json)
+    $upd = Invoke-Api Patch "$base/donors/me" @{ city = "Durgapur" } $s @{ "X-CSRF-Token" = $csrf }
     if ($upd.city -ne "Durgapur") { throw "profile update failed" }
-    Invoke-RestMethod -Uri "$base/auth/logout" -Method Post -WebSession $s -Headers @{ "X-CSRF-Token" = $csrf } | Out-Null
-    try { Invoke-RestMethod -Uri "$base/auth/me" -WebSession $s | Out-Null; throw "session still valid after logout" }
-    catch { if ($_.Exception.Message -like "*still valid*") { throw } }
+    Invoke-Api Post "$base/auth/logout" $null $s @{ "X-CSRF-Token" = $csrf } | Out-Null
+    $stillIn = $true
+    try { Invoke-Api Get "$base/auth/me" $null $s | Out-Null } catch { if ("$_" -like "*-> 401*") { $stillIn = $false } else { throw } }
+    if ($stillIn) { throw "session still valid after logout" }
     Log "   donor journey OK ($($me.user.email))"
   }
   Step "e2e: demo admin can sign in" {
     $s = New-Object Microsoft.PowerShell.Commands.WebRequestSession
-    $me = Invoke-RestMethod -Uri "http://localhost:3000/api/v1/auth/login" -Method Post -ContentType "application/json" -WebSession $s `
-      -Body (@{ email = "admin@veyra.demo"; password = "veyra-demo-admin-2026" } | ConvertTo-Json)
+    $me = Invoke-Api Post "http://localhost:3000/api/v1/auth/login" @{ email = "admin@veyra.demo"; password = "veyra-demo-console-2026" } $s
     if ($me.user.role -ne "ADMIN") { throw "admin login failed" }
   }
 }
@@ -240,6 +255,6 @@ $passed = @($results.Values | Where-Object { $_ -eq "PASS" }).Count
 Log ""
 Log ("OVERALL: {0}  ({1}/{2} steps passed)" -f ($(if ($script:anyFail) { "FAIL" } else { "PASS" })), $passed, $results.Count)
 if (-not $SkipDocker) { Log "Stack left running: http://localhost:3000  (stop: docker compose -f infra/docker-compose.yml down)"
-  Log "Demo admin: admin@veyra.demo / veyra-demo-admin-2026 (DEMO ONLY)" }
+  Log "Demo admin: admin@veyra.demo / veyra-demo-console-2026 (DEMO ONLY)" }
 Log "Log: $log"
 if ($script:anyFail) { exit 1 } else { exit 0 }

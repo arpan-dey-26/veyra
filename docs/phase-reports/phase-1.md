@@ -17,7 +17,7 @@ Date: 2026-09-28 · Product: **VEYRA — Intelligent Blood Network**
 | Account list (admin, no secrets) | `GET /admin/users` | — | `/admin` |
 | Audit trail (append-only, DB trigger) | internal | `audit.audit_logs` | — |
 | Registration reference data | `GET /reference/registration` | — | forms |
-| Demo admin seed | `python -m app.scripts.seed_demo` | — | — |
+| Demo admin seed | `python -m app.scripts.seed_demo` (DEMO ONLY: `admin@veyra.demo` / `veyra-demo-console-2026`) | — | — |
 
 Security properties:
 - Argon2id passwords with a pepper, and equal work for unknown accounts.

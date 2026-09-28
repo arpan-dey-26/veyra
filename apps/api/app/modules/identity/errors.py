@@ -59,3 +59,11 @@ class InviteInvalidError(AppError):
 
 class WeakPasswordError(AppError):
     status, code, title = 422, "validation_error", "Validation failed"
+
+
+class RegistrationNumberTakenError(AppError):
+    status, code, title = (
+        409,
+        "registration_number_taken",
+        "A facility with this registration number already exists",
+    )

@@ -8,10 +8,10 @@
   },
   "scripts": {
     "dev:web": "pnpm --filter @veyra/web dev",
-    "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test",
+    "build": "pnpm -r --no-bail build",
+    "lint": "pnpm -r --no-bail lint",
+    "typecheck": "pnpm -r --no-bail typecheck",
+    "test": "pnpm -r --no-bail test",
     "gen:api-client": "pnpm --filter @veyra/api-client generate",
     "bootstrap:win": "powershell -ExecutionPolicy Bypass -File scripts/bootstrap.ps1",
     "gen:api": "cd apps/api && uv run python -m app.scripts.export_openapi ../../packages/api-client/openapi.json && cd ../.. && pnpm --filter @veyra/api-client generate"

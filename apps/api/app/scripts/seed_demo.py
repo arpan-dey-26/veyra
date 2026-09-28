@@ -2,6 +2,8 @@
 
 Usage:  python -m app.scripts.seed_demo [--email admin@veyra.demo]
 Password: $VEYRA_DEMO_ADMIN_PASSWORD, or a random one printed once.
+The bootstrap uses the documented DEMO ONLY credentials below. The password must pass the
+normal policy (it may not contain the email name "admin"), which is validated before use.
 The account is flagged ``is_demo`` and the script refuses to run in production.
 """
 
@@ -26,6 +28,9 @@ from app.persistence.repositories import UnitOfWork
 from app.persistence.sql import SqlUnitOfWork
 
 DEMO_ADMIN_MOBILE = "+919000000000"
+DEMO_ADMIN_EMAIL = "admin@veyra.demo"
+# DEMO ONLY. Documented in README / phase-1 report; used by scripts/bootstrap.ps1.
+DEMO_ADMIN_PASSWORD = "veyra-demo-console-2026"  # noqa: S105 - documented DEMO-only credential
 
 
 async def ensure_demo_admin(
@@ -99,7 +104,7 @@ async def _main(settings: Settings, email: str) -> int:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--email", default="admin@veyra.demo")
+    parser.add_argument("--email", default=DEMO_ADMIN_EMAIL)
     args = parser.parse_args()
     raise SystemExit(asyncio.run(_main(get_settings(), normalize_email(args.email))))
 

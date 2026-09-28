@@ -3,8 +3,12 @@ import { describe, expect, it, vi } from "vitest";
 import { createVeyraClient, fieldErrors } from "./index";
 import { readCookie, sessionMiddleware } from "./session";
 
+// 204/205/304 are null-body statuses: the Fetch spec forbids a body on them.
+const NULL_BODY_STATUSES = new Set([204, 205, 304]);
 const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+  NULL_BODY_STATUSES.has(status)
+    ? new Response(null, { status })
+    : new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
 
 function setup(responses: Array<(req: Request) => Response>) {
   let csrf = "csrf-1";

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import secrets
+import uuid
 from collections.abc import AsyncIterator
 from contextlib import AsyncExitStack
 
@@ -27,7 +28,9 @@ pytestmark = pytest.mark.integration
 
 
 def _mobile() -> str:
-    return "9" + "".join(secrets.choice("0123456789") for _ in range(9))
+    """A valid Indian mobile that is unique per call: 9 + 9 digits from a fresh UUID4
+    (collision odds ~1e-9 per pair, vs. data left behind by earlier runs)."""
+    return "9" + f"{uuid.uuid4().int % 10**9:09d}"
 
 
 @pytest.fixture
