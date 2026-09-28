@@ -1,0 +1,24 @@
+{
+  "name": "@veyra/design-tokens",
+  "version": "0.0.0",
+  "private": true,
+  "description": "VEYRA design tokens: CSS variables (source of truth) + typed motion/breakpoint tokens",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": {
+      "style": "./src/tokens.css",
+      "default": "./src/tokens.css"
+    }
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2",
+    "vitest": "^5.0.2",
+    "@types/node": "^26.6.3"
+  }
+}

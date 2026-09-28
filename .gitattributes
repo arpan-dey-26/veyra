@@ -1,0 +1,10 @@
+# Normalise line endings (Windows + WSL safe)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.avif binary
+*.woff2 binary
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf

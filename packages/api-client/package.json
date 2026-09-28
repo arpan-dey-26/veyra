@@ -1,0 +1,25 @@
+{
+  "name": "@veyra/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Typed VEYRA API client generated from the FastAPI OpenAPI schema",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "openapi-typescript ./openapi.json -o ./src/schema.d.ts",
+    "check": "openapi-typescript ./openapi.json -o ./src/schema.d.ts --check",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.17.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0",
+    "typescript": "~5.9.2",
+    "vitest": "^5.0.2"
+  }
+}

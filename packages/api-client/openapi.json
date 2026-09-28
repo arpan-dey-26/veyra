@@ -1,0 +1,219 @@
+{
+  "components": {
+    "schemas": {
+      "DemoDisclosure": {
+        "properties": {
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "label": {
+            "description": "Short UI label, e.g. 'Simulated'",
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "component",
+          "label",
+          "detail"
+        ],
+        "title": "DemoDisclosure",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "const": "ok",
+            "default": "ok",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "MetaResponse": {
+        "properties": {
+          "api_version": {
+            "const": "v1",
+            "default": "v1",
+            "title": "Api Version",
+            "type": "string"
+          },
+          "demo_mode": {
+            "description": "True when simulated/demo components may be active",
+            "title": "Demo Mode",
+            "type": "boolean"
+          },
+          "disclosures": {
+            "description": "Active simulated/demo components. The UI must display these.",
+            "items": {
+              "$ref": "#/components/schemas/DemoDisclosure"
+            },
+            "title": "Disclosures",
+            "type": "array"
+          },
+          "environment": {
+            "enum": [
+              "dev",
+              "test",
+              "demo",
+              "production"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "name": {
+            "examples": [
+              "VEYRA"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "phase": {
+            "description": "Current build phase of the prototype",
+            "title": "Phase",
+            "type": "string"
+          },
+          "tagline": {
+            "examples": [
+              "Intelligent Blood Network"
+            ],
+            "title": "Tagline",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "tagline",
+          "version",
+          "environment",
+          "demo_mode",
+          "phase"
+        ],
+        "title": "MetaResponse",
+        "type": "object"
+      },
+      "ReadinessResponse": {
+        "properties": {
+          "checks": {
+            "additionalProperties": {
+              "enum": [
+                "ok",
+                "unavailable"
+              ],
+              "type": "string"
+            },
+            "title": "Checks",
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "ready",
+              "degraded"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "checks"
+        ],
+        "title": "ReadinessResponse",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Prototype API for the VEYRA intelligent blood network. Responses built from simulated or demo providers are labelled with `source.kind`.",
+    "summary": "VEYRA \u2014 Intelligent Blood Network",
+    "title": "VEYRA API",
+    "version": "0.0.0-phase0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/meta": {
+      "get": {
+        "operationId": "meta_api_v1_meta_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetaResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Public product metadata",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/healthz": {
+      "get": {
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Liveness probe",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/readyz": {
+      "get": {
+        "operationId": "readyz_readyz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Readiness probe (database, redis)",
+        "tags": [
+          "ops"
+        ]
+      }
+    }
+  }
+}

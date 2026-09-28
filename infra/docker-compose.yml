@@ -1,0 +1,63 @@
+# VEYRA local stack (Phase 0): Postgres, Redis, API, Web.
+# Later phases add: worker (ARQ), hardhat (local demo chain), iot-simulator.
+name: veyra
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-veyra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-veyra}
+      POSTGRES_DB: ${POSTGRES_DB:-veyra}
+    ports: ["${VEYRA_PG_PORT:-55432}:5432"]
+    volumes: [veyra_pg:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports: ["${VEYRA_REDIS_PORT:-56379}:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/docker/api.Dockerfile
+    environment:
+      VEYRA_ENV: ${VEYRA_ENV:-dev}
+      VEYRA_DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-veyra}:${POSTGRES_PASSWORD:-veyra}@postgres:5432/${POSTGRES_DB:-veyra}
+      VEYRA_REDIS_URL: redis://redis:6379/0
+      VEYRA_CORS_ALLOWED_ORIGINS: '["http://localhost:3000"]'
+    ports: ["8000:8000"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/docker/web.Dockerfile
+      args:
+        NEXT_PUBLIC_VEYRA_ENV: ${VEYRA_ENV:-dev}
+        # Next.js bakes rewrites in at build time, so the proxy target must be set here.
+        VEYRA_API_INTERNAL_URL: http://api:8000
+    environment:
+      VEYRA_API_INTERNAL_URL: http://api:8000
+    ports: ["3000:3000"]
+    depends_on:
+      api: { condition: service_healthy }
+
+volumes:
+  veyra_pg:

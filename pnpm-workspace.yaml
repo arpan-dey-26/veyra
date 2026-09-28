@@ -1,0 +1,10 @@
+packages:
+  - "apps/web"
+  - "packages/*"
+
+# pnpm 10 skips dependency build scripts unless allow-listed.
+onlyBuiltDependencies:
+  - "@tailwindcss/oxide"
+  - esbuild
+  - sharp
+  - unrs-resolver

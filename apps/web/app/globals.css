@@ -1,0 +1,131 @@
+@import "tailwindcss";
+/* Tokens are imported UNLAYERED so they always win over Tailwind's layered theme defaults. */
+@import "@veyra/design-tokens/tokens.css";
+
+/* Expose VEYRA tokens as Tailwind utilities (bg-surface, text-ink, text-vital, shadow-2, ...). */
+@theme inline {
+  --color-surface: var(--color-surface);
+  --color-surface-raised: var(--color-surface-raised);
+  --color-surface-sunken: var(--color-surface-sunken);
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-ink-subtle: var(--color-ink-subtle);
+  --color-line: var(--color-line);
+  --color-line-strong: var(--color-line-strong);
+  --color-vital: var(--color-vital);
+  --color-vital-strong: var(--color-vital-strong);
+  --color-vital-soft: var(--color-vital-soft);
+  --color-on-vital: var(--color-on-vital);
+  --color-critical: var(--color-critical);
+  --color-critical-soft: var(--color-critical-soft);
+  --color-verified: var(--color-verified);
+  --color-verified-soft: var(--color-verified-soft);
+  --color-warn: var(--color-warn);
+  --color-warn-soft: var(--color-warn-soft);
+  --color-simulated: var(--color-simulated);
+  --color-simulated-soft: var(--color-simulated-soft);
+  --color-focus: var(--color-focus);
+
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+
+  --text-2xs: var(--text-2xs);
+  --text-display: var(--text-display);
+  --text-display-sm: var(--text-display-sm);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-1: var(--shadow-1);
+  --shadow-2: var(--shadow-2);
+
+  --ease-standard: var(--ease-standard);
+  --ease-emphasized: var(--ease-emphasized);
+  --ease-exit: var(--ease-exit);
+}
+
+@layer base {
+  html {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    min-height: 100dvh;
+    line-height: var(--leading-body);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
+  ::selection {
+    background: var(--color-vital-soft);
+    color: var(--color-ink);
+  }
+}
+
+/* ---------- Motion primitives (all disabled under reduced motion) ---------- */
+
+/* A short pulse travelling along a vein-like path (paths use pathLength="100"). */
+@keyframes veyra-flow {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Soft expanding ring for live/emergency beacons. */
+@keyframes veyra-beacon {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes veyra-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes veyra-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.veyra-flow-pulse {
+  stroke-dasharray: 7 93;
+  animation: veyra-flow var(--dur-flow, 4.8s) linear infinite;
+}
+
+.veyra-beacon {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: veyra-beacon var(--dur-pulse) var(--ease-standard) infinite;
+}
+
+.veyra-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-sunken) 0%,
+    var(--color-line) 50%,
+    var(--color-surface-sunken) 100%
+  );
+  background-size: 200% 100%;
+  animation: veyra-shimmer 1.6s linear infinite;
+}
+
+.veyra-rise {
+  animation: veyra-rise var(--dur-slow) var(--ease-emphasized) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .veyra-flow-pulse,
+  .veyra-beacon,
+  .veyra-skeleton,
+  .veyra-rise {
+    animation: none !important;
+  }
+  .veyra-flow-pulse { stroke-dasharray: none; opacity: 0; }
+}

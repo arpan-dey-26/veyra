@@ -1,0 +1,282 @@
+bootstrap.cmd started 28-09-2026  9:31:09.67 
+C:\Program Files\nodejs\node.exe
+C:\Users\Dell\.local\bin\uv.exe
+C:\Program Files\Python314\python.exe
+C:\Users\Dell\AppData\Local\Microsoft\WindowsApps\python.exe
+INFO: Could not find "pnpm".
+
+==> tool versions
+v22.17.0
+[31m[1mInternal Error[22m[39m: EPERM: operation not permitted, open 'C:\Program Files\nodejs\pnpm.CMD'
+Error: EPERM: operation not permitted, open 'C:\Program Files\nodejs\pnpm.CMD'
+Preparing pnpm@10.28.0 for immediate activation...
+pnpm : The term 'pnpm' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\Dell\Desktop\veyra\scripts\bootstrap.ps1:24 char:3
++   pnpm -v
++   ~~~~
+    + CategoryInfo          : ObjectNotFound: (pnpm:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+uv 0.12.19 (bea138450 2026-09-24 x86_64-pc-windows-msvc)
+
+==> pnpm install
+pnpm : The term 'pnpm' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\Dell\Desktop\veyra\scripts\bootstrap.ps1:34 char:36
++ Step "pnpm install"              { pnpm install }
++                                    ~~~~
+    + CategoryInfo          : ObjectNotFound: (pnpm:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+
+==> pin versions
+node : ! apps/web: next not installed; left as latest
+At C:\Users\Dell\Desktop\veyra\scripts\bootstrap.ps1:35 char:36
++ ... p "pin versions"              { node scripts/pin-versions.mjs; pnpm i ...
++                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (! apps/web: nex... left as latest:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+! apps/web: react not installed; left as latest
+! apps/web: react-dom not installed; left as latest
+! apps/web: @eslint/eslintrc not installed; left as latest
+! apps/web: @tailwindcss/postcss not installed; left as latest
+! apps/web: @testing-library/jest-dom not installed; left as latest
+! apps/web: @testing-library/react not installed; left as latest
+! apps/web: @types/node not installed; left as latest
+! apps/web: @types/react not installed; left as latest
+! apps/web: @types/react-dom not installed; left as latest
+! apps/web: @vitejs/plugin-react not installed; left as latest
+! apps/web: eslint not installed; left as latest
+! apps/web: eslint-config-next not installed; left as latest
+! apps/web: jsdom not installed; left as latest
+! apps/web: tailwindcss not installed; left as latest
+! apps/web: typescript not installed; left as latest
+! apps/web: vitest not installed; left as latest
+! packages/api-client: openapi-fetch not installed; left as latest
+! packages/api-client: openapi-typescript not installed; left as latest
+! packages/api-client: typescript not installed; left as latest
+! packages/api-client: vitest not installed; left as latest
+! packages/design-tokens: typescript not installed; left as latest
+! packages/design-tokens: vitest not installed; left as latest
+! packages/design-tokens: @types/node not installed; left as latest
+pinned 0 dependencies
+pnpm : The term 'pnpm' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\Dell\Desktop\veyra\scripts\bootstrap.ps1:35 char:67
++ ...  versions"              { node scripts/pin-versions.mjs; pnpm install ...
++                                                              ~~~~
+    + CategoryInfo          : ObjectNotFound: (pnpm:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+
+==> uv sync (python 3.12)
+uv : Python 3.12 is already installed
+At C:\Users\Dell\Desktop\veyra\scripts\bootstrap.ps1:36 char:60
++ ... n 3.12)"     { Push-Location apps/api; uv python install 3.12; uv syn ...
++                                            ~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Python 3.12 is already installed:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+uv : Resolved 44 packages in 1ms
+At C:\Users\Dell\Desktop\veyra\scripts\bootstrap.ps1:36 char:84
++ ... ation apps/api; uv python install 3.12; uv sync --python 3.12; Pop-Lo ...
++                                             ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Resolved 44 packages in 1ms:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Checked 42 packages in 2ms
+
+==> export OpenAPI
+wrote ..\..\packages\api-client\openapi.json
+
+==> generate api-client
+pnpm : The term 'pnpm' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\Dell\Desktop\veyra\scripts\bootstrap.ps1:38 char:36
++ Step "generate api-client"       { pnpm --filter @veyra/api-client ge ...
++                                    ~~~~
+    + CategoryInfo          : ObjectNotFound: (pnpm:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+
+==> api: ruff format
+31 files left unchanged
+
+==> api: ruff check
+All checks passed!
+
+==> api: mypy
+Success: no issues found in 21 source files
+
+==> api: pytest
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\Dell\Desktop\veyra\apps\api
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.15.1, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 29 items
+
+tests\test_config.py ......                                              [ 20%]
+tests\test_core_primitives.py ..........                                 [ 55%]
+tests\test_errors_and_middleware.py ...F.F..                             [ 82%]
+tests\test_integration_infra.py s                                        [ 86%]
+tests\test_system.py .F..                                                [100%]
+
+================================== FAILURES ===================================
+__________________ test_validation_error_does_not_echo_input __________________
+
+app = <fastapi.applications.FastAPI object at 0x000001DB3D9B4980>
+client = <httpx.AsyncClient object at 0x000001DB3D9DDCA0>
+
+    async def test_validation_error_does_not_echo_input(app: FastAPI, client: AsyncClient) -> None:
+        _add_probe_routes(app)
+        r = await client.post("/_probe/validate", json={"units": "not-a-number-SENSITIVE"})
+        assert r.status_code == 422
+        body = r.json()
+        assert body["code"] == "validation_error"
+>       assert body["errors"][0]["loc"] == ["body", "units"]
+E       AssertionError: assert ['query', 'body'] == ['body', 'units']
+E         
+E         At index 0 diff: 'query' != 'body'
+E         Use -v to get more diff
+
+tests\test_errors_and_middleware.py:59: AssertionError
+---------------------------- Captured stdout call -----------------------------
+{"ts": "2026-09-28T04:01:13.518221+00:00", "level": "INFO", "logger": "httpx", "msg": "HTTP Request: POST http://test/_probe/validate \"HTTP/1.1 422 Unprocessable Entity\"", "request_id": null}
+------------------------------ Captured log call ------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://test/_probe/validate "HTTP/1.1 422 Unprocessable Entity"
+____________________ test_malformed_request_id_is_replaced ____________________
+
+client = <httpx.AsyncClient object at 0x000001DB3D9B66C0>
+
+    async def test_malformed_request_id_is_replaced(client: AsyncClient) -> None:
+>       r = await client.get("/healthz", headers={"x-request-id": "bad idé<script>"})
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_errors_and_middleware.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\httpx\_client.py:1768: in get
+    return await self.request(
+.venv\Lib\site-packages\httpx\_client.py:1527: in request
+    request = self.build_request(
+.venv\Lib\site-packages\httpx\_client.py:367: in build_request
+    headers = self._merge_headers(headers)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_client.py:430: in _merge_headers
+    merged_headers.update(headers)
+.venv\Lib\site-packages\httpx\_models.py:275: in update
+    headers = Headers(headers)
+              ^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\httpx\_models.py:156: in __init__
+    bytes_value = _normalize_header_value(v, encoding)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = 'bad idé<script>', encoding = None
+
+    def _normalize_header_value(value: str | bytes, encoding: str | None = None) -> bytes:
+        """
+        Coerce str/bytes into a strictly byte-wise HTTP header value.
+        """
+        if isinstance(value, bytes):
+            return value
+        if not isinstance(value, str):
+            raise TypeError(f"Header value must be str or bytes, not {type(value)}")
+>       return value.encode(encoding or "ascii")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       UnicodeEncodeError: 'ascii' codec can't encode character '\xe9' in position 6: ordinal not in range(128)
+
+.venv\Lib\site-packages\httpx\_models.py:82: UnicodeEncodeError
+______________ test_meta_uses_veyra_branding_and_discloses_demo _______________
+
+client = <httpx.AsyncClient object at 0x000001DB3DE15A30>
+
+    async def test_meta_uses_veyra_branding_and_discloses_demo(client: AsyncClient) -> None:
+        r = await client.get("/api/v1/meta")
+        assert r.status_code == 200
+        body = r.json()
+        assert body["name"] == "VEYRA"
+        assert body["tagline"] == "Intelligent Blood Network"
+>       assert body["environment"] == "test"
+E       AssertionError: assert 'dev' == 'test'
+E         
+E         - test
+E         + dev
+
+tests\test_system.py:19: AssertionError
+---------------------------- Captured stdout call -----------------------------
+{"ts": "2026-09-28T04:01:15.763512+00:00", "level": "INFO", "logger": "httpx", "msg": "HTTP Request: GET http://test/api/v1/meta \"HTTP/1.1 200 OK\"", "request_id": null}
+------------------------------ Captured log call ------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: GET http://test/api/v1/meta "HTTP/1.1 200 OK"
+=========================== short test summary info ===========================
+FAILED tests/test_errors_and_middleware.py::test_validation_error_does_not_echo_input
+FAILED tests/test_errors_and_middleware.py::test_malformed_request_id_is_replaced
+FAILED tests/test_system.py::test_meta_uses_veyra_branding_and_discloses_demo
+=================== 3 failed, 25 passed, 1 skipped in 2.37s ===================
+
+==> web+packages: typecheck
+pnpm : The term 'pnpm' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\Dell\Desktop\veyra\scripts\bootstrap.ps1:43 char:36
++ Step "web+packages: typecheck"   { pnpm -r typecheck }
++                                    ~~~~
+    + CategoryInfo          : ObjectNotFound: (pnpm:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+
+==> web+packages: lint
+pnpm : The term 'pnpm' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\Dell\Desktop\veyra\scripts\bootstrap.ps1:44 char:36
++ Step "web+packages: lint"        { pnpm -r lint }
++                                    ~~~~
+    + CategoryInfo          : ObjectNotFound: (pnpm:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+
+==> web+packages: vitest
+pnpm : The term 'pnpm' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\Dell\Desktop\veyra\scripts\bootstrap.ps1:45 char:36
++ Step "web+packages: vitest"      { pnpm -r test }
++                                    ~~~~
+    + CategoryInfo          : ObjectNotFound: (pnpm:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+
+==> web: next build
+pnpm : The term 'pnpm' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\Dell\Desktop\veyra\scripts\bootstrap.ps1:46 char:36
++ Step "web: next build"           { pnpm --filter @veyra/web build }
++                                    ~~~~
+    + CategoryInfo          : ObjectNotFound: (pnpm:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+
+==> docker available
+29.8.0
+
+===== SUMMARY =====
+tool versions                PASS
+pnpm install                 PASS
+pin versions                 PASS
+uv sync (python 3.12)        PASS
+export OpenAPI               PASS
+generate api-client          PASS
+api: ruff format             PASS
+api: ruff check              PASS
+api: mypy                    PASS
+api: pytest                  FAIL (exit 1)
+web+packages: typecheck      PASS
+web+packages: lint           PASS
+web+packages: vitest         PASS
+web: next build              PASS
+docker available             PASS
+
+Log: C:\Users\Dell\Desktop\veyra\docs\phase-reports\phase-0-verification.log
+powershell exit code 0 
