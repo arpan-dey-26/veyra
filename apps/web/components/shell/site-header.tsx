@@ -14,10 +14,19 @@ export function SiteHeader() {
           Disclosures
         </Link>
         {!isProductionEnv() && (
-          <Link href="/system" className="rounded-pill px-3 py-1.5 text-ink-muted hover:bg-surface-sunken hover:text-ink">
+          <Link href="/system" className="hidden rounded-pill px-3 py-1.5 text-ink-muted hover:bg-surface-sunken hover:text-ink sm:inline-block">
             Design system
           </Link>
         )}
+        <Link href="/sign-in" className="rounded-pill px-3 py-1.5 font-medium text-ink hover:bg-surface-sunken">
+          Sign in
+        </Link>
+        <Link
+          href="/register"
+          className="ml-1 rounded-pill bg-vital px-4 py-1.5 font-medium text-on-vital shadow-1 transition-colors duration-(--dur-fast) hover:bg-vital-strong"
+        >
+          Become a donor
+        </Link>
       </nav>
     </header>
   );

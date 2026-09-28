@@ -32,6 +32,11 @@ const ITEMS = [
     body: "Demo verification only. The last 4 digits of your mobile number are used for prototype verification instead of a real OTP.",
   },
   {
+    subject: "Staff invitations",
+    label: "Demo" as const,
+    body: "No email is sent. An administrator sees a one-time invitation link, labelled as demo delivery, and shares it with the invitee.",
+  },
+  {
     subject: "Privacy-preserving eligibility",
     label: "Demo" as const,
     body: "The zero-knowledge eligibility check is a technical prototype. It is not a medical certification or clinical decision system.",

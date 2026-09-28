@@ -6,7 +6,17 @@ VEYRA is a prototype of an intelligent blood-supply network. It connects donors,
 
 ## Current phase
 
-**Phase 0: Architecture & Foundation.** Only scaffolding exists. There are no product features yet (no auth, inventory, ML, AI, agent, blockchain, IoT or ZKP). See the [phase report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
+**Phase 1: Authentication & RBAC.**
+
+- Donor registration (all 9 fields) with **demo** phone verification (last 4 digits of the mobile, clearly labelled, never presented as OTP).
+- Argon2id passwords, rotating refresh sessions with reuse detection, CSRF protection.
+- Permission + scope RBAC for DONOR / HOSPITAL / BLOOD_BANK / ADMIN.
+- Admin facility onboarding + single-use staff invitations.
+- Donor profile, and role dashboards.
+
+See [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
+
+Demo sign-in after `scripts\bootstrap.cmd`: `admin@veyra.demo` / `veyra-demo-admin-2026` (**demo only**).
 
 ## Repository layout
 

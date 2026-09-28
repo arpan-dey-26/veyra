@@ -173,16 +173,63 @@ if ($SkipDocker) {
   Step "docker: compose config valid" { Invoke-Native docker ($compose + @("config", "--quiet")) }
   Step "docker: postgres + redis healthy" { Invoke-Native docker ($compose + @("up", "-d", "--wait", "postgres", "redis")) }
   Step "api: alembic upgrade head (real Postgres)" { InDir "apps/api" { Invoke-Native uv @("run", "alembic", "upgrade", "head") } }
+  Step "api: alembic check (models == migrations)" { InDir "apps/api" { Invoke-Native uv @("run", "alembic", "check") } }
   Step "api: pytest (integration, real Postgres + Redis)" {
     $env:VEYRA_REQUIRE_INFRA = "1"
     try { InDir "apps/api" { Invoke-Native uv @("run", "pytest", "-v", "-m", "integration") } }
     finally { Remove-Item Env:VEYRA_REQUIRE_INFRA -ErrorAction SilentlyContinue }
   }
-  Step "docker: full stack build + up" { Invoke-Native docker ($compose + @("up", "-d", "--build", "--wait")) }
+  Step "docker: full stack build + up" {
+    try { Invoke-Native docker ($compose + @("up", "-d", "--build", "--wait")) }
+    catch {
+      Log "---- api container logs (last 80 lines) ----"
+      try { Invoke-Native docker ($compose + @("logs", "--no-color", "--tail", "80", "api")) } catch { }
+      throw
+    }
+  }
+  Step "docker: seed demo admin" {
+    $env:VEYRA_DEMO_ADMIN_PASSWORD = "veyra-demo-admin-2026"
+    Invoke-Native docker ($compose + @("exec", "-T", "-e", "VEYRA_DEMO_ADMIN_PASSWORD", "api", "uv", "run", "--no-sync", "python", "-m", "app.scripts.seed_demo"))
+    Log "   demo admin: admin@veyra.demo / veyra-demo-admin-2026  (DEMO ONLY)"
+  }
   Step "e2e: API /healthz" { Assert-Http "http://localhost:8000/healthz" '"ok"' }
   Step "e2e: API /readyz (db + redis)" { Assert-Http "http://localhost:8000/readyz" '"ready"' }
   Step "e2e: web home page" { Assert-Http "http://localhost:3000/" "VEYRA" }
   Step "e2e: web -> API proxy /api/v1/meta" { Assert-Http "http://localhost:3000/api/v1/meta" '"name":"VEYRA"' }
+  Step "e2e: web pages render (register, sign-in, verify)" {
+    Assert-Http "http://localhost:3000/register" "Become a donor"
+    Assert-Http "http://localhost:3000/sign-in" "Sign in"
+    Assert-Http "http://localhost:3000/verify" "Verify your mobile"
+  }
+  Step "e2e: donor register -> demo verify -> me -> update -> logout (via web proxy)" {
+    $base = "http://localhost:3000/api/v1"
+    $s = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $tag = [Guid]::NewGuid().ToString("N").Substring(0, 8)
+    $mobile = "9" + (Get-Random -Minimum 100000000 -Maximum 999999999)
+    $body = @{ full_name = "Smoke Test"; email = "smoke-$tag@example.in"; mobile = $mobile; blood_group = "B+";
+               address = "1 Smoke Street"; city = "Kolkata"; state = "West Bengal"; pin_code = "700001";
+               password = "smoke-test-passphrase" } | ConvertTo-Json
+    $reg = Invoke-RestMethod -Uri "$base/auth/register" -Method Post -Body $body -ContentType "application/json" -WebSession $s
+    if ($reg.verification.mode -ne "demo" -or -not $reg.verification.disclaimer) { throw "demo verification not labelled" }
+    $code = $mobile.Substring($mobile.Length - 4)
+    $me = Invoke-RestMethod -Uri "$base/auth/verify" -Method Post -ContentType "application/json" -WebSession $s `
+      -Body (@{ challenge_id = $reg.verification.challenge_id; code = $code } | ConvertTo-Json)
+    if ($me.user.status -ne "active") { throw "verify did not activate the account" }
+    $csrf = ($s.Cookies.GetCookies("http://localhost:3000") | Where-Object Name -eq "veyra_csrf").Value
+    $upd = Invoke-RestMethod -Uri "$base/donors/me" -Method Patch -ContentType "application/json" -WebSession $s `
+      -Headers @{ "X-CSRF-Token" = $csrf } -Body (@{ city = "Durgapur" } | ConvertTo-Json)
+    if ($upd.city -ne "Durgapur") { throw "profile update failed" }
+    Invoke-RestMethod -Uri "$base/auth/logout" -Method Post -WebSession $s -Headers @{ "X-CSRF-Token" = $csrf } | Out-Null
+    try { Invoke-RestMethod -Uri "$base/auth/me" -WebSession $s | Out-Null; throw "session still valid after logout" }
+    catch { if ($_.Exception.Message -like "*still valid*") { throw } }
+    Log "   donor journey OK ($($me.user.email))"
+  }
+  Step "e2e: demo admin can sign in" {
+    $s = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $me = Invoke-RestMethod -Uri "http://localhost:3000/api/v1/auth/login" -Method Post -ContentType "application/json" -WebSession $s `
+      -Body (@{ email = "admin@veyra.demo"; password = "veyra-demo-admin-2026" } | ConvertTo-Json)
+    if ($me.user.role -ne "ADMIN") { throw "admin login failed" }
+  }
 }
 
 # ---------------------------------------------------------------- summary
@@ -192,6 +239,7 @@ foreach ($k in $results.Keys) { Log ("{0,-48} {1}" -f $k, $results[$k]) }
 $passed = @($results.Values | Where-Object { $_ -eq "PASS" }).Count
 Log ""
 Log ("OVERALL: {0}  ({1}/{2} steps passed)" -f ($(if ($script:anyFail) { "FAIL" } else { "PASS" })), $passed, $results.Count)
-if (-not $SkipDocker) { Log "Stack left running: http://localhost:3000  (stop: docker compose -f infra/docker-compose.yml down)" }
+if (-not $SkipDocker) { Log "Stack left running: http://localhost:3000  (stop: docker compose -f infra/docker-compose.yml down)"
+  Log "Demo admin: admin@veyra.demo / veyra-demo-admin-2026 (DEMO ONLY)" }
 Log "Log: $log"
 if ($script:anyFail) { exit 1 } else { exit 0 }

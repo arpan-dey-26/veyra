@@ -37,7 +37,7 @@ export default function HomePage() {
       <section className="mx-auto grid max-w-(--layout-max) items-center gap-12 px-(--gutter) pt-10 pb-20 md:grid-cols-[1.05fr_1fr] md:pt-16">
         <div className="veyra-rise">
           <Badge tone="neutral" className="mb-8">
-            Prototype · Phase 0 foundation
+            Prototype · Phase 1: accounts &amp; access
           </Badge>
           <h1 className="font-display text-display leading-(--leading-tight) tracking-(--tracking-display) text-ink">
             Every unit of blood,
@@ -50,12 +50,17 @@ export default function HomePage() {
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-3">
             <Link
-              href="/disclosures"
-              className="inline-flex h-12 items-center rounded-pill bg-ink px-6 text-sm font-medium text-surface shadow-1 transition-transform duration-(--dur-fast) ease-standard active:scale-[0.98]"
+              href="/register"
+              className="inline-flex h-12 items-center rounded-pill bg-vital px-6 text-sm font-medium text-on-vital shadow-1 transition-transform duration-(--dur-fast) ease-standard active:scale-[0.98]"
             >
-              How this prototype is labelled
+              Register as a donor
             </Link>
-            <span className="text-sm text-ink-subtle">Features arrive phase by phase.</span>
+            <Link
+              href="/disclosures"
+              className="inline-flex h-12 items-center rounded-pill border border-line-strong px-6 text-sm font-medium text-ink transition-colors duration-(--dur-fast) hover:border-ink/40"
+            >
+              What is simulated?
+            </Link>
           </div>
         </div>
 
