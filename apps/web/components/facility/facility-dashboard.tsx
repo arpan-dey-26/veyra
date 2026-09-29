@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { ComingInPhase, PageHeader } from "@/components/app/page-header";
 import { FacilityOverview } from "@/components/dashboard/facility-overview";
+import { ForecastPanel } from "@/components/forecast/forecast-panel";
 import { TraceSearch } from "@/components/network/bag-trace";
 import { DonationDesk } from "@/components/network/donation-desk";
 import { IncomingRequests } from "@/components/network/incoming-requests";
@@ -24,7 +25,6 @@ import { toFailure } from "@/lib/problem";
 
 const UPCOMING = {
   HOSPITAL: [
-    { phase: 4, title: "Demand forecast", description: "An explainable forecast of your demand, labelled with the data it was trained on." },
     { phase: 6, title: "Emergency assistant", description: "Critical stock triggers sourcing across the network, with you in control." },
     { phase: 7, title: "Transport routing", description: "Courier assignment and live ETAs for dispatched bags." },
   ],
@@ -40,6 +40,7 @@ const TABS = {
     { id: "overview", label: "Overview" },
     { id: "request", label: "Request blood" },
     { id: "requests", label: "My requests" },
+    { id: "forecast", label: "Forecast" },
     { id: "stock", label: "Received stock" },
     { id: "trace", label: "Trace" },
   ],
@@ -48,6 +49,7 @@ const TABS = {
     { id: "inventory", label: "Inventory" },
     { id: "donations", label: "Donation desk" },
     { id: "incoming", label: "Incoming requests" },
+    { id: "forecast", label: "Forecast" },
     { id: "trace", label: "Trace" },
   ],
 } as const;
@@ -144,6 +146,7 @@ function FacilityWorkspace({ kind }: { kind: "HOSPITAL" | "BLOOD_BANK" }) {
             }}
           />
         )}
+        {tab === "forecast" && <ForecastPanel kind={kind} />}
         {tab === "inventory" && <InventoryOverview canDiscard />}
         {tab === "stock" && <InventoryOverview canDiscard={false} />}
         {tab === "donations" && <DonationDesk />}

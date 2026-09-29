@@ -997,6 +997,152 @@
         "title": "DayCount",
         "type": "object"
       },
+      "DemandForecast": {
+        "properties": {
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "disclaimer": {
+            "default": "Synthetic ML forecast \u2014 prototype. Trained and run on synthetic demand data; not clinical guidance and not a certified medical prediction system.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "facilities_included": {
+            "title": "Facilities Included",
+            "type": "integer"
+          },
+          "facility_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Facility Id"
+          },
+          "facility_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Facility Name"
+          },
+          "forecast": {
+            "items": {
+              "$ref": "#/components/schemas/ForecastPointOut"
+            },
+            "title": "Forecast",
+            "type": "array"
+          },
+          "forecast_daily_mean": {
+            "title": "Forecast Daily Mean",
+            "type": "number"
+          },
+          "forecast_total": {
+            "title": "Forecast Total",
+            "type": "number"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryPoint"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "history_daily_mean": {
+            "title": "History Daily Mean",
+            "type": "number"
+          },
+          "horizon": {
+            "title": "Horizon",
+            "type": "integer"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelInfo"
+          },
+          "scope": {
+            "enum": [
+              "facility",
+              "network"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "signal": {
+            "$ref": "#/components/schemas/DemandSignal"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          }
+        },
+        "required": [
+          "scope",
+          "facility_id",
+          "facility_name",
+          "facilities_included",
+          "blood_group",
+          "component",
+          "horizon",
+          "generated_at",
+          "history",
+          "forecast",
+          "history_daily_mean",
+          "forecast_daily_mean",
+          "forecast_total",
+          "signal",
+          "model",
+          "source"
+        ],
+        "title": "DemandForecast",
+        "type": "object"
+      },
+      "DemandSignal": {
+        "description": "Operational prototype indicator only; never a medical or crisis prediction.",
+        "properties": {
+          "ratio": {
+            "description": "Forecast daily mean / trailing 28-day daily mean",
+            "title": "Ratio",
+            "type": "number"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "normal",
+              "elevated",
+              "high"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "ratio",
+          "reason"
+        ],
+        "title": "DemandSignal",
+        "type": "object"
+      },
       "DemoDisclosure": {
         "properties": {
           "component": {
@@ -1347,6 +1493,27 @@
         "title": "DonorSummary",
         "type": "object"
       },
+      "Evaluation": {
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/MetricSet"
+          },
+          "gbm": {
+            "$ref": "#/components/schemas/MetricSet"
+          },
+          "horizon": {
+            "title": "Horizon",
+            "type": "string"
+          }
+        },
+        "required": [
+          "horizon",
+          "baseline",
+          "gbm"
+        ],
+        "title": "Evaluation",
+        "type": "object"
+      },
       "ExpiryBucket": {
         "properties": {
           "bucket": {
@@ -1598,6 +1765,130 @@
         "title": "FacilityTotals",
         "type": "object"
       },
+      "ForecastPointOut": {
+        "properties": {
+          "baseline": {
+            "description": "Seasonal-naive baseline for the same day",
+            "title": "Baseline",
+            "type": "number"
+          },
+          "day": {
+            "format": "date",
+            "title": "Day",
+            "type": "string"
+          },
+          "lower": {
+            "description": "Lower bound of the ~80% prototype interval",
+            "title": "Lower",
+            "type": "number"
+          },
+          "predicted": {
+            "title": "Predicted",
+            "type": "number"
+          },
+          "upper": {
+            "description": "Upper bound of the ~80% prototype interval",
+            "title": "Upper",
+            "type": "number"
+          }
+        },
+        "required": [
+          "day",
+          "predicted",
+          "lower",
+          "upper",
+          "baseline"
+        ],
+        "title": "ForecastPointOut",
+        "type": "object"
+      },
+      "ForecastSummary": {
+        "properties": {
+          "disclaimer": {
+            "default": "Synthetic ML forecast \u2014 prototype. Trained and run on synthetic demand data; not clinical guidance and not a certified medical prediction system.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "facilities_included": {
+            "title": "Facilities Included",
+            "type": "integer"
+          },
+          "facility_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Facility Id"
+          },
+          "facility_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Facility Name"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "horizon": {
+            "title": "Horizon",
+            "type": "integer"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelInfo"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/SummaryRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "scope": {
+            "enum": [
+              "facility",
+              "network"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "signal_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Signal Counts",
+            "type": "object"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          }
+        },
+        "required": [
+          "scope",
+          "facility_id",
+          "facility_name",
+          "facilities_included",
+          "horizon",
+          "generated_at",
+          "rows",
+          "signal_counts",
+          "model",
+          "source"
+        ],
+        "title": "ForecastSummary",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1621,6 +1912,26 @@
           }
         },
         "title": "HealthResponse",
+        "type": "object"
+      },
+      "HistoryPoint": {
+        "properties": {
+          "day": {
+            "format": "date",
+            "title": "Day",
+            "type": "string"
+          },
+          "demand": {
+            "description": "Synthetic historical demand (units/day)",
+            "title": "Demand",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "demand"
+        ],
+        "title": "HistoryPoint",
         "type": "object"
       },
       "InventoryRow": {
@@ -1947,6 +2258,176 @@
           "phase"
         ],
         "title": "MetaResponse",
+        "type": "object"
+      },
+      "MetricSet": {
+        "properties": {
+          "mae": {
+            "title": "Mae",
+            "type": "number"
+          },
+          "rmse": {
+            "title": "Rmse",
+            "type": "number"
+          },
+          "wape": {
+            "title": "Wape",
+            "type": "number"
+          }
+        },
+        "required": [
+          "mae",
+          "rmse",
+          "wape"
+        ],
+        "title": "MetricSet",
+        "type": "object"
+      },
+      "ModelCard": {
+        "properties": {
+          "disclaimer": {
+            "default": "Synthetic ML forecast \u2014 prototype. Trained and run on synthetic demand data; not clinical guidance and not a certified medical prediction system.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "features": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Features",
+            "type": "array"
+          },
+          "fingerprint": {
+            "title": "Fingerprint",
+            "type": "string"
+          },
+          "generator": {
+            "title": "Generator",
+            "type": "string"
+          },
+          "horizon_7": {
+            "$ref": "#/components/schemas/Evaluation"
+          },
+          "intended_use": {
+            "title": "Intended Use",
+            "type": "string"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "model_type": {
+            "title": "Model Type",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "not_intended_for": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Not Intended For",
+            "type": "array"
+          },
+          "one_step": {
+            "$ref": "#/components/schemas/Evaluation"
+          },
+          "purpose": {
+            "title": "Purpose",
+            "type": "string"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer"
+          },
+          "split": {
+            "additionalProperties": true,
+            "title": "Split",
+            "type": "object"
+          },
+          "training_data": {
+            "additionalProperties": true,
+            "title": "Training Data",
+            "type": "object"
+          },
+          "uncertainty": {
+            "additionalProperties": true,
+            "title": "Uncertainty",
+            "type": "object"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "fingerprint",
+          "generator",
+          "seed",
+          "purpose",
+          "intended_use",
+          "not_intended_for",
+          "features",
+          "model_type",
+          "training_data",
+          "split",
+          "one_step",
+          "horizon_7",
+          "uncertainty",
+          "limitations"
+        ],
+        "title": "ModelCard",
+        "type": "object"
+      },
+      "ModelInfo": {
+        "properties": {
+          "baseline_one_step_mae": {
+            "title": "Baseline One Step Mae",
+            "type": "number"
+          },
+          "fingerprint": {
+            "title": "Fingerprint",
+            "type": "string"
+          },
+          "generator": {
+            "title": "Generator",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "one_step_mae": {
+            "title": "One Step Mae",
+            "type": "number"
+          },
+          "trained_on": {
+            "const": "synthetic",
+            "default": "synthetic",
+            "title": "Trained On",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "fingerprint",
+          "generator",
+          "one_step_mae",
+          "baseline_one_step_mae"
+        ],
+        "title": "ModelInfo",
         "type": "object"
       },
       "MovementDay": {
@@ -2745,6 +3226,83 @@
           "count"
         ],
         "title": "StatusCount",
+        "type": "object"
+      },
+      "SummaryRow": {
+        "properties": {
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "coverage_days": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Real stock / synthetic forecast daily mean",
+            "title": "Coverage Days"
+          },
+          "forecast_daily_mean": {
+            "title": "Forecast Daily Mean",
+            "type": "number"
+          },
+          "forecast_total": {
+            "title": "Forecast Total",
+            "type": "number"
+          },
+          "history_daily_mean": {
+            "title": "History Daily Mean",
+            "type": "number"
+          },
+          "pressure": {
+            "anyOf": [
+              {
+                "enum": [
+                  "ok",
+                  "watch",
+                  "pressure"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pressure"
+          },
+          "signal": {
+            "$ref": "#/components/schemas/DemandSignal"
+          },
+          "stock_available": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Real usable units on hand (facility scope only)",
+            "title": "Stock Available"
+          }
+        },
+        "required": [
+          "blood_group",
+          "component",
+          "history_daily_mean",
+          "forecast_daily_mean",
+          "forecast_total",
+          "signal"
+        ],
+        "title": "SummaryRow",
         "type": "object"
       },
       "UpdateDonorProfileRequest": {
@@ -3964,6 +4522,193 @@
         "summary": "My facility",
         "tags": [
           "facilities"
+        ]
+      }
+    },
+    "/api/v1/forecast/demand": {
+      "get": {
+        "operationId": "demand_forecast_api_v1_forecast_demand_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "blood_group",
+            "required": true,
+            "schema": {
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-"
+              ],
+              "title": "Blood Group",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "component",
+            "required": false,
+            "schema": {
+              "default": "PRBC",
+              "enum": [
+                "PRBC",
+                "PLATELETS",
+                "FFP"
+              ],
+              "title": "Component",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Days ahead (1-14)",
+            "in": "query",
+            "name": "horizon",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "description": "Days ahead (1-14)",
+              "maximum": 14,
+              "minimum": 1,
+              "title": "Horizon",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Admins: any facility (omit for the network). Others: only their own.",
+            "in": "query",
+            "name": "facility_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admins: any facility (omit for the network). Others: only their own.",
+              "title": "Facility Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemandForecast"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Synthetic ML demand forecast for one blood group and component (prototype)",
+        "tags": [
+          "forecast"
+        ]
+      }
+    },
+    "/api/v1/forecast/model": {
+      "get": {
+        "operationId": "forecast_model_api_v1_forecast_model_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelCard"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Forecast model card",
+        "tags": [
+          "forecast"
+        ]
+      }
+    },
+    "/api/v1/forecast/summary": {
+      "get": {
+        "operationId": "forecast_summary_api_v1_forecast_summary_get",
+        "parameters": [
+          {
+            "description": "Days ahead (1-14)",
+            "in": "query",
+            "name": "horizon",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "description": "Days ahead (1-14)",
+              "maximum": 14,
+              "minimum": 1,
+              "title": "Horizon",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Admins: any facility (omit for the network). Others: only their own.",
+            "in": "query",
+            "name": "facility_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Admins: any facility (omit for the network). Others: only their own.",
+              "title": "Facility Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Forecast by blood group x component, with supply vs forecast (prototype)",
+        "tags": [
+          "forecast"
         ]
       }
     },

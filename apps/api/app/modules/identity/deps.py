@@ -95,6 +95,18 @@ def require(permission: Permission) -> Callable[..., Awaitable[AuthContext]]:
     return _dependency
 
 
+def require_any(*permissions: Permission) -> Callable[..., Awaitable[AuthContext]]:
+    """AuthContext holding at least one of ``permissions`` or 403 (the service applies scope)."""
+
+    async def _dependency(ctx: AuthContext = Depends(current_context)) -> AuthContext:
+        if not any(ctx.has(p) for p in permissions):
+            raise PermissionDeniedError()
+        return ctx
+
+    _dependency.__name__ = "require_any_" + "_".join(p.name.lower() for p in permissions)
+    return _dependency
+
+
 async def csrf_protect(request: Request) -> None:
     """Unsafe requests authenticated by cookie must echo the CSRF cookie in a header.
 

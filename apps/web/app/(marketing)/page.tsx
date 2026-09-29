@@ -68,6 +68,7 @@ const PRINCIPLES = [
 const SIMULATED = [
   { subject: "Partner blood banks", label: "Simulated" as const, body: "Mock banks with generated availability; no real blood bank is contacted." },
   { subject: "Phone verification", label: "Demo" as const, body: "Demo verification only. The last 4 digits of your mobile number are used for prototype verification instead of a real OTP." },
+  { subject: "Demand forecasts", label: "Synthetic data" as const, body: "A real model, trained and run on synthetic demand data. Not clinical guidance." },
   { subject: "Demo facilities", label: "Demo" as const, body: "The seeded demo blood bank and hospital run real workflows on demo data." },
   { subject: "Blockchain anchoring", label: "Demo" as const, body: "Not yet: trace hashes live in the VEYRA database only (planned for a later phase)." },
 ] as const;
@@ -101,7 +102,7 @@ export default function HomePage() {
       <section className="mx-auto grid max-w-(--layout-max) items-center gap-12 px-(--gutter) pt-10 pb-20 md:grid-cols-[1.05fr_1fr] md:pt-16">
         <div className="veyra-rise">
           <Badge tone="neutral" className="mb-8">
-            Prototype · Phase 3: dashboards &amp; live network
+            Prototype · Phase 4: synthetic ML forecasting
           </Badge>
           <h1 className="font-display text-display leading-(--leading-tight) tracking-(--tracking-display) text-ink">
             Every unit of blood,

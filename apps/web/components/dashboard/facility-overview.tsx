@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { StatTile } from "@/components/app/page-header";
 import { BarList, ColumnChart } from "@/components/charts/charts";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
+import { ForecastOutlook } from "@/components/forecast/forecast-panel";
 import { LiveNetwork } from "@/components/network/live-network";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -133,6 +134,8 @@ export function FacilityOverview({
           </Button>
         </Card>
       )}
+
+      <ForecastOutlook onOpen={() => onNavigate("forecast")} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

@@ -368,6 +368,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/forecast/demand": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Synthetic ML demand forecast for one blood group and component (prototype) */
+        get: operations["demand_forecast_api_v1_forecast_demand_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/forecast/model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Forecast model card */
+        get: operations["forecast_model_api_v1_forecast_model_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/forecast/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Forecast by blood group x component, with supply vs forecast (prototype) */
+        get: operations["forecast_summary_api_v1_forecast_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inventory/bags": {
         parameters: {
             query?: never;
@@ -1032,6 +1083,67 @@ export interface components {
              */
             day: string;
         };
+        /** DemandForecast */
+        DemandForecast: {
+            /** Blood Group */
+            blood_group: string;
+            /** Component */
+            component: string;
+            /**
+             * Disclaimer
+             * @default Synthetic ML forecast — prototype. Trained and run on synthetic demand data; not clinical guidance and not a certified medical prediction system.
+             */
+            disclaimer: string;
+            /** Facilities Included */
+            facilities_included: number;
+            /** Facility Id */
+            facility_id: string | null;
+            /** Facility Name */
+            facility_name: string | null;
+            /** Forecast */
+            forecast: components["schemas"]["ForecastPointOut"][];
+            /** Forecast Daily Mean */
+            forecast_daily_mean: number;
+            /** Forecast Total */
+            forecast_total: number;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** History */
+            history: components["schemas"]["HistoryPoint"][];
+            /** History Daily Mean */
+            history_daily_mean: number;
+            /** Horizon */
+            horizon: number;
+            model: components["schemas"]["ModelInfo"];
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "facility" | "network";
+            signal: components["schemas"]["DemandSignal"];
+            source: components["schemas"]["SourceMeta"];
+        };
+        /**
+         * DemandSignal
+         * @description Operational prototype indicator only; never a medical or crisis prediction.
+         */
+        DemandSignal: {
+            /**
+             * Ratio
+             * @description Forecast daily mean / trailing 28-day daily mean
+             */
+            ratio: number;
+            /** Reason */
+            reason: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "normal" | "elevated" | "high";
+        };
         /** DemoDisclosure */
         DemoDisclosure: {
             /** Component */
@@ -1189,6 +1301,13 @@ export interface components {
             /** State */
             state: string;
         };
+        /** Evaluation */
+        Evaluation: {
+            baseline: components["schemas"]["MetricSet"];
+            gbm: components["schemas"]["MetricSet"];
+            /** Horizon */
+            horizon: string;
+        };
         /** ExpiryBucket */
         ExpiryBucket: {
             /**
@@ -1295,6 +1414,65 @@ export interface components {
             /** Simulated */
             simulated: number;
         };
+        /** ForecastPointOut */
+        ForecastPointOut: {
+            /**
+             * Baseline
+             * @description Seasonal-naive baseline for the same day
+             */
+            baseline: number;
+            /**
+             * Day
+             * Format: date
+             */
+            day: string;
+            /**
+             * Lower
+             * @description Lower bound of the ~80% prototype interval
+             */
+            lower: number;
+            /** Predicted */
+            predicted: number;
+            /**
+             * Upper
+             * @description Upper bound of the ~80% prototype interval
+             */
+            upper: number;
+        };
+        /** ForecastSummary */
+        ForecastSummary: {
+            /**
+             * Disclaimer
+             * @default Synthetic ML forecast — prototype. Trained and run on synthetic demand data; not clinical guidance and not a certified medical prediction system.
+             */
+            disclaimer: string;
+            /** Facilities Included */
+            facilities_included: number;
+            /** Facility Id */
+            facility_id: string | null;
+            /** Facility Name */
+            facility_name: string | null;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Horizon */
+            horizon: number;
+            model: components["schemas"]["ModelInfo"];
+            /** Rows */
+            rows: components["schemas"]["SummaryRow"][];
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "facility" | "network";
+            /** Signal Counts */
+            signal_counts: {
+                [key: string]: number;
+            };
+            source: components["schemas"]["SourceMeta"];
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -1308,6 +1486,19 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /** HistoryPoint */
+        HistoryPoint: {
+            /**
+             * Day
+             * Format: date
+             */
+            day: string;
+            /**
+             * Demand
+             * @description Synthetic historical demand (units/day)
+             */
+            demand: number;
         };
         /** InventoryRow */
         InventoryRow: {
@@ -1464,6 +1655,80 @@ export interface components {
              * @example Intelligent Blood Network
              */
             tagline: string;
+            /** Version */
+            version: string;
+        };
+        /** MetricSet */
+        MetricSet: {
+            /** Mae */
+            mae: number;
+            /** Rmse */
+            rmse: number;
+            /** Wape */
+            wape: number;
+        };
+        /** ModelCard */
+        ModelCard: {
+            /**
+             * Disclaimer
+             * @default Synthetic ML forecast — prototype. Trained and run on synthetic demand data; not clinical guidance and not a certified medical prediction system.
+             */
+            disclaimer: string;
+            /** Features */
+            features: string[];
+            /** Fingerprint */
+            fingerprint: string;
+            /** Generator */
+            generator: string;
+            horizon_7: components["schemas"]["Evaluation"];
+            /** Intended Use */
+            intended_use: string;
+            /** Limitations */
+            limitations: string[];
+            /** Model Type */
+            model_type: string;
+            /** Name */
+            name: string;
+            /** Not Intended For */
+            not_intended_for: string[];
+            one_step: components["schemas"]["Evaluation"];
+            /** Purpose */
+            purpose: string;
+            /** Seed */
+            seed: number;
+            /** Split */
+            split: {
+                [key: string]: unknown;
+            };
+            /** Training Data */
+            training_data: {
+                [key: string]: unknown;
+            };
+            /** Uncertainty */
+            uncertainty: {
+                [key: string]: unknown;
+            };
+            /** Version */
+            version: string;
+        };
+        /** ModelInfo */
+        ModelInfo: {
+            /** Baseline One Step Mae */
+            baseline_one_step_mae: number;
+            /** Fingerprint */
+            fingerprint: string;
+            /** Generator */
+            generator: string;
+            /** Name */
+            name: string;
+            /** One Step Mae */
+            one_step_mae: number;
+            /**
+             * Trained On
+             * @default synthetic
+             * @constant
+             */
+            trained_on: "synthetic";
             /** Version */
             version: string;
         };
@@ -1797,6 +2062,32 @@ export interface components {
             count: number;
             /** Status */
             status: string;
+        };
+        /** SummaryRow */
+        SummaryRow: {
+            /** Blood Group */
+            blood_group: string;
+            /** Component */
+            component: string;
+            /**
+             * Coverage Days
+             * @description Real stock / synthetic forecast daily mean
+             */
+            coverage_days?: number | null;
+            /** Forecast Daily Mean */
+            forecast_daily_mean: number;
+            /** Forecast Total */
+            forecast_total: number;
+            /** History Daily Mean */
+            history_daily_mean: number;
+            /** Pressure */
+            pressure?: ("ok" | "watch" | "pressure") | null;
+            signal: components["schemas"]["DemandSignal"];
+            /**
+             * Stock Available
+             * @description Real usable units on hand (facility scope only)
+             */
+            stock_available?: number | null;
         };
         /**
          * UpdateDonorProfileRequest
@@ -2619,6 +2910,96 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FacilityOut"];
+                };
+            };
+        };
+    };
+    demand_forecast_api_v1_forecast_demand_get: {
+        parameters: {
+            query: {
+                blood_group: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+                component?: "PRBC" | "PLATELETS" | "FFP";
+                /** @description Days ahead (1-14) */
+                horizon?: number;
+                /** @description Admins: any facility (omit for the network). Others: only their own. */
+                facility_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemandForecast"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    forecast_model_api_v1_forecast_model_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelCard"];
+                };
+            };
+        };
+    };
+    forecast_summary_api_v1_forecast_summary_get: {
+        parameters: {
+            query?: {
+                /** @description Days ahead (1-14) */
+                horizon?: number;
+                /** @description Admins: any facility (omit for the network). Others: only their own. */
+                facility_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForecastSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

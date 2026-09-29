@@ -1,4 +1,4 @@
-"""RBAC matrix: every Phase 1 and Phase 2 endpoint x every role (+ anonymous) → expected status.
+"""RBAC matrix: every Phase 1-4 endpoint x every role (+ anonymous) → expected status.
 
 This is the contract for the security boundary. Adding an endpoint means adding a row.
 """
@@ -193,6 +193,25 @@ MATRIX: list[tuple[str, str, dict[str, object] | None, dict[str, int]]] = [
     (
         "GET",
         "/api/v1/network/graph",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    # ---------------------------------------------------------------- Phase 4
+    (
+        "GET",
+        "/api/v1/forecast/demand?blood_group=O%2B&component=PRBC&horizon=7",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    (
+        "GET",
+        "/api/v1/forecast/summary?horizon=7",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    (
+        "GET",
+        "/api/v1/forecast/model",
         None,
         {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
     ),

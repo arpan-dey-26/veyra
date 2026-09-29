@@ -6,7 +6,14 @@ VEYRA is a prototype of an intelligent blood-supply network. It connects donors,
 
 ## Current phase
 
-**Phase 3: Dashboards & UX** (on top of the Phase 2 core blood network and Phase 1 auth & RBAC).
+**Phase 4: ML demand forecasting (synthetic, prototype).**
+
+- Deterministic synthetic demand generator, a transparent seasonal baseline and a pure-Python gradient-boosted model, compared on a chronological split. The model artifact is versioned and reproducible (`uv run python -m app.scripts.train_forecast --check`).
+- Scoped read-only API: `/forecast/demand`, `/forecast/summary`, `/forecast/model`.
+- Forecast tab for hospitals and blood banks (with blood-bank supply vs forecast), and a network forecast plus model evaluation for admins.
+- Everything is labelled **"Synthetic ML forecast — prototype"**. It is not clinical guidance. See the [model card](docs/model-cards/demand-forecast.md).
+
+Phase 3, still in place: dashboards & UX.
 
 - Role dashboards with charts from real API data: donor impact, hospital and blood-bank overviews, admin network overview with system health and an audit summary.
 - **Live Blood Network 2D** (`/network`): a scoped, schematic facility graph updated live over SSE. It is a "Prototype network visualization — not a geographic map."
@@ -23,7 +30,7 @@ Phase 2, still in place:
 
 Phase 1 (still in place): donor registration with **demo** phone verification (last 4 digits of the mobile, labelled, never presented as OTP), Argon2id passwords, rotating refresh sessions, CSRF protection, permission + scope RBAC, admin facility onboarding and staff invitations.
 
-See the [Phase 3 report](docs/phase-reports/phase-3.md), [Phase 2 report](docs/phase-reports/phase-2.md), [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
+See the [Phase 4 report](docs/phase-reports/phase-4.md), [Phase 3 report](docs/phase-reports/phase-3.md), [Phase 2 report](docs/phase-reports/phase-2.md), [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
 
 Demo sign-ins after `scripts\bootstrap.cmd` (**DEMO ONLY**, password `veyra-demo-console-2026` for all three):
 

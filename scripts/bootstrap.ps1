@@ -176,6 +176,9 @@ Step "api: ruff format" {
 Step "api: ruff check" { InDir "apps/api" { Invoke-Native uv @("run", "ruff", "check", ".") } }
 Step "api: mypy" { InDir "apps/api" { Invoke-Native uv @("run", "mypy", "app") } }
 Step "api: pytest (unit)" { InDir "apps/api" { Invoke-Native uv @("run", "pytest", "-v", "-m", "not integration") } }
+Step "ml: forecast model reproducible (retrain == committed artifact)" {
+  InDir "apps/api" { Invoke-Native uv @("run", "python", "-m", "app.scripts.train_forecast", "--check") }
+}
 
 # ---------------------------------------------------------------- web + packages
 Step "pnpm typecheck" { Invoke-Native pnpm @("run", "typecheck") }
@@ -316,6 +319,59 @@ if ($SkipDocker) {
     if (-not $denied) { throw "hospital could read the admin dashboard" }
     Assert-Http "http://localhost:3000/" "What is real, and what is simulated"
     Log "   dashboards OK (bank on hand $($bd.on_hand), hospital open $($hd.requests.open), graph $(@($g.nodes).Count) nodes)"
+  }
+  Step "e2e: phase 4 synthetic ML forecast (scoped, disclaimer, RBAC, via web proxy)" {
+    $base = "http://localhost:3000/api/v1"
+    $pw = "veyra-demo-console-2026"
+    $hosp = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $bank = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $adm = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    Invoke-Api Post "$base/auth/login" @{ email = "hospital@veyra.demo"; password = $pw } $hosp | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "bank@veyra.demo"; password = $pw } $bank | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "admin@veyra.demo"; password = $pw } $adm | Out-Null
+    $hf = Invoke-Api Get "$base/facilities/me" $null $hosp
+    $bf = Invoke-Api Get "$base/facilities/me" $null $bank
+    # Hospital: open the dashboard page, request a forecast, check chart/table data + labelling.
+    Assert-Http "http://localhost:3000/hospital" ""
+    $f = Invoke-Api Get "$base/forecast/demand?blood_group=O%2B&component=PRBC&horizon=7" $null $hosp
+    if ($f.scope -ne "facility" -or $f.facility_id -ne $hf.id) { throw "hospital forecast not scoped to its facility" }
+    if (@($f.history).Count -ne 28 -or @($f.forecast).Count -ne 7) { throw "forecast series shape" }
+    foreach ($p in @($f.forecast)) { if ($p.lower -gt $p.predicted -or $p.predicted -gt $p.upper) { throw "interval does not contain the forecast" } }
+    if ($f.source.kind -ne "synthetic" -or -not $f.source.simulated) { throw "forecast not labelled synthetic" }
+    if ($f.disclaimer -notlike "*not clinical guidance*") { throw "forecast disclaimer missing" }
+    if (@("normal", "elevated", "high") -notcontains $f.signal.status) { throw "unexpected signal status" }
+    $again = Invoke-Api Get "$base/forecast/demand?blood_group=O%2B&component=PRBC&horizon=7" $null $hosp
+    if (($again.forecast | ConvertTo-Json -Compress) -ne ($f.forecast | ConvertTo-Json -Compress)) { throw "forecast not deterministic" }
+    # Scope: a hospital cannot read the bank's forecast; horizon is bounded.
+    $blocked = $false
+    try { Invoke-Api Get "$base/forecast/demand?blood_group=O%2B&facility_id=$($bf.id)" $null $hosp | Out-Null } catch { if ("$_" -like "*-> 404*") { $blocked = $true } else { throw } }
+    if (-not $blocked) { throw "hospital read another facility's forecast" }
+    $bounded = $false
+    try { Invoke-Api Get "$base/forecast/demand?blood_group=O%2B&horizon=15" $null $hosp | Out-Null } catch { if ("$_" -like "*-> 422*") { $bounded = $true } else { throw } }
+    if (-not $bounded) { throw "horizon > 14 accepted" }
+    # Blood bank: supply vs forecast uses its own real stock.
+    Assert-Http "http://localhost:3000/blood-bank" ""
+    $bs = Invoke-Api Get "$base/forecast/summary?horizon=7" $null $bank
+    if ($bs.facility_id -ne $bf.id -or @($bs.rows).Count -ne 24) { throw "bank summary shape/scope" }
+    if (@($bs.rows | Where-Object { $null -eq $_.stock_available }).Count -ne 0) { throw "bank summary lacks stock" }
+    # Admin: network aggregate + model card.
+    $as = Invoke-Api Get "$base/forecast/summary?horizon=7" $null $adm
+    if ($as.scope -ne "network") { throw "admin summary is not network-level" }
+    $card = Invoke-Api Get "$base/forecast/model" $null $adm
+    if ($card.fingerprint -ne $f.model.fingerprint -or $card.disclaimer -notlike "*not a certified medical prediction system*") { throw "model card mismatch" }
+    if ($card.one_step.gbm.mae -ge $card.one_step.baseline.mae) { throw "GBM does not beat the baseline" }
+    # Donor: denied.
+    $d = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $tag = [Guid]::NewGuid().ToString("N").Substring(0, 8)
+    $mobile = "9" + ([UInt64]("0x" + [Guid]::NewGuid().ToString("N").Substring(0, 15)) % 1000000000).ToString("000000000")
+    $reg = Invoke-Api Post "$base/auth/register" @{ full_name = "Forecast Smoke"; email = "fc-$tag@example.in"; mobile = $mobile;
+      blood_group = "A+"; address = "1 Smoke Street"; city = "Kolkata"; state = "West Bengal"; pin_code = "700001";
+      password = "smoke-test-passphrase" } $d
+    Invoke-Api Post "$base/auth/verify" @{ challenge_id = $reg.verification.challenge_id; code = $mobile.Substring(6) } $d | Out-Null
+    $denied = $false
+    try { Invoke-Api Get "$base/forecast/summary" $null $d | Out-Null } catch { if ("$_" -like "*-> 403*") { $denied = $true } else { throw } }
+    if (-not $denied) { throw "donor could read operational forecasts" }
+    Log "   forecast OK (model $($card.name) v$($card.version) $($card.fingerprint); O+ PRBC 7d = $($f.forecast_total) units, signal $($f.signal.status))"
   }
 }
 

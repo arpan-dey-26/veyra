@@ -24,6 +24,7 @@ import {
   referencesUnknownNode,
 } from "@/lib/network-graph";
 import { DEMO_VERIFICATION_DISCLAIMER } from "@/lib/validation";
+import { summaryFixture } from "@/test/forecast-fixtures";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
@@ -306,7 +307,13 @@ describe("LiveNetwork", () => {
 describe("FacilityOverview", () => {
   it("renders blood-bank tiles, charts and the emergency call-out", async () => {
     GET.mockImplementation(async (path: string) =>
-      path === "/api/v1/dashboard/facility" ? ok(BANK_DASH) : path === "/api/v1/inventory/summary" ? ok(STOCK) : ok(GRAPH),
+      path === "/api/v1/dashboard/facility"
+        ? ok(BANK_DASH)
+        : path === "/api/v1/inventory/summary"
+          ? ok(STOCK)
+          : path === "/api/v1/forecast/summary"
+            ? ok(summaryFixture())
+            : ok(GRAPH),
     );
     const onNavigate = vi.fn();
     render(<FacilityOverview kind="BLOOD_BANK" onNavigate={onNavigate} />);
@@ -325,6 +332,7 @@ describe("FacilityOverview", () => {
     GET.mockImplementation(async (path: string) => {
       if (path === "/api/v1/dashboard/facility") return ok(hospitalDash);
       if (path === "/api/v1/inventory/summary") return ok(STOCK);
+      if (path === "/api/v1/forecast/summary") return ok(summaryFixture());
       if (path === "/api/v1/network/availability") {
         return ok({ blood_group: "O+", component: "PRBC", units: 2, results: [
           { provider: "internal", target_ref: "b1", name: "Central", city: "Kolkata", state: "WB", band: "sufficient", source: { provider: "internal", kind: "internal", simulated: false } },

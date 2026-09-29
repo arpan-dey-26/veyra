@@ -54,6 +54,13 @@ export type ExpiryBucket = Schemas["ExpiryBucket"];
 export type NetworkGraph = Schemas["NetworkGraph"];
 export type NetworkNode = Schemas["NetworkNode"];
 export type NetworkEdge = Schemas["NetworkEdge"];
+// Phase 4: synthetic ML demand forecasting (prototype)
+export type DemandForecast = Schemas["DemandForecast"];
+export type ForecastSummary = Schemas["ForecastSummary"];
+export type ForecastSummaryRow = Schemas["SummaryRow"];
+export type ForecastPoint = Schemas["ForecastPointOut"];
+export type DemandSignal = Schemas["DemandSignal"];
+export type ModelCard = Schemas["ModelCard"];
 
 /** A live event from `GET /api/v1/stream` (Server-Sent Events, fed by the outbox). */
 export interface NetworkEvent {

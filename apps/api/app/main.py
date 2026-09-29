@@ -25,6 +25,7 @@ from app.modules.dashboard.router import router as dashboard_router
 from app.modules.donations.router import router as donations_router
 from app.modules.donors.router import router as donors_router
 from app.modules.facilities.router import router as facilities_router
+from app.modules.forecast.router import router as forecast_router
 from app.modules.identity.router import router as identity_router
 from app.modules.outbox.router import router as events_router
 from app.modules.outbox.service import EventBroker, run_relay
@@ -135,6 +136,7 @@ def create_app(settings: Settings | None = None, *, with_infra: bool = True) -> 
         requests_router,
         events_router,
         dashboard_router,
+        forecast_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
     return app

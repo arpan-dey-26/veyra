@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import { PageHeader, StatTile } from "@/components/app/page-header";
 import { AdminOverview } from "@/components/dashboard/admin-overview";
+import { AdminForecast } from "@/components/forecast/forecast-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardLabel } from "@/components/ui/card";
@@ -95,6 +96,10 @@ export function AdminDashboard() {
         description="Network health, activity and accounts. Onboard hospitals and blood banks and invite their staff. Admins never see donor health data."
       />
       <AdminOverview />
+
+      <div className="mt-10">
+        <AdminForecast />
+      </div>
 
       <h2 className="mt-10 text-lg font-medium">Accounts &amp; facilities</h2>
       <div className="mt-3 grid gap-4 sm:grid-cols-3">
