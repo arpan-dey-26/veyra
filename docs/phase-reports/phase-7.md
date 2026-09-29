@@ -5,6 +5,16 @@
 ## Phase 6 final gate
 Real Windows bootstrap: **`OVERALL: PASS (38/38 steps passed)`**, saved as `docs/phase-reports/phase-6-verification.log`.
 
+## Phase 7 gate
+Real Windows bootstrap, 2026-09-29 16:29 IST: **`OVERALL: PASS (39/39 steps passed)`**. The run is saved as `docs/phase-reports/phase-7-verification.log`.
+
+- **Phase 7 E2E:** shipment `SH-BVTN9V84` for request `RQ-6PKKGCHM`. It had a fictional courier (Demo Courier Echo) and 5 checkpoints, got a cold-chain warning in transit and a +18 min simulated delay, and was then received by the hospital.
+- **Integration tests on PostgreSQL:** 12/12 pass.
+
+**Earlier attempts**, fixed without changing any assertion:
+- **Run 1: 36/39.** On PostgreSQL, `SHIPMENT_IN_TRANSIT` and friends overflowed `trace.bag_events.event_type VARCHAR(16)`. Fixed by migration `0006` and a regression test.
+- **Run 2: 38/39.** The unchanged Phase 2 E2E replay (`after=0`) was crowded out by other facilities' events in the long-lived database. The SSE replay fix is described below.
+
 ## Architecture
 
 ```
