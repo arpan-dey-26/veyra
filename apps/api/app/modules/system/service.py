@@ -4,7 +4,7 @@ from app.core.config import PRODUCT_NAME, PRODUCT_TAGLINE, Settings
 from app.core.readiness import Check, run_checks
 from app.modules.system.schemas import DemoDisclosure, MetaResponse, ReadinessResponse
 
-CURRENT_PHASE = "4 — ML demand forecasting (synthetic)"
+CURRENT_PHASE = "8 — compatibility, camps, QR (complete demo network)"
 
 
 class SystemService:

@@ -174,7 +174,8 @@ async def _main(settings: Settings, email: str, *, network: bool = True) -> int:
     if settings.is_production:
         print("Refusing to seed demo accounts in production.", file=sys.stderr)
         return 2
-    password = os.environ.get("VEYRA_DEMO_ADMIN_PASSWORD") or f"veyra-demo-{secrets.token_hex(6)}"
+    chosen = os.environ.get("VEYRA_DEMO_ADMIN_PASSWORD")
+    password = chosen or f"veyra-demo-{secrets.token_hex(6)}"
     validate_new_password(password, email=email)
     db = Database(settings.database_url)
     try:
@@ -200,7 +201,10 @@ async def _main(settings: Settings, email: str, *, network: bool = True) -> int:
         await db.dispose()
     if created:
         print(f"[DEMO] Admin created: {user.email}")
-        print(f"[DEMO] Password: {password}   (shown once; set VEYRA_DEMO_ADMIN_PASSWORD to pick)")
+        if chosen:  # never echo a password the operator supplied (e.g. into build logs)
+            print("[DEMO] Password: the value of VEYRA_DEMO_ADMIN_PASSWORD")
+        else:
+            print(f"[DEMO] Password: {password}   (shown once; set VEYRA_DEMO_ADMIN_PASSWORD)")
     else:
         print(f"[DEMO] Admin already exists: {user.email} (password unchanged)")
     for staff_email, staff_created in staff:

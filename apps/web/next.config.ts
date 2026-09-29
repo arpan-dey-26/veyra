@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 
+// On a hosting platform the API URL must be configured: never fall back to localhost there.
+if (process.env.VERCEL && !process.env.VEYRA_API_INTERNAL_URL) {
+  throw new Error("VEYRA_API_INTERNAL_URL must be set for a hosted (Vercel) build");
+}
 const apiInternalUrl = process.env.VEYRA_API_INTERNAL_URL ?? "http://localhost:8000";
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -38,6 +42,10 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
+          // HTTPS-only on hosted deployments (never on local http://localhost).
+          ...(process.env.VERCEL
+            ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" }]
+            : []),
         ],
       },
     ];

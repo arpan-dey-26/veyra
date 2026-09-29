@@ -38,3 +38,7 @@ pnpm-debug.log*
 
 # transfer archives
 *.tar.gz
+
+# deployment (Vercel CLI link state, local deploy logs)
+.vercel/
+.deploy-logs/

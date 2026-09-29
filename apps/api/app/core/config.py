@@ -6,8 +6,10 @@ e.g. demo verification or placeholder secrets in production.
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
-from typing import Literal
+from typing import Any, Literal
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -19,6 +21,39 @@ PRODUCT_NAME = "VEYRA"
 PRODUCT_TAGLINE = "Intelligent Blood Network"
 
 _PLACEHOLDER_SECRET_MARKERS = ("change-me", "not-a-real-secret")
+
+
+def asyncpg_url(url: str) -> str:
+    """A platform Postgres URL (``postgres://…?sslmode=require&channel_binding=require``, as
+    injected by hosted Postgres integrations) → a SQLAlchemy asyncpg URL (``ssl=require``)."""
+    parts = urlsplit(url)
+    scheme = "postgresql+asyncpg" if parts.scheme in ("postgres", "postgresql") else parts.scheme
+    query = dict(parse_qsl(parts.query))
+    sslmode = query.pop("sslmode", None)
+    query.pop("channel_binding", None)  # libpq-only option; asyncpg negotiates SCRAM itself
+    if sslmode and "ssl" not in query:
+        query["ssl"] = sslmode
+    return urlunsplit((scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
+
+
+def _platform_defaults(data: Any) -> Any:
+    """Hosted deployments (e.g. Vercel Marketplace Postgres/Redis) inject un-prefixed URLs.
+    Use them only when the explicit VEYRA_ variables are absent."""
+    if not isinstance(data, dict):
+        return data
+    env = os.environ
+    if "database_url" not in data and "VEYRA_DATABASE_URL" not in env:
+        # Direct (unpooled) connection first: asyncpg's prepared statements and a
+        # transaction-mode pooler don't mix.
+        raw = env.get("DATABASE_URL_UNPOOLED") or env.get("POSTGRES_URL_NON_POOLING")
+        raw = raw or env.get("DATABASE_URL")
+        if raw:
+            data["database_url"] = asyncpg_url(raw)
+    if "redis_url" not in data and "VEYRA_REDIS_URL" not in env:
+        raw = env.get("REDIS_URL") or env.get("KV_URL")
+        if raw:
+            data["redis_url"] = raw
+    return data
 
 
 class Settings(BaseSettings):
@@ -74,6 +109,11 @@ class Settings(BaseSettings):
     # Simulated logistics controls (Phase 7, DEMO). None = enabled exactly when not in production.
     enable_logistics_simulator: bool | None = None
 
+    @model_validator(mode="before")
+    @classmethod
+    def _platform(cls, data: Any) -> Any:
+        return _platform_defaults(data)
+
     @property
     def is_production(self) -> bool:
         return self.env == "production"
@@ -84,8 +124,14 @@ class Settings(BaseSettings):
         return not self.is_production
 
     @property
+    def hosted(self) -> bool:
+        """Running on a public hosting platform (Vercel sets ``VERCEL=1``). A hosted demo keeps
+        the labelled demo features but gets production-grade secrets, cookies and no docs."""
+        return bool(os.environ.get("VERCEL"))
+
+    @property
     def docs_enabled(self) -> bool:
-        return not self.is_production
+        return not self.is_production and not self.hosted
 
     @property
     def mock_blood_banks_enabled(self) -> bool:
@@ -107,14 +153,25 @@ class Settings(BaseSettings):
 
     @property
     def secure_cookies(self) -> bool:
-        return self.is_production if self.cookie_secure is None else self.cookie_secure
+        if self.cookie_secure is None:
+            return self.is_production or self.hosted
+        return self.cookie_secure
 
     @model_validator(mode="after")
     def _guard_production(self) -> Settings:
+        secret = self.secret_key.get_secret_value()
+        weak = len(secret) < 32 or any(m in secret for m in _PLACEHOLDER_SECRET_MARKERS)
+        if self.hosted and not self.is_production:
+            # Public demo deployment: demo features stay (labelled), secrets must be real.
+            if weak:
+                raise ValueError("VEYRA_SECRET_KEY must be a real secret (>= 32 chars) when hosted")
+            if self.cookie_secure is False:
+                raise ValueError("Insecure cookies are not allowed on a hosted deployment")
+            if any("*" in o for o in self.cors_allowed_origins):
+                raise ValueError("Wildcard CORS origins are not allowed on a hosted deployment")
         if not self.is_production:
             return self
-        secret = self.secret_key.get_secret_value()
-        if len(secret) < 32 or any(m in secret for m in _PLACEHOLDER_SECRET_MARKERS):
+        if weak:
             raise ValueError("VEYRA_SECRET_KEY must be a real secret (>= 32 chars) in production")
         if self.password_pepper is not None:
             pepper = self.password_pepper.get_secret_value()

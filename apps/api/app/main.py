@@ -142,7 +142,7 @@ def create_app(settings: Settings | None = None, *, with_infra: bool = True) -> 
         allow_headers=["content-type", "x-request-id", "x-csrf-token", "idempotency-key"],
         expose_headers=["x-request-id"],
     )
-    app.add_middleware(SecurityHeadersMiddleware, hsts=settings.is_production)
+    app.add_middleware(SecurityHeadersMiddleware, hsts=settings.is_production or settings.hosted)
     app.add_middleware(RequestIdMiddleware)
 
     app.include_router(ops_router)

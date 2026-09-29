@@ -1,0 +1,19 @@
+# Uploaded by `vercel deploy` from the repo root (web project, root directory apps/web).
+node_modules
+**/node_modules
+.git
+**/.venv
+**/.next
+**/__pycache__
+**/.mypy_cache
+**/.pytest_cache
+**/.ruff_cache
+.env
+.env.*
+!.env.example
+*.tgz
+*.tar.gz
+.deploy-logs
+.sync
+docs/phase-reports/*.log
+docs/phase-reports/*.log.txt

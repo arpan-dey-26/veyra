@@ -102,7 +102,7 @@ export default function HomePage() {
       <section className="mx-auto grid max-w-(--layout-max) items-center gap-12 px-(--gutter) pt-10 pb-20 md:grid-cols-[1.05fr_1fr] md:pt-16">
         <div className="veyra-rise">
           <Badge tone="neutral" className="mb-8">
-            Prototype · Phase 4: synthetic ML forecasting
+            Prototype · Phase 8: complete demo network
           </Badge>
           <h1 className="font-display text-display leading-(--leading-tight) tracking-(--tracking-display) text-ink">
             Every unit of blood,

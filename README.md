@@ -4,6 +4,10 @@ VEYRA is a prototype of an intelligent blood-supply network. It connects donors,
 
 > **Prototype status.** VEYRA is a student engineering prototype, not a certified medical system. Every simulated or demo component (mock blood banks, synthetic ML data, simulated IoT, local blockchain, demo verification) is labelled as such in the API and UI. See [`docs/demo-disclosures.md`](docs/demo-disclosures.md).
 
+## Live demo
+
+**https://veyra-web-sigma.vercel.app**: the public, labelled prototype demo on Vercel. The web app is at that address, the API at https://veyra-api-five.vercel.app, with Neon Postgres and Redis Cloud from the Vercel Marketplace. Demo verification and the simulators are intentionally on and labelled. See [`docs/deployment.md`](docs/deployment.md) for the architecture, environment, release steps and known limitations of the serverless demo. The demo staff accounts on the live site use a separate private password, not the local one documented below.
+
 ## Current phase
 
 **Phase 8: product completion — blood compatibility matrix, donation camps, QR bag scanning.**

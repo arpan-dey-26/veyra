@@ -29,6 +29,11 @@ dev = [
 [tool.uv]
 package = false
 
+# Vercel (Python runtime): entrypoint index.py exports `app`; the build step migrates the
+# production database and seeds the labelled demo accounts (see vercel_build.py).
+[tool.vercel.scripts]
+build = "python vercel_build.py"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
