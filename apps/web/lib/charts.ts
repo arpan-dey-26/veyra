@@ -26,11 +26,15 @@ export interface SeriesPoint {
   values: Record<string, number>;
 }
 
-/** A clean axis maximum: 1, 2, 5 × 10^n, never below `floor`. */
+/**
+ * A clean axis maximum. Values above `floor` round up to 1, 2, 2.5 or 5 × 10^n; empty or
+ * tiny data uses `floor` itself (small whole numbers, integer mid-tick), never a re-rounded
+ * floor.
+ */
 export function niceMax(value: number, floor = 4): number {
-  const v = Math.max(value, floor);
-  const exp = 10 ** Math.floor(Math.log10(v));
-  for (const m of [1, 2, 2.5, 5, 10]) if (v <= m * exp) return m * exp;
+  if (value <= floor) return floor;
+  const exp = 10 ** Math.floor(Math.log10(value));
+  for (const m of [1, 2, 2.5, 5, 10]) if (value <= m * exp) return m * exp;
   return 10 * exp;
 }
 
