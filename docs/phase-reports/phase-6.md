@@ -5,6 +5,14 @@
 ## Phase 5 final gate
 Real Windows bootstrap: **`OVERALL: PASS (37/37 steps passed)`**, saved as `docs/phase-reports/phase-5-verification.log`.
 
+## Phase 6 gate
+Real Windows bootstrap, 2026-09-29 14:54 IST: **`OVERALL: PASS (38/38 steps passed)`**. The run is saved as `docs/phase-reports/phase-6-verification.log`.
+
+- **Phase 6 E2E:** request `RQ-B8G1Z0MV` scored 73 (immediate). The recommendation skipped the simulated-critical bag `VYR-6XS3-ETEE`, the bank confirmed dispatch of `VYR-SZAC-EJRQ`, and the simulated ETA was 23 min.
+- **First attempt: 37/38.** The only failure was the intermittent Phase 3 `LiveNetwork` test, which also failed once during Phase 5.
+  - **Root cause:** a real race in the component. The known-facility set was only updated in an effect after the graph rendered, so a live event arriving in between looked like an unknown facility and triggered a second graph fetch.
+  - **Fix:** the set is now seeded with the fetched graph before it is rendered. The test is unchanged.
+
 ## Architecture
 
 ```
@@ -202,7 +210,7 @@ The response is labelled **"Synthetic forecast input — prototype"** with `sour
   - SSE: scope, replay, unique ordered ids
 - **API** `test_integration_phase6.py` (PostgreSQL): recommendation with a critical bag, pressure, alerts, scope, confirmed dispatch, routing, SSE.
 - **RBAC matrix:** +8 rows × 5 roles.
-- **Web** `operations.test.tsx` (19):
+- **Web** `operations.test.tsx` (17):
   - helpers and verbatim disclaimer
   - queue: skeleton, order, band text, score label
   - reasons with sr-only tone and `aria-expanded`
