@@ -6,7 +6,17 @@ VEYRA is a prototype of an intelligent blood-supply network. It connects donors,
 
 ## Current phase
 
-**Phase 6: operational intelligence & emergency response (prototype).**
+**Phase 7: logistics, shipment tracking & delivery (simulated, prototype).**
+
+- A human-confirmed dispatch (recommended bags) creates a shipment. It goes created → pickup_pending → picked_up → in_transit (checkpoints) ⇄ delayed → arrived → received, through an explicit state machine where invalid transitions return 409.
+- It has a fictional simulated courier, a schematic five-checkpoint route ("Prototype logistics route — not a geographic map") and a deterministic "Simulated ETA — prototype", with visible delays.
+- Demo controls (`/simulator/shipments/{id}/advance|delay|resume|arrive`) are for the dispatching bank only. They are CSRF-protected, audited and disabled in production.
+- Receipt is always a person's action. The hospital confirms an arrived shipment, which runs the existing receive workflow.
+- Cold-chain warnings in transit flag the shipment (`shipment.cold_chain_alert`) and never auto-discard or auto-receive. Shipment observations join each bag's hash-chained trace.
+- There is a shipments section in Operations, a `/shipments/[id]` page and network shipments for admins.
+- This is a simulated logistics prototype. Routes, courier status and ETAs are not real-world navigation or delivery guarantees. See the [Phase 7 report](docs/phase-reports/phase-7.md).
+
+Phase 6, still in place: **operational intelligence & emergency response (prototype).**
 
 - Explainable operational priority for every request: a score, a band (immediate / high / standard), a recommended action and the structured reasons behind them. No hidden model, and not a clinical score.
 - Allocation recommendations for blood banks: exact-match candidates, ranked by cold-chain concern then FEFO, each with its reasons. **Nothing is dispatched automatically.** Staff confirm through the existing dispatch action, optionally with the recommended bag ids.
@@ -50,7 +60,7 @@ Phase 2, still in place:
 
 Phase 1 (still in place): donor registration with **demo** phone verification (last 4 digits of the mobile, labelled, never presented as OTP), Argon2id passwords, rotating refresh sessions, CSRF protection, permission + scope RBAC, admin facility onboarding and staff invitations.
 
-See the [Phase 6 report](docs/phase-reports/phase-6.md), [Phase 5 report](docs/phase-reports/phase-5.md), [Phase 4 report](docs/phase-reports/phase-4.md), [Phase 3 report](docs/phase-reports/phase-3.md), [Phase 2 report](docs/phase-reports/phase-2.md), [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
+See the [Phase 7 report](docs/phase-reports/phase-7.md), [Phase 6 report](docs/phase-reports/phase-6.md), [Phase 5 report](docs/phase-reports/phase-5.md), [Phase 4 report](docs/phase-reports/phase-4.md), [Phase 3 report](docs/phase-reports/phase-3.md), [Phase 2 report](docs/phase-reports/phase-2.md), [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
 
 Demo sign-ins after `scripts\bootstrap.cmd` (**DEMO ONLY**, password `veyra-demo-console-2026` for all three):
 

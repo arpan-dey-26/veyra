@@ -21,6 +21,11 @@ from app.core.rbac import AuthContext, Role
 from app.modules.audit.service import record
 from app.modules.bags.domain import BagEventType
 from app.modules.bags.service import BagService, append_event, require_facility
+from app.modules.logistics.hooks import (
+    after_request_receipt,
+    before_request_receipt,
+    create_for_dispatch,
+)
 from app.modules.operations.service import (
     OperationsService,
     on_request_created,
@@ -303,6 +308,7 @@ class RequestService:
         if req.status != "dispatched":
             raise InvalidRequestStateError(f"A '{req.status}' request can't be received.")
         now = self._clock.now()
+        shipment = await before_request_receipt(self._uow, self._clock, req, actor_id=ctx.user_id)
         for bag_id in await self._uow.requests.allocated_bag_ids(req.id):
             bag = await self._uow.bags.get(bag_id)
             if bag is None:  # pragma: no cover - FK guarantees presence
@@ -318,6 +324,7 @@ class RequestService:
                 meta={"request": req.reference},
             )
             bag.current_facility_id = hospital_id
+        await after_request_receipt(self._uow, self._clock, shipment, actor_id=ctx.user_id)
         return await self._transition(
             ctx, req, {"dispatched"}, "fulfilled", "request.fulfilled", None
         )
@@ -405,6 +412,9 @@ class RequestService:
             audience=[bank_id],
             payload={"reason": "request_dispatched", "bags_removed": len(bags)},
         )
+        if bag_public_ids is not None:
+            # Phase 7: a human-confirmed dispatch starts a (simulated) shipment.
+            await create_for_dispatch(self._uow, self._clock, req, bags, actor_id=ctx.user_id)
         if self._ops is not None:
             await on_request_dispatched(self._ops, req, len(bags))
         return await self._transition(

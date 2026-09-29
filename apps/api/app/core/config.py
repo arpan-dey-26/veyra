@@ -71,6 +71,8 @@ class Settings(BaseSettings):
     enable_telemetry_simulator: bool | None = None
     # Background simulator cadence for devices set to "running" (0 disables the ticker).
     telemetry_tick_seconds: float = Field(default=15.0, ge=0)
+    # Simulated logistics controls (Phase 7, DEMO). None = enabled exactly when not in production.
+    enable_logistics_simulator: bool | None = None
 
     @property
     def is_production(self) -> bool:
@@ -98,6 +100,12 @@ class Settings(BaseSettings):
         return self.enable_telemetry_simulator
 
     @property
+    def logistics_simulator_enabled(self) -> bool:
+        if self.enable_logistics_simulator is None:
+            return self.demo_mode
+        return self.enable_logistics_simulator
+
+    @property
     def secure_cookies(self) -> bool:
         return self.is_production if self.cookie_secure is None else self.cookie_secure
 
@@ -123,6 +131,8 @@ class Settings(BaseSettings):
             raise ValueError("Simulated (mock) blood banks cannot be enabled in production")
         if self.enable_telemetry_simulator:
             raise ValueError("The simulated IoT telemetry simulator cannot run in production")
+        if self.enable_logistics_simulator:
+            raise ValueError("The simulated logistics controls cannot run in production")
         if any("*" in o for o in self.cors_allowed_origins):
             raise ValueError("Wildcard CORS origins are not allowed in production")
         return self

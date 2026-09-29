@@ -23,6 +23,7 @@ from app.modules.audit.service import record
 from app.modules.bags.domain import BagEventType, BagStatus
 from app.modules.bags.models import BagEvent, BloodBag
 from app.modules.bags.service import BagService, append_event, require_facility, verify_chain
+from app.modules.logistics.hooks import on_cold_chain_transition
 from app.modules.outbox.service import emit
 from app.modules.telemetry.errors import (
     DeviceUnavailableError,
@@ -509,6 +510,8 @@ async def take_reading(
             audience=audience,
             payload=payload | extra,
         )
+    for t in transitions:  # Phase 7: logistics-scoped alert while the bag is in a shipment
+        await on_cold_chain_transition(uow, clock, bag, t, payload)
     concern = next(
         (t for t in transitions if t in ("temperature.warning", "temperature.critical")), None
     )

@@ -812,6 +812,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/shipments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Shipments in scope (simulated logistics) */
+        get: operations["list_shipments_api_v1_shipments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{shipment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One shipment */
+        get: operations["get_shipment_api_v1_shipments__shipment_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{shipment_id}/receive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Destination hospital confirms receipt (uses the existing receive workflow) */
+        post: operations["receive_shipment_api_v1_shipments__shipment_id__receive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{shipment_id}/route": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Schematic route checkpoints (not a geographic map) */
+        get: operations["shipment_route_api_v1_shipments__shipment_id__route_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{shipment_id}/telemetry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cold-chain state of the shipment's bags (simulated telemetry) */
+        get: operations["shipment_telemetry_api_v1_shipments__shipment_id__telemetry_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{shipment_id}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Append-only timeline */
+        get: operations["shipment_timeline_api_v1_shipments__shipment_id__timeline_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/simulator/bags/{public_id}/attach": {
         parameters: {
             query?: never;
@@ -923,6 +1025,74 @@ export interface paths {
          * @description Generate ``count`` readings now (deterministic).
          */
         post: operations["tick_api_v1_simulator_bags__public_id__tick_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulator/shipments/{shipment_id}/advance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Advance */
+        post: operations["advance_api_v1_simulator_shipments__shipment_id__advance_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulator/shipments/{shipment_id}/arrive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Arrive */
+        post: operations["arrive_api_v1_simulator_shipments__shipment_id__arrive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulator/shipments/{shipment_id}/delay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delay */
+        post: operations["delay_api_v1_simulator_shipments__shipment_id__delay_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulator/shipments/{shipment_id}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resume */
+        post: operations["resume_api_v1_simulator_shipments__shipment_id__resume_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1416,6 +1586,56 @@ export interface components {
              */
             urgency: "routine" | "urgent" | "emergency";
         };
+        /** CheckpointOut */
+        CheckpointOut: {
+            /** Actual At */
+            actual_at: string | null;
+            /** Current */
+            current: boolean;
+            /**
+             * Distance Km
+             * @description Simulated cumulative distance (schematic, not GPS)
+             */
+            distance_km: number;
+            /**
+             * Expected At
+             * Format: date-time
+             */
+            expected_at: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "source" | "collection" | "transit" | "destination_area" | "destination";
+            /** Name */
+            name: string;
+            /** Seq */
+            seq: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "reached" | "confirmed_at_receipt";
+        };
+        /** ColdChainBag */
+        ColdChainBag: {
+            /** Cold Chain Status */
+            cold_chain_status: string;
+            /** Device Id */
+            device_id: string | null;
+            /** Device Status */
+            device_status: string | null;
+            /** Excursion Active */
+            excursion_active: boolean;
+            /** Last Telemetry At */
+            last_telemetry_at: string | null;
+            /** Latest Temperature C */
+            latest_temperature_c: number | null;
+            /** Monitored */
+            monitored: boolean;
+            /** Public Id */
+            public_id: string;
+        };
         /** ColdChainEvent */
         ColdChainEvent: {
             /** Event Type */
@@ -1477,6 +1697,20 @@ export interface components {
             shelf_life_days: number;
             /** Storage */
             storage: string;
+        };
+        /** CourierOut */
+        CourierOut: {
+            /** Courier Id */
+            courier_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Simulated
+             * @default true
+             */
+            simulated: boolean;
+            /** Vehicle Type */
+            vehicle_type: string;
         };
         /** CreateBloodRequest */
         CreateBloodRequest: {
@@ -1582,6 +1816,20 @@ export interface components {
              * Format: date
              */
             day: string;
+        };
+        /** DelayBody */
+        DelayBody: {
+            /**
+             * Minutes
+             * @default 18
+             */
+            minutes: number;
+            /**
+             * Reason
+             * @default traffic_simulated
+             * @enum {string}
+             */
+            reason: "traffic_simulated" | "vehicle_check_simulated" | "handover_wait_simulated" | "weather_simulated";
         };
         /** DemandForecast */
         DemandForecast: {
@@ -1835,6 +2083,34 @@ export interface components {
             city: string;
             /** State */
             state: string;
+        };
+        /** EtaOut */
+        EtaOut: {
+            /** Delay Active */
+            delay_active: boolean;
+            /** Delay Minutes */
+            delay_minutes: number;
+            /** Delay Reason */
+            delay_reason: string | null;
+            /**
+             * Eta At
+             * Format: date-time
+             */
+            eta_at: string;
+            /**
+             * Label
+             * @default Simulated ETA — prototype
+             */
+            label: string;
+            /** Reasons */
+            reasons: string[];
+            /** Remaining Minutes */
+            remaining_minutes: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "on_schedule" | "delayed" | "late" | "arrived" | "delivered";
         };
         /** Evaluation */
         Evaluation: {
@@ -2213,6 +2489,17 @@ export interface components {
             email: string;
             /** Password */
             password: string;
+        };
+        /** LogisticsResult */
+        LogisticsResult: {
+            /** Action */
+            action: string;
+            /**
+             * Events
+             * @description Shipment events raised by this action
+             */
+            events: string[];
+            shipment: components["schemas"]["ShipmentDetail"];
         };
         /** MeResponse */
         MeResponse: {
@@ -2982,6 +3269,309 @@ export interface components {
              */
             scope: "facility" | "network";
         };
+        /** ShipmentBagOut */
+        ShipmentBagOut: {
+            /** Blood Group */
+            blood_group: string;
+            /** Chain Length */
+            chain_length: number;
+            /** Chain Valid */
+            chain_valid: boolean;
+            /** Component */
+            component: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Public Id */
+            public_id: string;
+            /** Status */
+            status: string;
+        };
+        /** ShipmentDetail */
+        ShipmentDetail: {
+            /** Arrived At */
+            arrived_at: string | null;
+            /** Bag Count */
+            bag_count: number;
+            /** Bags */
+            bags: components["schemas"]["ShipmentBagOut"][];
+            /** Blood Group */
+            blood_group: string;
+            /** Checkpoints */
+            checkpoints: components["schemas"]["CheckpointOut"][];
+            /**
+             * Cold Chain Alert
+             * @enum {string}
+             */
+            cold_chain_alert: "none" | "warning" | "critical";
+            /** Component */
+            component: string;
+            courier: components["schemas"]["CourierOut"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Current Checkpoint */
+            current_checkpoint: number;
+            /** Current Checkpoint Name */
+            current_checkpoint_name: string | null;
+            /**
+             * Destination Facility Id
+             * Format: uuid
+             */
+            destination_facility_id: string;
+            /** Destination Name */
+            destination_name: string;
+            /**
+             * Disclaimer
+             * @default Simulated logistics — prototype. This is a simulated logistics prototype. Routes, courier status and ETAs are not real-world navigation or delivery guarantees.
+             */
+            disclaimer: string;
+            /** Distance Km */
+            distance_km: number;
+            eta: components["schemas"]["EtaOut"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Label
+             * @default Simulated logistics — prototype
+             */
+            label: string;
+            /**
+             * Last Update At
+             * Format: date-time
+             */
+            last_update_at: string;
+            /** Picked Up At */
+            picked_up_at: string | null;
+            /** Planned Minutes */
+            planned_minutes: number;
+            /** Received At */
+            received_at: string | null;
+            /** Reference */
+            reference: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Request Reference */
+            request_reference: string;
+            /** Request Status */
+            request_status: string;
+            /** Simulator Enabled */
+            simulator_enabled: boolean;
+            source: components["schemas"]["SourceMeta"];
+            /**
+             * Source Facility Id
+             * Format: uuid
+             */
+            source_facility_id: string;
+            /** Source Name */
+            source_name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "created" | "pickup_pending" | "picked_up" | "in_transit" | "delayed" | "arrived" | "received";
+            telemetry: components["schemas"]["ShipmentTelemetry"];
+            /**
+             * Trace Valid
+             * @description Every bag's hash-chained trace verifies
+             */
+            trace_valid: boolean;
+            /** Urgency */
+            urgency: string;
+        };
+        /** ShipmentList */
+        ShipmentList: {
+            /**
+             * Average Delivery Minutes
+             * @description Mean simulated created→arrived time of completed shipments in scope
+             */
+            average_delivery_minutes: number | null;
+            /**
+             * Counts
+             * @description awaiting_pickup, in_transit, delayed, arrived, completed_today, cold_chain_alerts, on_schedule, late
+             */
+            counts: {
+                [key: string]: number;
+            };
+            /**
+             * Disclaimer
+             * @default Simulated logistics — prototype. This is a simulated logistics prototype. Routes, courier status and ETAs are not real-world navigation or delivery guarantees.
+             */
+            disclaimer: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /**
+             * Label
+             * @default Simulated logistics — prototype
+             */
+            label: string;
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "source" | "destination" | "network";
+            /** Shipments */
+            shipments: components["schemas"]["ShipmentSummary"][];
+        };
+        /** ShipmentRoute */
+        ShipmentRoute: {
+            /** Checkpoints */
+            checkpoints: components["schemas"]["CheckpointOut"][];
+            /** Current Checkpoint */
+            current_checkpoint: number;
+            /** Distance Km */
+            distance_km: number;
+            eta: components["schemas"]["EtaOut"];
+            /**
+             * Label
+             * @default Prototype logistics route — not a geographic map
+             */
+            label: string;
+            /** Reference */
+            reference: string;
+            /**
+             * Shipment Id
+             * Format: uuid
+             */
+            shipment_id: string;
+            source: components["schemas"]["SourceMeta"];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "created" | "pickup_pending" | "picked_up" | "in_transit" | "delayed" | "arrived" | "received";
+        };
+        /** ShipmentSummary */
+        ShipmentSummary: {
+            /** Arrived At */
+            arrived_at: string | null;
+            /** Bag Count */
+            bag_count: number;
+            /** Blood Group */
+            blood_group: string;
+            /**
+             * Cold Chain Alert
+             * @enum {string}
+             */
+            cold_chain_alert: "none" | "warning" | "critical";
+            /** Component */
+            component: string;
+            courier: components["schemas"]["CourierOut"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Current Checkpoint */
+            current_checkpoint: number;
+            /** Current Checkpoint Name */
+            current_checkpoint_name: string | null;
+            /**
+             * Destination Facility Id
+             * Format: uuid
+             */
+            destination_facility_id: string;
+            /** Destination Name */
+            destination_name: string;
+            eta: components["schemas"]["EtaOut"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Last Update At
+             * Format: date-time
+             */
+            last_update_at: string;
+            /** Picked Up At */
+            picked_up_at: string | null;
+            /** Received At */
+            received_at: string | null;
+            /** Reference */
+            reference: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Request Reference */
+            request_reference: string;
+            /**
+             * Source Facility Id
+             * Format: uuid
+             */
+            source_facility_id: string;
+            /** Source Name */
+            source_name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "created" | "pickup_pending" | "picked_up" | "in_transit" | "delayed" | "arrived" | "received";
+            /** Urgency */
+            urgency: string;
+        };
+        /** ShipmentTelemetry */
+        ShipmentTelemetry: {
+            /** Bags */
+            bags: components["schemas"]["ColdChainBag"][];
+            /**
+             * Cold Chain Alert
+             * @enum {string}
+             */
+            cold_chain_alert: "none" | "warning" | "critical";
+            /** In Transit */
+            in_transit: boolean;
+            /**
+             * Note
+             * @default Simulated IoT telemetry — prototype. Critical bags stay flagged for human review.
+             */
+            note: string;
+            /** Reference */
+            reference: string;
+            /**
+             * Shipment Id
+             * Format: uuid
+             */
+            shipment_id: string;
+            source: components["schemas"]["SourceMeta"];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "created" | "pickup_pending" | "picked_up" | "in_transit" | "delayed" | "arrived" | "received";
+        };
+        /** ShipmentTimeline */
+        ShipmentTimeline: {
+            /** Events */
+            events: components["schemas"]["TimelineEvent"][];
+            /**
+             * Label
+             * @default Simulated logistics — prototype
+             */
+            label: string;
+            /** Reference */
+            reference: string;
+            /**
+             * Shipment Id
+             * Format: uuid
+             */
+            shipment_id: string;
+        };
         /** SimulatorResult */
         SimulatorResult: {
             device: components["schemas"]["DeviceOut"];
@@ -3141,6 +3731,27 @@ export interface components {
              * @default 1
              */
             count: number;
+        };
+        /** TimelineEvent */
+        TimelineEvent: {
+            /** Event Type */
+            event_type: string;
+            /** Meta */
+            meta: {
+                [key: string]: unknown;
+            };
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /** Seq */
+            seq: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "created" | "pickup_pending" | "picked_up" | "in_transit" | "delayed" | "arrived" | "received";
         };
         /**
          * UpdateDonorProfileRequest
@@ -4795,6 +5406,192 @@ export interface operations {
             };
         };
     };
+    list_shipments_api_v1_shipments_get: {
+        parameters: {
+            query?: {
+                status?: ("created" | "pickup_pending" | "picked_up" | "in_transit" | "delayed" | "arrived" | "received") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_shipment_api_v1_shipments__shipment_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    receive_shipment_api_v1_shipments__shipment_id__receive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    shipment_route_api_v1_shipments__shipment_id__route_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentRoute"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    shipment_telemetry_api_v1_shipments__shipment_id__telemetry_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentTelemetry"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    shipment_timeline_api_v1_shipments__shipment_id__timeline_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentTimeline"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     attach_api_v1_simulator_bags__public_id__attach_post: {
         parameters: {
             query?: never;
@@ -4978,6 +5775,134 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SimulatorResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    advance_api_v1_simulator_shipments__shipment_id__advance_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    arrive_api_v1_simulator_shipments__shipment_id__arrive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delay_api_v1_simulator_shipments__shipment_id__delay_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["DelayBody"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resume_api_v1_simulator_shipments__shipment_id__resume_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogisticsResult"];
                 };
             };
             /** @description Validation Error */

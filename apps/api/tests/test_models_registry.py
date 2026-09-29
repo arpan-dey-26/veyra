@@ -14,6 +14,7 @@ EXPECTED_TABLES = {
     "network.donors", "audit.audit_logs", "network.donations", "trace.blood_bags",
     "trace.bag_events", "network.blood_requests", "network.request_allocations",
     "network.outbox_events", "telemetry.devices", "telemetry.readings",
+    "network.shipments", "network.shipment_bags", "network.shipment_events",
 }  # fmt: skip
 
 

@@ -1018,6 +1018,153 @@
         "title": "ChangePriority",
         "type": "object"
       },
+      "CheckpointOut": {
+        "properties": {
+          "actual_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual At"
+          },
+          "current": {
+            "title": "Current",
+            "type": "boolean"
+          },
+          "distance_km": {
+            "description": "Simulated cumulative distance (schematic, not GPS)",
+            "title": "Distance Km",
+            "type": "number"
+          },
+          "expected_at": {
+            "format": "date-time",
+            "title": "Expected At",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "source",
+              "collection",
+              "transit",
+              "destination_area",
+              "destination"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "seq": {
+            "title": "Seq",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "reached",
+              "confirmed_at_receipt"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "seq",
+          "name",
+          "kind",
+          "distance_km",
+          "expected_at",
+          "actual_at",
+          "status",
+          "current"
+        ],
+        "title": "CheckpointOut",
+        "type": "object"
+      },
+      "ColdChainBag": {
+        "properties": {
+          "cold_chain_status": {
+            "title": "Cold Chain Status",
+            "type": "string"
+          },
+          "device_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Id"
+          },
+          "device_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Status"
+          },
+          "excursion_active": {
+            "title": "Excursion Active",
+            "type": "boolean"
+          },
+          "last_telemetry_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Telemetry At"
+          },
+          "latest_temperature_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Temperature C"
+          },
+          "monitored": {
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "public_id",
+          "monitored",
+          "device_id",
+          "cold_chain_status",
+          "excursion_active",
+          "latest_temperature_c",
+          "device_status",
+          "last_telemetry_at"
+        ],
+        "title": "ColdChainBag",
+        "type": "object"
+      },
       "ColdChainEvent": {
         "properties": {
           "event_type": {
@@ -1154,6 +1301,34 @@
           "storage"
         ],
         "title": "ComponentInfo",
+        "type": "object"
+      },
+      "CourierOut": {
+        "properties": {
+          "courier_id": {
+            "title": "Courier Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "simulated": {
+            "default": true,
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "vehicle_type": {
+            "title": "Vehicle Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "courier_id",
+          "name",
+          "vehicle_type"
+        ],
+        "title": "CourierOut",
         "type": "object"
       },
       "CreateBloodRequest": {
@@ -1386,6 +1561,31 @@
           "count"
         ],
         "title": "DayCount",
+        "type": "object"
+      },
+      "DelayBody": {
+        "additionalProperties": false,
+        "properties": {
+          "minutes": {
+            "default": 18,
+            "maximum": 240.0,
+            "minimum": 1.0,
+            "title": "Minutes",
+            "type": "integer"
+          },
+          "reason": {
+            "default": "traffic_simulated",
+            "enum": [
+              "traffic_simulated",
+              "vehicle_check_simulated",
+              "handover_wait_simulated",
+              "weather_simulated"
+            ],
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "title": "DelayBody",
         "type": "object"
       },
       "DemandForecast": {
@@ -1966,6 +2166,72 @@
           "state"
         ],
         "title": "DonorSummary",
+        "type": "object"
+      },
+      "EtaOut": {
+        "properties": {
+          "delay_active": {
+            "title": "Delay Active",
+            "type": "boolean"
+          },
+          "delay_minutes": {
+            "title": "Delay Minutes",
+            "type": "integer"
+          },
+          "delay_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delay Reason"
+          },
+          "eta_at": {
+            "format": "date-time",
+            "title": "Eta At",
+            "type": "string"
+          },
+          "label": {
+            "default": "Simulated ETA \u2014 prototype",
+            "title": "Label",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "remaining_minutes": {
+            "title": "Remaining Minutes",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "on_schedule",
+              "delayed",
+              "late",
+              "arrived",
+              "delivered"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "eta_at",
+          "remaining_minutes",
+          "status",
+          "delay_minutes",
+          "delay_active",
+          "delay_reason",
+          "reasons"
+        ],
+        "title": "EtaOut",
         "type": "object"
       },
       "Evaluation": {
@@ -2780,6 +3046,32 @@
           "password"
         ],
         "title": "LoginRequest",
+        "type": "object"
+      },
+      "LogisticsResult": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "events": {
+            "description": "Shipment events raised by this action",
+            "items": {
+              "type": "string"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "shipment": {
+            "$ref": "#/components/schemas/ShipmentDetail"
+          }
+        },
+        "required": [
+          "shipment",
+          "action",
+          "events"
+        ],
+        "title": "LogisticsResult",
         "type": "object"
       },
       "MeResponse": {
@@ -4523,6 +4815,679 @@
         "title": "RoutingOverview",
         "type": "object"
       },
+      "ShipmentBagOut": {
+        "properties": {
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "chain_length": {
+            "title": "Chain Length",
+            "type": "integer"
+          },
+          "chain_valid": {
+            "title": "Chain Valid",
+            "type": "boolean"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "public_id",
+          "blood_group",
+          "component",
+          "status",
+          "expires_at",
+          "chain_valid",
+          "chain_length"
+        ],
+        "title": "ShipmentBagOut",
+        "type": "object"
+      },
+      "ShipmentDetail": {
+        "properties": {
+          "arrived_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Arrived At"
+          },
+          "bag_count": {
+            "title": "Bag Count",
+            "type": "integer"
+          },
+          "bags": {
+            "items": {
+              "$ref": "#/components/schemas/ShipmentBagOut"
+            },
+            "title": "Bags",
+            "type": "array"
+          },
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "checkpoints": {
+            "items": {
+              "$ref": "#/components/schemas/CheckpointOut"
+            },
+            "title": "Checkpoints",
+            "type": "array"
+          },
+          "cold_chain_alert": {
+            "enum": [
+              "none",
+              "warning",
+              "critical"
+            ],
+            "title": "Cold Chain Alert",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "courier": {
+            "$ref": "#/components/schemas/CourierOut"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "current_checkpoint": {
+            "title": "Current Checkpoint",
+            "type": "integer"
+          },
+          "current_checkpoint_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Checkpoint Name"
+          },
+          "destination_facility_id": {
+            "format": "uuid",
+            "title": "Destination Facility Id",
+            "type": "string"
+          },
+          "destination_name": {
+            "title": "Destination Name",
+            "type": "string"
+          },
+          "disclaimer": {
+            "default": "Simulated logistics \u2014 prototype. This is a simulated logistics prototype. Routes, courier status and ETAs are not real-world navigation or delivery guarantees.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "distance_km": {
+            "title": "Distance Km",
+            "type": "number"
+          },
+          "eta": {
+            "$ref": "#/components/schemas/EtaOut"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "default": "Simulated logistics \u2014 prototype",
+            "title": "Label",
+            "type": "string"
+          },
+          "last_update_at": {
+            "format": "date-time",
+            "title": "Last Update At",
+            "type": "string"
+          },
+          "picked_up_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Picked Up At"
+          },
+          "planned_minutes": {
+            "title": "Planned Minutes",
+            "type": "integer"
+          },
+          "received_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received At"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "request_reference": {
+            "title": "Request Reference",
+            "type": "string"
+          },
+          "request_status": {
+            "title": "Request Status",
+            "type": "string"
+          },
+          "simulator_enabled": {
+            "title": "Simulator Enabled",
+            "type": "boolean"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          },
+          "source_facility_id": {
+            "format": "uuid",
+            "title": "Source Facility Id",
+            "type": "string"
+          },
+          "source_name": {
+            "title": "Source Name",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "created",
+              "pickup_pending",
+              "picked_up",
+              "in_transit",
+              "delayed",
+              "arrived",
+              "received"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "telemetry": {
+            "$ref": "#/components/schemas/ShipmentTelemetry"
+          },
+          "trace_valid": {
+            "description": "Every bag's hash-chained trace verifies",
+            "title": "Trace Valid",
+            "type": "boolean"
+          },
+          "urgency": {
+            "title": "Urgency",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "request_id",
+          "request_reference",
+          "source_facility_id",
+          "source_name",
+          "destination_facility_id",
+          "destination_name",
+          "status",
+          "urgency",
+          "bag_count",
+          "blood_group",
+          "component",
+          "courier",
+          "eta",
+          "current_checkpoint",
+          "current_checkpoint_name",
+          "cold_chain_alert",
+          "created_at",
+          "picked_up_at",
+          "arrived_at",
+          "received_at",
+          "last_update_at",
+          "request_status",
+          "bags",
+          "checkpoints",
+          "distance_km",
+          "planned_minutes",
+          "trace_valid",
+          "telemetry",
+          "simulator_enabled",
+          "source"
+        ],
+        "title": "ShipmentDetail",
+        "type": "object"
+      },
+      "ShipmentList": {
+        "properties": {
+          "average_delivery_minutes": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mean simulated created\u2192arrived time of completed shipments in scope",
+            "title": "Average Delivery Minutes"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "awaiting_pickup, in_transit, delayed, arrived, completed_today, cold_chain_alerts, on_schedule, late",
+            "title": "Counts",
+            "type": "object"
+          },
+          "disclaimer": {
+            "default": "Simulated logistics \u2014 prototype. This is a simulated logistics prototype. Routes, courier status and ETAs are not real-world navigation or delivery guarantees.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "label": {
+            "default": "Simulated logistics \u2014 prototype",
+            "title": "Label",
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "source",
+              "destination",
+              "network"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "shipments": {
+            "items": {
+              "$ref": "#/components/schemas/ShipmentSummary"
+            },
+            "title": "Shipments",
+            "type": "array"
+          }
+        },
+        "required": [
+          "scope",
+          "shipments",
+          "counts",
+          "average_delivery_minutes",
+          "generated_at"
+        ],
+        "title": "ShipmentList",
+        "type": "object"
+      },
+      "ShipmentRoute": {
+        "properties": {
+          "checkpoints": {
+            "items": {
+              "$ref": "#/components/schemas/CheckpointOut"
+            },
+            "title": "Checkpoints",
+            "type": "array"
+          },
+          "current_checkpoint": {
+            "title": "Current Checkpoint",
+            "type": "integer"
+          },
+          "distance_km": {
+            "title": "Distance Km",
+            "type": "number"
+          },
+          "eta": {
+            "$ref": "#/components/schemas/EtaOut"
+          },
+          "label": {
+            "default": "Prototype logistics route \u2014 not a geographic map",
+            "title": "Label",
+            "type": "string"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
+          },
+          "shipment_id": {
+            "format": "uuid",
+            "title": "Shipment Id",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          },
+          "status": {
+            "enum": [
+              "created",
+              "pickup_pending",
+              "picked_up",
+              "in_transit",
+              "delayed",
+              "arrived",
+              "received"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "shipment_id",
+          "reference",
+          "status",
+          "distance_km",
+          "current_checkpoint",
+          "checkpoints",
+          "eta",
+          "source"
+        ],
+        "title": "ShipmentRoute",
+        "type": "object"
+      },
+      "ShipmentSummary": {
+        "properties": {
+          "arrived_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Arrived At"
+          },
+          "bag_count": {
+            "title": "Bag Count",
+            "type": "integer"
+          },
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "cold_chain_alert": {
+            "enum": [
+              "none",
+              "warning",
+              "critical"
+            ],
+            "title": "Cold Chain Alert",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "courier": {
+            "$ref": "#/components/schemas/CourierOut"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "current_checkpoint": {
+            "title": "Current Checkpoint",
+            "type": "integer"
+          },
+          "current_checkpoint_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Checkpoint Name"
+          },
+          "destination_facility_id": {
+            "format": "uuid",
+            "title": "Destination Facility Id",
+            "type": "string"
+          },
+          "destination_name": {
+            "title": "Destination Name",
+            "type": "string"
+          },
+          "eta": {
+            "$ref": "#/components/schemas/EtaOut"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "last_update_at": {
+            "format": "date-time",
+            "title": "Last Update At",
+            "type": "string"
+          },
+          "picked_up_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Picked Up At"
+          },
+          "received_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received At"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "request_reference": {
+            "title": "Request Reference",
+            "type": "string"
+          },
+          "source_facility_id": {
+            "format": "uuid",
+            "title": "Source Facility Id",
+            "type": "string"
+          },
+          "source_name": {
+            "title": "Source Name",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "created",
+              "pickup_pending",
+              "picked_up",
+              "in_transit",
+              "delayed",
+              "arrived",
+              "received"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "urgency": {
+            "title": "Urgency",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "request_id",
+          "request_reference",
+          "source_facility_id",
+          "source_name",
+          "destination_facility_id",
+          "destination_name",
+          "status",
+          "urgency",
+          "bag_count",
+          "blood_group",
+          "component",
+          "courier",
+          "eta",
+          "current_checkpoint",
+          "current_checkpoint_name",
+          "cold_chain_alert",
+          "created_at",
+          "picked_up_at",
+          "arrived_at",
+          "received_at",
+          "last_update_at"
+        ],
+        "title": "ShipmentSummary",
+        "type": "object"
+      },
+      "ShipmentTelemetry": {
+        "properties": {
+          "bags": {
+            "items": {
+              "$ref": "#/components/schemas/ColdChainBag"
+            },
+            "title": "Bags",
+            "type": "array"
+          },
+          "cold_chain_alert": {
+            "enum": [
+              "none",
+              "warning",
+              "critical"
+            ],
+            "title": "Cold Chain Alert",
+            "type": "string"
+          },
+          "in_transit": {
+            "title": "In Transit",
+            "type": "boolean"
+          },
+          "note": {
+            "default": "Simulated IoT telemetry \u2014 prototype. Critical bags stay flagged for human review.",
+            "title": "Note",
+            "type": "string"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
+          },
+          "shipment_id": {
+            "format": "uuid",
+            "title": "Shipment Id",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          },
+          "status": {
+            "enum": [
+              "created",
+              "pickup_pending",
+              "picked_up",
+              "in_transit",
+              "delayed",
+              "arrived",
+              "received"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "shipment_id",
+          "reference",
+          "status",
+          "in_transit",
+          "cold_chain_alert",
+          "bags",
+          "source"
+        ],
+        "title": "ShipmentTelemetry",
+        "type": "object"
+      },
+      "ShipmentTimeline": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineEvent"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "label": {
+            "default": "Simulated logistics \u2014 prototype",
+            "title": "Label",
+            "type": "string"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
+          },
+          "shipment_id": {
+            "format": "uuid",
+            "title": "Shipment Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "shipment_id",
+          "reference",
+          "events"
+        ],
+        "title": "ShipmentTimeline",
+        "type": "object"
+      },
       "SimulatorResult": {
         "properties": {
           "device": {
@@ -4962,6 +5927,50 @@
           }
         },
         "title": "TickRequest",
+        "type": "object"
+      },
+      "TimelineEvent": {
+        "properties": {
+          "event_type": {
+            "title": "Event Type",
+            "type": "string"
+          },
+          "meta": {
+            "additionalProperties": true,
+            "title": "Meta",
+            "type": "object"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "seq": {
+            "title": "Seq",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "created",
+              "pickup_pending",
+              "picked_up",
+              "in_transit",
+              "delayed",
+              "arrived",
+              "received"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "seq",
+          "event_type",
+          "status",
+          "occurred_at",
+          "meta"
+        ],
+        "title": "TimelineEvent",
         "type": "object"
       },
       "UpdateDonorProfileRequest": {
@@ -7532,6 +8541,279 @@
         ]
       }
     },
+    "/api/v1/shipments": {
+      "get": {
+        "operationId": "list_shipments_api_v1_shipments_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "created",
+                    "pickup_pending",
+                    "picked_up",
+                    "in_transit",
+                    "delayed",
+                    "arrived",
+                    "received"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Shipments in scope (simulated logistics)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/api/v1/shipments/{shipment_id}": {
+      "get": {
+        "operationId": "get_shipment_api_v1_shipments__shipment_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Shipment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "One shipment",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/api/v1/shipments/{shipment_id}/receive": {
+      "post": {
+        "operationId": "receive_shipment_api_v1_shipments__shipment_id__receive_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Shipment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Destination hospital confirms receipt (uses the existing receive workflow)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/api/v1/shipments/{shipment_id}/route": {
+      "get": {
+        "operationId": "shipment_route_api_v1_shipments__shipment_id__route_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Shipment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentRoute"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Schematic route checkpoints (not a geographic map)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/api/v1/shipments/{shipment_id}/telemetry": {
+      "get": {
+        "operationId": "shipment_telemetry_api_v1_shipments__shipment_id__telemetry_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Shipment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentTelemetry"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cold-chain state of the shipment's bags (simulated telemetry)",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/api/v1/shipments/{shipment_id}/timeline": {
+      "get": {
+        "operationId": "shipment_timeline_api_v1_shipments__shipment_id__timeline_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Shipment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentTimeline"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Append-only timeline",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
     "/api/v1/simulator/bags/{public_id}/attach": {
       "post": {
         "description": "Attach a SIMULATED smart-bag device (no hardware).",
@@ -7814,6 +9096,195 @@
         "summary": "Tick",
         "tags": [
           "telemetry simulator (demo)"
+        ]
+      }
+    },
+    "/api/v1/simulator/shipments/{shipment_id}/advance": {
+      "post": {
+        "operationId": "advance_api_v1_simulator_shipments__shipment_id__advance_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Shipment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Advance",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/api/v1/simulator/shipments/{shipment_id}/arrive": {
+      "post": {
+        "operationId": "arrive_api_v1_simulator_shipments__shipment_id__arrive_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Shipment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Arrive",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/api/v1/simulator/shipments/{shipment_id}/delay": {
+      "post": {
+        "operationId": "delay_api_v1_simulator_shipments__shipment_id__delay_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Shipment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DelayBody"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delay",
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/api/v1/simulator/shipments/{shipment_id}/resume": {
+      "post": {
+        "operationId": "resume_api_v1_simulator_shipments__shipment_id__resume_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Shipment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resume",
+        "tags": [
+          "logistics"
         ]
       }
     },

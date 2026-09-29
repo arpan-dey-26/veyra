@@ -16,6 +16,7 @@ import type {
 import { useEffect, useRef, useState } from "react";
 
 import { StatTile } from "@/components/app/page-header";
+import { ShipmentsPanel } from "@/components/logistics/logistics";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardLabel } from "@/components/ui/card";
@@ -737,6 +738,7 @@ export function OperationsWorkspace({ kind, facilityId }: { kind: Kind; facility
       <OpsDisclaimer />
       {kind === "BLOOD_BANK" ? <AlertsPanel /> : null}
       <EmergencyQueue kind={kind} />
+      <ShipmentsPanel kind={kind} />
       <RoutingPanel title={kind === "BLOOD_BANK" ? "Dispatch queue — simulated ETAs" : "Expected deliveries — simulated ETAs"} />
       {kind === "HOSPITAL" && <AvailabilityBands />}
       <PressurePanel facilityId={facilityId} />

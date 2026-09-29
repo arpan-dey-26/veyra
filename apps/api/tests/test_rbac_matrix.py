@@ -1,4 +1,4 @@
-"""RBAC matrix: every Phase 1-6 endpoint x every role (+ anonymous) → expected status.
+"""RBAC matrix: every Phase 1-7 endpoint x every role (+ anonymous) → expected status.
 
 This is the contract for the security boundary. Adding an endpoint means adding a row.
 """
@@ -331,6 +331,67 @@ MATRIX: list[tuple[str, str, dict[str, object] | None, dict[str, int]]] = [
         "/api/v1/operations/alerts",
         None,
         {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    # Phase 7: simulated logistics
+    (
+        "GET",
+        "/api/v1/shipments",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    (
+        "GET",
+        f"/api/v1/shipments/{_UUID}",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "GET",
+        f"/api/v1/shipments/{_UUID}/route",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "GET",
+        f"/api/v1/shipments/{_UUID}/timeline",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "GET",
+        f"/api/v1/shipments/{_UUID}/telemetry",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "POST",
+        f"/api/v1/shipments/{_UUID}/receive",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 403, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/simulator/shipments/{_UUID}/advance",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/simulator/shipments/{_UUID}/delay",
+        {"minutes": 5},
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/simulator/shipments/{_UUID}/resume",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/simulator/shipments/{_UUID}/arrive",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 403},
     ),
     (
         "GET",

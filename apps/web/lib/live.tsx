@@ -45,6 +45,16 @@ export const TOPICS = [
   "routing.updated",
   "forecast.pressure_changed",
   "cold_chain.operational_alert",
+  // Phase 7: simulated logistics
+  "shipment.created",
+  "shipment.picked_up",
+  "shipment.in_transit",
+  "shipment.delayed",
+  "shipment.resumed",
+  "shipment.checkpoint_reached",
+  "shipment.arrived",
+  "shipment.received",
+  "shipment.cold_chain_alert",
 ] as const;
 
 /**

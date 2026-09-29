@@ -65,7 +65,9 @@ class BagEvent(Base):
         UniqueConstraint("bag_id", "seq", name="uq_bag_events_bag_id_seq"),
         CheckConstraint(
             "event_type IN ('COLLECTED', 'DISPATCHED', 'RECEIVED', 'DISCARDED', "
-            "'DEVICE_ATTACHED', 'TEMP_EXCURSION', 'TEMP_RECOVERED')",
+            "'DEVICE_ATTACHED', 'TEMP_EXCURSION', 'TEMP_RECOVERED', "
+            "'SHIPMENT_CREATED', 'SHIPMENT_PICKED_UP', 'SHIPMENT_IN_TRANSIT', "
+            "'SHIPMENT_DELAYED', 'SHIPMENT_ARRIVED', 'SHIPMENT_RECEIVED')",
             name="event_type_valid",
         ),
         {"schema": "trace"},

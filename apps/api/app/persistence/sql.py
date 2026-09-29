@@ -29,6 +29,7 @@ from app.modules.identity.models import (
     User,
     VerificationChallenge,
 )
+from app.modules.logistics.models import Shipment, ShipmentBag, ShipmentEvent
 from app.modules.outbox.models import OutboxEvent
 from app.modules.requests.models import BloodRequest, RequestAllocation
 from app.modules.telemetry.errors import DeviceAlreadyAttachedError
@@ -523,6 +524,70 @@ class SqlStatsRepository(_Repo):
         return {action: int(n) for action, n in (await self._s.execute(q)).all()}
 
 
+class SqlShipmentRepository(_Repo):
+    async def add(self, shipment: Shipment) -> None:
+        await self._add(shipment)
+
+    async def add_bag(self, link: ShipmentBag) -> None:
+        await self._add(link)
+
+    async def add_event(self, event: ShipmentEvent) -> None:
+        await self._add(event)
+
+    async def get(self, shipment_id: UUID, *, lock: bool = False) -> Shipment | None:
+        q = select(Shipment).where(Shipment.id == shipment_id)
+        if lock:
+            q = q.with_for_update()
+        return await self._s.scalar(q)
+
+    async def for_request(self, request_id: UUID) -> Shipment | None:
+        return await self._s.scalar(select(Shipment).where(Shipment.request_id == request_id))
+
+    async def for_bag(self, bag_id: UUID) -> Shipment | None:
+        return await self._s.scalar(
+            select(Shipment)
+            .join(ShipmentBag, ShipmentBag.shipment_id == Shipment.id)
+            .where(ShipmentBag.bag_id == bag_id)
+        )
+
+    async def list_shipments(
+        self,
+        *,
+        source_facility_id: UUID | None,
+        destination_facility_id: UUID | None,
+        status: str | None,
+        limit: int,
+    ) -> list[Shipment]:
+        conds = []
+        if source_facility_id is not None:
+            conds.append(Shipment.source_facility_id == source_facility_id)
+        if destination_facility_id is not None:
+            conds.append(Shipment.destination_facility_id == destination_facility_id)
+        if status is not None:
+            conds.append(Shipment.status == status)
+        rows = await self._s.scalars(
+            select(Shipment)
+            .where(*conds)
+            .order_by(Shipment.created_at.desc(), Shipment.id.desc())
+            .limit(limit)
+        )
+        return list(rows)
+
+    async def bag_ids(self, shipment_id: UUID) -> list[UUID]:
+        rows = await self._s.scalars(
+            select(ShipmentBag.bag_id).where(ShipmentBag.shipment_id == shipment_id)
+        )
+        return list(rows)
+
+    async def events(self, shipment_id: UUID) -> list[ShipmentEvent]:
+        rows = await self._s.scalars(
+            select(ShipmentEvent)
+            .where(ShipmentEvent.shipment_id == shipment_id)
+            .order_by(ShipmentEvent.seq)
+        )
+        return list(rows)
+
+
 class SqlTelemetryRepository(_Repo):
     async def add_device(self, device: TelemetryDevice) -> None:
         await self._add(device)
@@ -587,6 +652,7 @@ class SqlUnitOfWork:
         self.outbox = SqlOutboxRepository(session)
         self.stats = SqlStatsRepository(session)
         self.telemetry = SqlTelemetryRepository(session)
+        self.shipments = SqlShipmentRepository(session)
 
     async def commit(self) -> None:
         try:

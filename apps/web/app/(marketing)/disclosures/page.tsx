@@ -37,6 +37,11 @@ const ITEMS = [
     body: "Estimated travel times are deterministic schematic simulations (no GPS, maps or traffic data), labelled “Simulated routing — prototype”.",
   },
   {
+    subject: "Logistics and shipments",
+    label: "Simulated" as const,
+    body: "Couriers are fictional, routes are schematic checkpoints and ETAs are deterministic simulations. This is a simulated logistics prototype. Routes, courier status and ETAs are not real-world navigation or delivery guarantees. A person always confirms receipt.",
+  },
+  {
     subject: "Operational recommendations",
     label: "Demo" as const,
     body: "Priority scores, pressure bands and bag rankings are explainable prototype rules with their reasons shown. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice, and nothing is dispatched without a person confirming it.",

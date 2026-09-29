@@ -13,6 +13,7 @@ import app.modules.donations.models
 import app.modules.donors.models
 import app.modules.facilities.models
 import app.modules.identity.models
+import app.modules.logistics.models
 import app.modules.outbox.models
 import app.modules.requests.models
 import app.modules.telemetry.models  # noqa: F401
@@ -25,6 +26,7 @@ MODEL_MODULES: tuple[str, ...] = (
     "app.modules.donors.models",
     "app.modules.facilities.models",
     "app.modules.identity.models",
+    "app.modules.logistics.models",
     "app.modules.outbox.models",
     "app.modules.requests.models",
     "app.modules.telemetry.models",

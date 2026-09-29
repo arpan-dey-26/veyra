@@ -27,6 +27,7 @@ from app.modules.identity.models import (
     User,
     VerificationChallenge,
 )
+from app.modules.logistics.models import Shipment, ShipmentBag, ShipmentEvent
 from app.modules.outbox.models import OutboxEvent
 from app.modules.requests.models import BloodRequest, RequestAllocation
 from app.modules.telemetry.errors import DeviceAlreadyAttachedError
@@ -54,6 +55,9 @@ class MemoryDatabase:
     outbox_ids: count[int] = field(default_factory=lambda: count(1))
     devices: dict[UUID, TelemetryDevice] = field(default_factory=dict)
     readings: list[TelemetryReading] = field(default_factory=list)
+    shipments: dict[UUID, Shipment] = field(default_factory=dict)
+    shipment_bags: list[ShipmentBag] = field(default_factory=list)
+    shipment_events: list[ShipmentEvent] = field(default_factory=list)
     reading_ids: count[int] = field(default_factory=lambda: count(1))
 
 
@@ -549,6 +553,66 @@ class _MemTelemetry:
         return (min(temps), max(temps)) if temps else (None, None)
 
 
+class _MemShipments:
+    def __init__(self, db: MemoryDatabase) -> None:
+        self._db = db
+
+    async def add(self, shipment: Shipment) -> None:
+        if any(x.request_id == shipment.request_id for x in self._db.shipments.values()):
+            raise ConflictError("This request already has a shipment")
+        self._db.shipments[shipment.id] = shipment
+
+    async def add_bag(self, link: ShipmentBag) -> None:
+        if any(x.bag_id == link.bag_id for x in self._db.shipment_bags):
+            raise ConflictError("This bag is already in a shipment")
+        self._db.shipment_bags.append(link)
+
+    async def add_event(self, event: ShipmentEvent) -> None:
+        if event.id is None:
+            event.id = len(self._db.shipment_events) + 1
+        self._db.shipment_events.append(event)
+
+    async def get(self, shipment_id: UUID, *, lock: bool = False) -> Shipment | None:
+        return self._db.shipments.get(shipment_id)
+
+    async def for_request(self, request_id: UUID) -> Shipment | None:
+        return next((x for x in self._db.shipments.values() if x.request_id == request_id), None)
+
+    async def for_bag(self, bag_id: UUID) -> Shipment | None:
+        link = next((x for x in self._db.shipment_bags if x.bag_id == bag_id), None)
+        return self._db.shipments.get(link.shipment_id) if link else None
+
+    async def list_shipments(
+        self,
+        *,
+        source_facility_id: UUID | None,
+        destination_facility_id: UUID | None,
+        status: str | None,
+        limit: int,
+    ) -> list[Shipment]:
+        rows = [
+            x
+            for x in self._db.shipments.values()
+            if (source_facility_id is None or x.source_facility_id == source_facility_id)
+            and (
+                destination_facility_id is None
+                or x.destination_facility_id == destination_facility_id
+            )
+            and (status is None or x.status == status)
+        ]
+        rows.sort(key=lambda x: (x.created_at, x.id), reverse=True)
+        return rows[:limit]
+
+    async def bag_ids(self, shipment_id: UUID) -> list[UUID]:
+        return [x.bag_id for x in self._db.shipment_bags if x.shipment_id == shipment_id]
+
+    async def events(self, shipment_id: UUID) -> list[ShipmentEvent]:
+        return sorted(
+            (e for e in self._db.shipment_events if e.shipment_id == shipment_id),
+            key=lambda e: e.seq,
+        )
+
+
 class MemoryUnitOfWork:
     def __init__(self, db: MemoryDatabase) -> None:
         self.users = _MemUsers(db)
@@ -564,6 +628,7 @@ class MemoryUnitOfWork:
         self.outbox = _MemOutbox(db)
         self.stats = _MemStats(db)
         self.telemetry = _MemTelemetry(db)
+        self.shipments = _MemShipments(db)
 
     async def commit(self) -> None:
         return None

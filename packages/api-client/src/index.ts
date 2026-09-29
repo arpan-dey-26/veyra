@@ -85,6 +85,18 @@ export type OpsRoutingOverview = Schemas["RoutingOverview"];
 export type OpsAlert = Schemas["AlertOut"];
 export type OpsAlerts = Schemas["AlertsOut"];
 export type ChangePriorityBody = Schemas["ChangePriority"];
+// Phase 7: simulated logistics (prototype; not real navigation or delivery guarantees)
+export type Shipment = Schemas["ShipmentSummary"];
+export type ShipmentDetail = Schemas["ShipmentDetail"];
+export type ShipmentList = Schemas["ShipmentList"];
+export type ShipmentRoute = Schemas["ShipmentRoute"];
+export type ShipmentCheckpoint = Schemas["CheckpointOut"];
+export type ShipmentEta = Schemas["EtaOut"];
+export type ShipmentTimeline = Schemas["ShipmentTimeline"];
+export type ShipmentTimelineEvent = Schemas["TimelineEvent"];
+export type ShipmentTelemetry = Schemas["ShipmentTelemetry"];
+export type ShipmentColdChainBag = Schemas["ColdChainBag"];
+export type LogisticsResult = Schemas["LogisticsResult"];
 
 /** A live event from `GET /api/v1/stream` (Server-Sent Events, fed by the outbox). */
 export interface NetworkEvent {

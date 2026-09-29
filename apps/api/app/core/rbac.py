@@ -54,6 +54,10 @@ class Permission(StrEnum):
     OPERATIONS_READ = "operations:read:scoped"
     # Phase 6: bag allocation recommendations for requests targeted at the caller's bank
     ALLOCATION_RECOMMEND = "allocation:recommend:own_facility"
+    # Phase 7: simulated shipments (source bank or destination hospital; admins: NETWORK_READ)
+    SHIPMENT_READ = "shipment:read:scoped"
+    # Phase 7: drive the SIMULATED logistics of shipments the bank dispatched (demo only)
+    LOGISTICS_SIMULATE = "logistics:simulate:own_facility"
     TRANSPORT_READ = "transport:read"
     # Admin
     USER_READ = "user:read"
@@ -89,6 +93,7 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.BAG_RECEIVE,
             _P.TELEMETRY_SIMULATE,
             _P.OPERATIONS_READ,
+            _P.SHIPMENT_READ,
             _P.BAG_TRACE_READ,
             _P.NETWORK_AVAILABILITY_READ,
             _P.EVENTS_SUBSCRIBE,
@@ -110,6 +115,8 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.TELEMETRY_SIMULATE,
             _P.OPERATIONS_READ,
             _P.ALLOCATION_RECOMMEND,
+            _P.SHIPMENT_READ,
+            _P.LOGISTICS_SIMULATE,
             _P.TRANSPORT_READ,
             _P.EVENTS_SUBSCRIBE,
             _P.NOTIFICATION_READ_SELF,

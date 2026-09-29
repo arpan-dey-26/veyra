@@ -57,10 +57,27 @@ class BagEventType(StrEnum):
     DEVICE_ATTACHED = "DEVICE_ATTACHED"
     TEMP_EXCURSION = "TEMP_EXCURSION"
     TEMP_RECOVERED = "TEMP_RECOVERED"
+    # Phase 7: simulated logistics observations (never change the bag status)
+    SHIPMENT_CREATED = "SHIPMENT_CREATED"
+    SHIPMENT_PICKED_UP = "SHIPMENT_PICKED_UP"
+    SHIPMENT_IN_TRANSIT = "SHIPMENT_IN_TRANSIT"
+    SHIPMENT_DELAYED = "SHIPMENT_DELAYED"
+    SHIPMENT_ARRIVED = "SHIPMENT_ARRIVED"
+    SHIPMENT_RECEIVED = "SHIPMENT_RECEIVED"
 
 
 OBSERVATION_EVENTS: frozenset[BagEventType] = frozenset(
-    {BagEventType.DEVICE_ATTACHED, BagEventType.TEMP_EXCURSION, BagEventType.TEMP_RECOVERED}
+    {
+        BagEventType.DEVICE_ATTACHED,
+        BagEventType.TEMP_EXCURSION,
+        BagEventType.TEMP_RECOVERED,
+        BagEventType.SHIPMENT_CREATED,
+        BagEventType.SHIPMENT_PICKED_UP,
+        BagEventType.SHIPMENT_IN_TRANSIT,
+        BagEventType.SHIPMENT_DELAYED,
+        BagEventType.SHIPMENT_ARRIVED,
+        BagEventType.SHIPMENT_RECEIVED,
+    }
 )
 
 

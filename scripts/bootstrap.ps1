@@ -576,6 +576,112 @@ if ($SkipDocker) {
     Invoke-Api Post "$base/bags/$hot/discard" @{ reason = "other"; note = "E2E cleanup after simulated cold-chain excursion" } $bank @{ "X-CSRF-Token" = (Csrf $bank) } | Out-Null
     Log "   operations OK (request $($req.reference) band $($prio.band) score $($prio.score); dispatched $(@($rec.recommended_bag_ids)[0]), skipped critical $hot; ETA $($rec.route.eta_minutes) min simulated)"
   }
+  Step "e2e: phase 7 simulated logistics (shipment, checkpoints, delay, cold chain, human receipt)" {
+    $base = "http://localhost:3000/api/v1"
+    $pw = "veyra-demo-console-2026"
+    function Csrf($sess) { ($sess.Cookies.GetCookies("http://localhost:3000") | Where-Object Name -eq "veyra_csrf").Value }
+    function Status-Of([scriptblock]$Call) {
+      try { & $Call | Out-Null; return 200 } catch { if ("$_" -match "-> (\d{3})") { return [int]$Matches[1] } else { throw } }
+    }
+    $bank = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $hosp = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $adm = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $other = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    Invoke-Api Post "$base/auth/login" @{ email = "bank@veyra.demo"; password = $pw } $bank | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "hospital@veyra.demo"; password = $pw } $hosp | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "admin@veyra.demo"; password = $pw } $adm | Out-Null
+    # The unrelated hospital onboarded by the phase 6 step (normal admin + invite flow).
+    Invoke-Api Post "$base/auth/login" @{ email = "ops-e2e-unrelated@example.in"; password = "unrelated-hospital-smoke-2026" } $other | Out-Null
+    $bf = Invoke-Api Get "$base/facilities/me" $null $bank
+    $head = 0
+    while ($true) {
+      $page = (Invoke-WebRequest -Uri "$base/stream?once=true&after=$head" -WebSession $adm -UseBasicParsing).Content
+      $ids = @([regex]::Matches($page, "(?m)^id: (\d+)") | ForEach-Object { [int64]$_.Groups[1].Value })
+      if ($ids.Count -eq 0) { break }
+      $head = ($ids | Measure-Object -Maximum).Maximum
+    }
+    # A fresh A+ PRBC donation (the donor session is reused for the 403 check).
+    $d = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $tag = [Guid]::NewGuid().ToString("N").Substring(0, 8)
+    $mobile = "9" + ([UInt64]("0x" + [Guid]::NewGuid().ToString("N").Substring(0, 15)) % 1000000000).ToString("000000000")
+    $reg = Invoke-Api Post "$base/auth/register" @{ full_name = "Logistics Smoke"; email = "lg-$tag@example.in"; mobile = $mobile;
+      blood_group = "A+"; address = "1 Smoke Street"; city = "Kolkata"; state = "West Bengal"; pin_code = "700001";
+      password = "smoke-test-passphrase" } $d
+    Invoke-Api Post "$base/auth/verify" @{ challenge_id = $reg.verification.challenge_id; code = $mobile.Substring(6) } $d | Out-Null
+    $found = Invoke-Api Post "$base/donors/lookup" @{ mobile = $mobile } $bank @{ "X-CSRF-Token" = (Csrf $bank) }
+    Invoke-Api Post "$base/donations" @{ donor_id = $found.donor_id; blood_group = "A+"; volume_ml = 450; components = @("PRBC") } $bank @{ "X-CSRF-Token" = (Csrf $bank) } | Out-Null
+    # Hospital: emergency request. Blood bank: inspect, confirm the recommended allocation, dispatch.
+    $req = Invoke-Api Post "$base/requests" @{ provider = "internal"; target_ref = $bf.id; blood_group = "A+"; component = "PRBC"; units = 1;
+      urgency = "emergency"; needed_by = (Get-Date).ToUniversalTime().AddHours(2).ToString("yyyy-MM-ddTHH:mm:ssZ") } $hosp @{ "X-CSRF-Token" = (Csrf $hosp) }
+    $queue = Invoke-Api Get "$base/operations/requests" $null $bank
+    if (-not (@($queue.requests) | Where-Object { $_.id -eq $req.id })) { throw "request missing from the operations queue" }
+    $rec = Invoke-Api Get "$base/operations/requests/$($req.id)/recommendations" $null $bank
+    $bag = @($rec.recommended_bag_ids)[0]
+    if (-not $bag) { throw "no recommended bag" }
+    $h = @{ "X-CSRF-Token" = (Csrf $bank) }
+    if ((Status-Of { Invoke-Api Post "$base/simulator/bags/$bag/attach" $null $bank $h }) -notin @(200, 409)) { throw "attach device" }
+    Invoke-Api Post "$base/simulator/bags/$bag/tick" @{ count = 1 } $bank $h | Out-Null
+    $ful = Invoke-Api Post "$base/requests/$($req.id)/fulfil" @{ bag_public_ids = @($bag) } $bank $h
+    if ($ful.status -ne "dispatched") { throw "confirmed dispatch" }
+    # Shipment created, courier assigned.
+    $list = Invoke-Api Get "$base/shipments" $null $bank
+    $s = @($list.shipments) | Where-Object { $_.request_id -eq $req.id }
+    if (-not $s -or $s.status -ne "pickup_pending" -or $s.courier.simulated -ne $true) { throw "shipment not created" }
+    if ($list.disclaimer -notlike "*not real-world navigation or delivery guarantees*") { throw "logistics disclaimer missing" }
+    $sid = $s.id
+    Assert-Http "http://localhost:3000/shipments/$sid" ""
+    function Ship($action, $body = $null) { Invoke-Api Post "$base/simulator/shipments/$sid/$action" $body $bank @{ "X-CSRF-Token" = (Csrf $bank) } }
+    if ((Ship "advance").shipment.status -ne "picked_up") { throw "pickup" }
+    if ((Ship "advance").shipment.status -ne "in_transit") { throw "in transit" }
+    $r = Ship "advance"
+    if ($r.shipment.current_checkpoint -ne 2 -or @($r.events) -notcontains "shipment.checkpoint_reached") { throw "checkpoint progression" }
+    # Cold-chain warning while in transit (the bank keeps custody until receipt).
+    Invoke-Api Post "$base/simulator/bags/$bag/excursion" $null $bank $h | Out-Null
+    Invoke-Api Post "$base/simulator/bags/$bag/tick" @{ count = 1 } $bank $h | Out-Null
+    $tele = Invoke-Api Get "$base/shipments/$sid/telemetry" $null $hosp
+    if (@("warning", "critical") -notcontains $tele.cold_chain_alert -or -not $tele.in_transit) { throw "cold-chain alert in transit" }
+    Invoke-Api Post "$base/simulator/bags/$bag/recover" $null $bank $h | Out-Null
+    Invoke-Api Post "$base/simulator/bags/$bag/tick" @{ count = 2 } $bank $h | Out-Null
+    # Delay +18 min, blocked advance, resume.
+    $dl = Ship "delay" @{ minutes = 18; reason = "traffic_simulated" }
+    if ($dl.shipment.status -ne "delayed" -or $dl.shipment.eta.delay_minutes -ne 18 -or $dl.shipment.eta.status -ne "delayed") { throw "delay" }
+    if ((Status-Of { Ship "advance" }) -ne 409) { throw "advance allowed while delayed" }
+    if ((Ship "resume").shipment.status -ne "in_transit") { throw "resume" }
+    Ship "advance" | Out-Null
+    if ((Ship "arrive").shipment.status -ne "arrived") { throw "arrive" }
+    # Hospital: inspect ETA, route and cold chain; nothing was received automatically.
+    $det = Invoke-Api Get "$base/shipments/$sid" $null $hosp
+    if ($det.eta.status -ne "arrived" -or $det.request_status -ne "dispatched") { throw "arrival must not receive" }
+    $route = Invoke-Api Get "$base/shipments/$sid/route" $null $hosp
+    if ($route.label -notlike "Prototype logistics route*not a geographic map" -or @($route.checkpoints | Where-Object { $_.status -eq "reached" }).Count -ne 5) { throw "route" }
+    if (-not $det.telemetry.bags -or $det.telemetry.cold_chain_alert -eq "none") { throw "cold-chain history on the shipment" }
+    $rcv = Invoke-Api Post "$base/shipments/$sid/receive" $null $hosp @{ "X-CSRF-Token" = (Csrf $hosp) }
+    if ($rcv.status -ne "received" -or $rcv.request_status -ne "fulfilled" -or (@($rcv.bags)[0].status) -ne "received" -or -not $rcv.trace_valid) { throw "receipt" }
+    if ((Invoke-Api Get "$base/requests/$($req.id)" $null $hosp).status -ne "fulfilled") { throw "request not fulfilled" }
+    $tl = @((Invoke-Api Get "$base/shipments/$sid/timeline" $null $hosp).events | ForEach-Object { $_.event_type })
+    foreach ($e in @("SHIPMENT_CREATED", "COURIER_ASSIGNED", "SHIPMENT_PICKED_UP", "SHIPMENT_IN_TRANSIT", "CHECKPOINT_REACHED", "COLD_CHAIN_WARNING",
+                     "SHIPMENT_DELAYED", "SHIPMENT_RESUMED", "SHIPMENT_ARRIVED", "SHIPMENT_RECEIVED")) {
+      if ($tl -notcontains $e) { throw "timeline missing $e" }
+    }
+    $trace = Invoke-Api Get "$base/bags/$bag" $null $hosp
+    $types = @($trace.events | ForEach-Object { $_.event_type })
+    if (-not $trace.chain.valid -or $trace.bag.status -ne "received" -or $types -notcontains "SHIPMENT_RECEIVED" -or $types -notcontains "RECEIVED") { throw "trace after receipt" }
+    # SSE replay (Last-Event-ID) through the web proxy; the unrelated hospital receives nothing.
+    foreach ($sess in @($bank, $hosp)) {
+      $sse = (Invoke-WebRequest -Uri "$base/stream?once=true" -Headers @{ "Last-Event-ID" = "$head" } -WebSession $sess -UseBasicParsing).Content
+      foreach ($t in @("shipment.created", "shipment.picked_up", "shipment.in_transit", "shipment.checkpoint_reached", "shipment.delayed",
+                       "shipment.resumed", "shipment.arrived", "shipment.received", "shipment.cold_chain_alert")) {
+        if ($sse -notlike "*event: $t*") { throw "SSE missing $t" }
+      }
+    }
+    $osse = (Invoke-WebRequest -Uri "$base/stream?once=true&after=$head" -WebSession $other -UseBasicParsing).Content
+    if ($osse -like "*$sid*" -or $osse -like "*event: shipment.*") { throw "unrelated hospital received shipment events" }
+    if ((Status-Of { Invoke-Api Get "$base/shipments/$sid" $null $other }) -ne 404) { throw "unrelated hospital saw the shipment" }
+    if ((Status-Of { Invoke-Api Get "$base/shipments" $null $d }) -ne 403) { throw "donor read shipments" }
+    $net = Invoke-Api Get "$base/shipments" $null $adm
+    if ($net.scope -ne "network" -or -not (@($net.shipments) | Where-Object { $_.id -eq $sid })) { throw "admin network view" }
+    Log "   logistics OK (shipment $($s.reference) for $($req.reference): $($det.courier.name), $(@($route.checkpoints).Count) checkpoints, +18 min simulated delay, received)"
+  }
 }
 
 # ---------------------------------------------------------------- summary
