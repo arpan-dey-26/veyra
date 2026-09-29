@@ -50,13 +50,18 @@ export function LiveNetwork({
   const [version, reload] = useReload();
   const { subscribe } = useLive();
   const reduced = useReducedMotion();
+  const knownIds = useRef<ReadonlySet<string>>(new Set());
 
   useEffect(() => {
     let active = true;
     void api.GET("/api/v1/network/graph").then(({ data, error: e, response }) => {
       if (!active) return;
       if (data) {
-        dispatch({ type: "graph", graph: data as NetworkGraph });
+        const graph = data as NetworkGraph;
+        // Known before the first render with this graph: a live event arriving before the
+        // effect below has run must not look like an unknown facility (spurious refetch).
+        knownIds.current = new Set(graph.nodes.map((n) => n.id));
+        dispatch({ type: "graph", graph });
         setLoaded(true);
       } else {
         setError(toFailure(e, response).message);
@@ -67,7 +72,6 @@ export function LiveNetwork({
     };
   }, [version]);
 
-  const knownIds = useRef<ReadonlySet<string>>(new Set());
   useEffect(() => {
     knownIds.current = new Set(state.nodes.map((n) => n.id));
   }, [state.nodes]);
