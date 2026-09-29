@@ -42,3 +42,15 @@ pnpm-debug.log*
 # deployment (Vercel CLI link state, local deploy logs)
 .vercel/
 .deploy-logs/
+
+# publication hygiene
+venv/
+dist/
+build/
+*.sql
+*.dump
+*.backup
+*.tgz
+*.zip
+_to_delete/
+.phase8-sync*.tgz
