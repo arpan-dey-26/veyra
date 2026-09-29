@@ -8,15 +8,11 @@ from alembic import context
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
-# Import every ORM module so Base.metadata is complete (autogenerate / `alembic check`).
-import app.modules.audit.models
-import app.modules.donors.models
-import app.modules.facilities.models
-import app.modules.identity.models  # noqa: F401
 from app.core.config import get_settings
-from app.core.db import Base
 
-target_metadata = Base.metadata
+# The registry imports every ORM module, so the metadata is complete for autogenerate /
+# `alembic check` (a missing import would make existing tables look like "remove_table").
+from app.models_registry import metadata as target_metadata
 
 
 def _configure(connection: Connection | None = None, url: str | None = None) -> None:

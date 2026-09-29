@@ -1,7 +1,7 @@
 "use client";
 
 import type { BloodRequestOut } from "@veyra/api-client";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { RequestCard } from "@/components/network/request-card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { EmptyState, ErrorState, Skeleton } from "@/components/ui/states";
 import { api } from "@/lib/api";
 import { useLiveRefresh } from "@/lib/live";
 import { toFailure } from "@/lib/problem";
+import { useReload } from "@/lib/use-reload";
 
 type View = "pending" | "all";
 
@@ -20,18 +21,24 @@ export function IncomingRequests() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ id: string; tone: "error" | "success"; text: string } | null>(null);
 
-  const load = useCallback(async () => {
-    const { data, error: e, response } = await api.GET("/api/v1/requests", {
-      params: { query: { limit: 50, ...(view === "pending" ? { status: "pending" } : {}) } },
-    });
-    if (data) setItems(data.data);
-    else setError(toFailure(e, response).message);
-  }, [view]);
+  const [version, reload] = useReload();
 
   useEffect(() => {
-    void load();
-  }, [load]);
-  useLiveRefresh(["request.created", "request.cancelled", "request.fulfilled"], () => void load());
+    let active = true;
+    void api
+      .GET("/api/v1/requests", {
+        params: { query: { limit: 50, ...(view === "pending" ? { status: "pending" } : {}) } },
+      })
+      .then(({ data, error: e, response }) => {
+        if (!active) return;
+        if (data) setItems(data.data);
+        else setError(toFailure(e, response).message);
+      });
+    return () => {
+      active = false;
+    };
+  }, [view, version]);
+  useLiveRefresh(["request.created", "request.cancelled", "request.fulfilled"], reload);
 
   async function fulfil(r: BloodRequestOut) {
     const { data, error: e, response } = await api.POST("/api/v1/requests/{request_id}/fulfil", {
@@ -43,7 +50,7 @@ export function IncomingRequests() {
         ? { id: r.id, tone: "success", text: `Dispatched ${data.bags.map((b) => b.public_id).join(", ")}` }
         : { id: r.id, tone: "error", text: toFailure(e, response).message },
     );
-    await load();
+    reload();
   }
 
   async function reject(r: BloodRequestOut, note: string) {
@@ -56,7 +63,7 @@ export function IncomingRequests() {
         ? { id: r.id, tone: "error", text: toFailure(e, response).message }
         : { id: r.id, tone: "success", text: `Declined ${r.reference}` },
     );
-    await load();
+    reload();
   }
 
   if (error) return <ErrorState description={error} />;

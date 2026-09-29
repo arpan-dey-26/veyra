@@ -1,7 +1,7 @@
 "use client";
 
 import type { BloodRequestOut } from "@veyra/api-client";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { RequestCard } from "@/components/network/request-card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { EmptyState, ErrorState, Skeleton } from "@/components/ui/states";
 import { api } from "@/lib/api";
 import { useLiveRefresh } from "@/lib/live";
 import { toFailure } from "@/lib/problem";
+import { useReload } from "@/lib/use-reload";
 
 /** Hospital: outgoing requests. Status changes arrive live; receiving closes the loop. */
 export function MyRequests({ highlight }: { highlight?: string | null }) {
@@ -17,18 +18,22 @@ export function MyRequests({ highlight }: { highlight?: string | null }) {
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    const { data, error: e, response } = await api.GET("/api/v1/requests", {
-      params: { query: { limit: 50 } },
-    });
-    if (data) setItems(data.data);
-    else setError(toFailure(e, response).message);
-  }, []);
+  const [version, reload] = useReload();
 
   useEffect(() => {
-    void load();
-  }, [load, highlight]);
-  useLiveRefresh(["request.dispatched", "request.rejected", "request.created"], () => void load());
+    let active = true;
+    void api
+      .GET("/api/v1/requests", { params: { query: { limit: 50 } } })
+      .then(({ data, error: e, response }) => {
+        if (!active) return;
+        if (data) setItems(data.data);
+        else setError(toFailure(e, response).message);
+      });
+    return () => {
+      active = false;
+    };
+  }, [version, highlight]);
+  useLiveRefresh(["request.dispatched", "request.rejected", "request.created"], reload);
 
   async function act(r: BloodRequestOut, action: "cancel" | "receive") {
     setActionError(null);
@@ -36,7 +41,7 @@ export function MyRequests({ highlight }: { highlight?: string | null }) {
       action === "cancel" ? "/api/v1/requests/{request_id}/cancel" : "/api/v1/requests/{request_id}/receive";
     const { error: e, response } = await api.POST(path, { params: { path: { request_id: r.id } } });
     if (e) setActionError(toFailure(e, response).message);
-    await load();
+    reload();
   }
 
   if (error) return <ErrorState description={error} />;

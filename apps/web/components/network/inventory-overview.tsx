@@ -2,7 +2,7 @@
 
 import type { BagOut, InventorySummary } from "@veyra/api-client";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import {
   relativeExpiry,
 } from "@/lib/network";
 import { toFailure } from "@/lib/problem";
+import { useReload } from "@/lib/use-reload";
 
 type DiscardReason = "expired" | "damaged" | "failed_screening" | "other";
 
@@ -94,25 +95,29 @@ export function InventoryOverview({ canDiscard }: { canDiscard: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    const [s, b] = await Promise.all([
+  const [version, reload] = useReload();
+
+  useEffect(() => {
+    let active = true;
+    void Promise.all([
       api.GET("/api/v1/inventory/summary"),
       api.GET("/api/v1/inventory/bags", {
         params: { query: { limit: 50, ...(status ? { status } : {}) } },
       }),
-    ]);
-    if (s.data) setSummary(s.data);
-    else setError(toFailure(s.error, s.response).message);
-    if (b.data) {
-      setBags(b.data.data);
-      setTotal(b.data.meta.total);
-    }
-  }, [status]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-  useLiveRefresh(["inventory.updated", "bag.discarded", "request.fulfilled"], () => void load());
+    ]).then(([s, b]) => {
+      if (!active) return;
+      if (s.data) setSummary(s.data);
+      else setError(toFailure(s.error, s.response).message);
+      if (b.data) {
+        setBags(b.data.data);
+        setTotal(b.data.meta.total);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [status, version]);
+  useLiveRefresh(["inventory.updated", "bag.discarded", "request.fulfilled"], reload);
 
   async function discard(bag: BagOut, reason: DiscardReason) {
     setActionError(null);
@@ -121,7 +126,7 @@ export function InventoryOverview({ canDiscard }: { canDiscard: boolean }) {
       body: { reason },
     });
     if (e) setActionError(toFailure(e, response).message);
-    await load();
+    reload();
   }
 
   if (error) return <ErrorState description={error} />;

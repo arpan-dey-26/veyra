@@ -7,7 +7,7 @@ import type {
   DonorLookupResult,
 } from "@veyra/api-client";
 import Link from "next/link";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import {
   formatDateTime,
 } from "@/lib/network";
 import { toFailure } from "@/lib/problem";
+import { useReload } from "@/lib/use-reload";
 
 const SEPARATED: BloodComponent[] = ["PRBC", "FFP", "PLATELETS", "CRYO"];
 
@@ -37,14 +38,17 @@ export function DonationDesk() {
   const [recent, setRecent] = useState<DonationOut[] | null>(null);
   const [created, setCreated] = useState<DonationOut | null>(null);
 
-  const loadRecent = useCallback(async () => {
-    const { data } = await api.GET("/api/v1/donations", { params: { query: { limit: 10 } } });
-    if (data) setRecent(data.data);
-  }, []);
+  const [version, reloadRecent] = useReload();
 
   useEffect(() => {
-    void loadRecent();
-  }, [loadRecent]);
+    let active = true;
+    void api.GET("/api/v1/donations", { params: { query: { limit: 10 } } }).then(({ data }) => {
+      if (active && data) setRecent(data.data);
+    });
+    return () => {
+      active = false;
+    };
+  }, [version]);
 
   async function onLookup(e: FormEvent) {
     e.preventDefault();
@@ -90,7 +94,7 @@ export function DonationDesk() {
             donor={donor}
             onRecorded={(d) => {
               setCreated(d);
-              void loadRecent();
+              reloadRecent();
             }}
           />
         )}
