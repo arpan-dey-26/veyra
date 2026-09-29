@@ -78,7 +78,7 @@ class BagEvent(Base):
         PG_UUID(as_uuid=True), ForeignKey("trace.blood_bags.id"), nullable=False, index=True
     )
     seq: Mapped[int] = mapped_column(Integer, nullable=False)
-    event_type: Mapped[str] = mapped_column(String(16), nullable=False)
+    event_type: Mapped[str] = mapped_column(String(32), nullable=False)
     from_facility_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True))
     to_facility_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True))
     actor_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True))

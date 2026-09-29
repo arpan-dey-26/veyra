@@ -461,3 +461,12 @@ async def test_shipment_events_are_scoped_replayable_and_unique(
     assert "shipment.delayed" not in resumed and "shipment.received" in resumed
     for other in (net.bank2, net.hospital2):
         assert "shipment." not in (await other.get(f"{API}/stream", params={"once": "true"})).text
+
+
+def test_every_trace_event_type_fits_the_column() -> None:
+    """Regression: SHIPMENT_IN_TRANSIT etc. must fit trace.bag_events.event_type."""
+    from app.modules.bags.domain import BagEventType
+    from app.modules.bags.models import BagEvent
+
+    width = BagEvent.__table__.c.event_type.type.length
+    assert all(len(t.value) <= width for t in BagEventType), width
