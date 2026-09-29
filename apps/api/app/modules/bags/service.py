@@ -95,8 +95,11 @@ async def append_event(
     to_facility_id: UUID | None,
     meta: dict[str, Any] | None = None,
 ) -> BagEvent:
-    """The ONLY way a bag changes state: validates the transition and appends a chained event."""
-    if event_type is not BagEventType.COLLECTED:
+    """The ONLY way a bag changes state: validates the transition and appends a chained event.
+
+    Observation events (cold chain) are chained the same way but never change the status.
+    """
+    if event_type in TRANSITIONS:
         allowed_from, to_status = TRANSITIONS[event_type]
         if BagStatus(bag.status) not in allowed_from:
             raise InvalidTransitionError(
@@ -229,6 +232,12 @@ class BagService:
         if facility_id is None or facility_id not in touched:
             raise NotFoundError("Blood bag not found")
         return bag, events
+
+    async def visible_bag(
+        self, ctx: AuthContext, public_id: str
+    ) -> tuple[BloodBag, list[BagEvent]]:
+        """The bag and its events, if ``ctx`` may see it (custody chain or admin), else 404."""
+        return await self._visible_bag(ctx, public_id)
 
     async def trace(self, ctx: AuthContext, public_id: str) -> BagTrace:
         bag, events = await self._visible_bag(ctx, public_id)

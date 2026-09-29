@@ -32,6 +32,9 @@ from app.modules.outbox.service import EventBroker, run_relay
 from app.modules.requests.router import router as requests_router
 from app.modules.system.router import api_router as system_api_router
 from app.modules.system.router import ops_router
+from app.modules.telemetry.router import router as telemetry_router
+from app.modules.telemetry.router import simulator as telemetry_simulator_router
+from app.modules.telemetry.ticker import run_ticker
 from app.persistence.sql import sql_uow_factory
 from app.providers.bloodbank import build_bloodbank_providers
 from app.providers.verification import build_verification_provider
@@ -48,6 +51,7 @@ def create_app(settings: Settings | None = None, *, with_infra: bool = True) -> 
         db: Database | None = None
         rds = None
         relay: asyncio.Task[None] | None = None
+        ticker: asyncio.Task[None] | None = None
         if with_infra:
             db = Database(settings.database_url)
             rds = redis_mod.create_redis(settings.redis_url)
@@ -68,16 +72,27 @@ def create_app(settings: Settings | None = None, *, with_infra: bool = True) -> 
                 ),
                 name="outbox-relay",
             )
+            if settings.telemetry_simulator_enabled and settings.telemetry_tick_seconds > 0:
+                # SIMULATED IoT telemetry for devices set to "running" (demo only).
+                ticker = asyncio.create_task(
+                    run_ticker(
+                        app.state.uow_factory,
+                        app.state.clock,
+                        interval=settings.telemetry_tick_seconds,
+                    ),
+                    name="telemetry-simulator",
+                )
         # Tests may pre-populate readiness_checks before startup.
         if not getattr(app.state, "readiness_checks", None):
             app.state.readiness_checks = checks
         try:
             yield
         finally:
-            if relay is not None:
-                relay.cancel()
-                with contextlib.suppress(asyncio.CancelledError):
-                    await relay
+            for task in (relay, ticker):
+                if task is not None:
+                    task.cancel()
+                    with contextlib.suppress(asyncio.CancelledError):
+                        await task
             if rds is not None:
                 await rds.aclose()
             if db is not None:
@@ -137,6 +152,8 @@ def create_app(settings: Settings | None = None, *, with_infra: bool = True) -> 
         events_router,
         dashboard_router,
         forecast_router,
+        telemetry_router,
+        telemetry_simulator_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
     return app

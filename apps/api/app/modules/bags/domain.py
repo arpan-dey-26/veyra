@@ -53,6 +53,15 @@ class BagEventType(StrEnum):
     DISPATCHED = "DISPATCHED"
     RECEIVED = "RECEIVED"
     DISCARDED = "DISCARDED"
+    # Phase 5 observation events (simulated cold chain). They never change the bag's status.
+    DEVICE_ATTACHED = "DEVICE_ATTACHED"
+    TEMP_EXCURSION = "TEMP_EXCURSION"
+    TEMP_RECOVERED = "TEMP_RECOVERED"
+
+
+OBSERVATION_EVENTS: frozenset[BagEventType] = frozenset(
+    {BagEventType.DEVICE_ATTACHED, BagEventType.TEMP_EXCURSION, BagEventType.TEMP_RECOVERED}
+)
 
 
 # Allowed lifecycle transitions (event → required current status → resulting status).

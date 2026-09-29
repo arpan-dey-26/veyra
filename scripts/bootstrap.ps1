@@ -373,6 +373,92 @@ if ($SkipDocker) {
     if (-not $denied) { throw "donor could read operational forecasts" }
     Log "   forecast OK (model $($card.name) v$($card.version) $($card.fingerprint); O+ PRBC 7d = $($f.forecast_total) units, signal $($f.signal.status))"
   }
+  Step "e2e: phase 5 simulated IoT cold chain (excursion -> trace -> SSE, scoped)" {
+    $base = "http://localhost:3000/api/v1"
+    $pw = "veyra-demo-console-2026"
+    function Csrf($sess) { ($sess.Cookies.GetCookies("http://localhost:3000") | Where-Object Name -eq "veyra_csrf").Value }
+    $bank = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $hosp = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $adm = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    Invoke-Api Post "$base/auth/login" @{ email = "bank@veyra.demo"; password = $pw } $bank | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "hospital@veyra.demo"; password = $pw } $hosp | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "admin@veyra.demo"; password = $pw } $adm | Out-Null
+    # Current head of the outbox (admin sees every event), so the SSE replay below covers only this run.
+    $head = 0
+    while ($true) {
+      $page = (Invoke-WebRequest -Uri "$base/stream?once=true&after=$head" -WebSession $adm -UseBasicParsing).Content
+      $ids = @([regex]::Matches($page, "(?m)^id: (\d+)") | ForEach-Object { [int64]$_.Groups[1].Value })
+      if ($ids.Count -eq 0) { break }
+      $head = ($ids | Measure-Object -Maximum).Maximum
+    }
+    # A fresh donor + donation gives the bank a bag it holds (the donor is reused for the 403 check).
+    $d = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $tag = [Guid]::NewGuid().ToString("N").Substring(0, 8)
+    $mobile = "9" + ([UInt64]("0x" + [Guid]::NewGuid().ToString("N").Substring(0, 15)) % 1000000000).ToString("000000000")
+    $reg = Invoke-Api Post "$base/auth/register" @{ full_name = "Cold Chain Smoke"; email = "cc-$tag@example.in"; mobile = $mobile;
+      blood_group = "B+"; address = "1 Smoke Street"; city = "Kolkata"; state = "West Bengal"; pin_code = "700001";
+      password = "smoke-test-passphrase" } $d
+    Invoke-Api Post "$base/auth/verify" @{ challenge_id = $reg.verification.challenge_id; code = $mobile.Substring(6) } $d | Out-Null
+    $found = Invoke-Api Post "$base/donors/lookup" @{ mobile = $mobile } $bank @{ "X-CSRF-Token" = (Csrf $bank) }
+    $don = Invoke-Api Post "$base/donations" @{ donor_id = $found.donor_id; blood_group = "B+"; volume_ml = 450; components = @("PRBC") } $bank @{ "X-CSRF-Token" = (Csrf $bank) }
+    $bagId = @($don.bags)[0].public_id
+    # Blood bank: smart-bag monitoring page, then select the bag and drive the DEMO simulator.
+    Assert-Http "http://localhost:3000/blood-bank" ""
+    $mon = Invoke-Api Get "$base/telemetry/monitored" $null $bank
+    if (-not $mon.simulator_enabled -or $mon.scope -ne "facility") { throw "telemetry simulator not enabled for the demo bank" }
+    if ($mon.disclaimer -notlike "*not a certified medical monitoring system*") { throw "monitor disclaimer missing" }
+    Assert-Http "http://localhost:3000/bags/$bagId" ""
+    $h = @{ "X-CSRF-Token" = (Csrf $bank) }
+    $att = Invoke-Api Post "$base/simulator/bags/$bagId/attach" $null $bank $h
+    if (-not $att.device.simulated -or $att.device.device_id -notlike "SIM-*") { throw "device not labelled simulated" }
+    $r = Invoke-Api Post "$base/simulator/bags/$bagId/tick" @{ count = 3 } $bank $h
+    if ($r.summary.cold_chain_status -ne "normal") { throw "baseline readings not normal" }
+    Invoke-Api Post "$base/simulator/bags/$bagId/excursion" $null $bank $h | Out-Null
+    $w = Invoke-Api Post "$base/simulator/bags/$bagId/tick" @{ count = 1 } $bank $h
+    if (@($w.transitions) -notcontains "temperature.warning") { throw "no warning after excursion" }
+    $c = Invoke-Api Post "$base/simulator/bags/$bagId/tick" @{ count = 2 } $bank $h
+    if (@($c.transitions) -notcontains "temperature.critical" -or -not $c.summary.excursion_active) { throw "no critical after excursion" }
+    Invoke-Api Post "$base/simulator/bags/$bagId/recover" $null $bank $h | Out-Null
+    $rec = Invoke-Api Post "$base/simulator/bags/$bagId/tick" @{ count = 2 } $bank $h
+    if (@($rec.transitions) -notcontains "temperature.recovered" -or $rec.summary.cold_chain_status -ne "normal") { throw "no recovery" }
+    # Reads: telemetry, summary, cold-chain report, device; trace stays hash-chained and valid.
+    $series = Invoke-Api Get "$base/bags/$bagId/telemetry" $null $bank
+    if (@($series.readings).Count -ne 8 -or $series.disclaimer -notlike "*student engineering prototype*") { throw "telemetry series" }
+    $sum = Invoke-Api Get "$base/bags/$bagId/telemetry/summary" $null $bank
+    if ($sum.max_c -le $sum.thresholds.critical_high) { throw "summary max did not record the excursion" }
+    $cc = Invoke-Api Get "$base/bags/$bagId/cold-chain" $null $bank
+    $types = (@($cc.trace_events) | ForEach-Object { $_.event_type }) -join ","
+    if ($types -ne "DEVICE_ATTACHED,TEMP_EXCURSION,TEMP_EXCURSION,TEMP_RECOVERED" -or -not $cc.chain_valid) { throw "cold-chain trace: $types" }
+    if (@($cc.excursions).Count -ne 1 -or @($cc.excursions)[0].severity -ne "critical") { throw "excursion report" }
+    $dev = Invoke-Api Get "$base/bags/$bagId/device" $null $bank
+    if ($dev.readings_count -ne 8) { throw "device reading count" }
+    $trace = Invoke-Api Get "$base/bags/$bagId" $null $bank
+    if (@($trace.events).Count -ne 5 -or -not $trace.chain.valid -or $trace.bag.status -ne "available") { throw "bag trace after telemetry" }
+    # SSE: Last-Event-ID replay through the web proxy carries the cold-chain alerts for this bag.
+    $sse = (Invoke-WebRequest -Uri "$base/stream?once=true" -Headers @{ "Last-Event-ID" = "$head" } -WebSession $bank -UseBasicParsing).Content
+    foreach ($t in @("telemetry.updated", "temperature.warning", "temperature.critical", "temperature.recovered")) {
+      if ($sse -notlike "*event: $t*") { throw "SSE replay missing $t" }
+    }
+    if ($sse -notlike "*$bagId*") { throw "SSE replay missing the bag" }
+    # Another facility: no telemetry, no simulator, no events for this bag.
+    foreach ($path in @("bags/$bagId/telemetry", "bags/$bagId/telemetry/summary", "bags/$bagId/cold-chain", "bags/$bagId/device")) {
+      $hidden = $false
+      try { Invoke-Api Get "$base/$path" $null $hosp | Out-Null } catch { if ("$_" -like "*-> 404*") { $hidden = $true } else { throw } }
+      if (-not $hidden) { throw "hospital could read $path" }
+    }
+    $blocked = $false
+    try { Invoke-Api Post "$base/simulator/bags/$bagId/tick" @{ count = 1 } $hosp @{ "X-CSRF-Token" = (Csrf $hosp) } | Out-Null } catch { if ("$_" -like "*-> 404*") { $blocked = $true } else { throw } }
+    if (-not $blocked) { throw "hospital could drive another facility's simulator" }
+    $hsse = (Invoke-WebRequest -Uri "$base/stream?once=true&after=$head" -WebSession $hosp -UseBasicParsing).Content
+    if ($hsse -like "*$bagId*") { throw "hospital received another facility's telemetry events" }
+    # Admin: network-level view. Donor: denied.
+    $net = Invoke-Api Get "$base/telemetry/monitored" $null $adm
+    if ($net.scope -ne "network" -or -not (@($net.bags) | Where-Object { $_.public_id -eq $bagId })) { throw "admin network view" }
+    $denied = $false
+    try { Invoke-Api Get "$base/bags/$bagId/telemetry" $null $d | Out-Null } catch { if ("$_" -like "*-> 403*") { $denied = $true } else { throw } }
+    if (-not $denied) { throw "donor could read bag telemetry" }
+    Log "   cold chain OK (bag $bagId, device $($dev.device_id), peak $($sum.max_c) C, $(@($series.readings).Count) simulated readings)"
+  }
 }
 
 # ---------------------------------------------------------------- summary

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { PageHeader } from "@/components/app/page-header";
+import { BagTelemetryPanel } from "@/components/telemetry/cold-chain";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardLabel } from "@/components/ui/card";
@@ -25,6 +26,7 @@ import {
   relativeExpiry,
 } from "@/lib/network";
 import { toFailure } from "@/lib/problem";
+import { useOptionalSession } from "@/lib/session";
 
 /** Type a bag id or paste a scanned QR payload. */
 export function TraceSearch() {
@@ -71,6 +73,7 @@ export function TraceSearch() {
 }
 
 export function BagTraceView({ publicId }: { publicId: string }) {
+  const me = useOptionalSession()?.me ?? null;
   const [trace, setTrace] = useState<BagTrace | null>(null);
   const [error, setError] = useState<{ message: string; notFound: boolean } | null>(null);
   const [tick, setTick] = useState(0);
@@ -205,6 +208,16 @@ export function BagTraceView({ publicId }: { publicId: string }) {
           </Card>
         </div>
       </div>
+      {me && (
+        <BagTelemetryPanel
+          publicId={bag.public_id}
+          canSimulate={
+            !!me.facility &&
+            me.facility.id === bag.current_facility_id &&
+            (me.user.role === "BLOOD_BANK" || me.user.role === "HOSPITAL")
+          }
+        />
+      )}
     </>
   );
 }

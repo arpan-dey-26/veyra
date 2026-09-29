@@ -31,6 +31,8 @@ from app.modules.identity.models import (
 )
 from app.modules.outbox.models import OutboxEvent
 from app.modules.requests.models import BloodRequest, RequestAllocation
+from app.modules.telemetry.errors import DeviceAlreadyAttachedError
+from app.modules.telemetry.models import TelemetryDevice, TelemetryReading
 from app.persistence.repositories import InventoryCount, UnitOfWork
 
 # Unique-constraint name → domain error (names come from the frozen naming convention).
@@ -38,6 +40,7 @@ _CONSTRAINT_ERRORS: dict[str, type[AppError]] = {
     "uq_users_email": EmailTakenError,
     "uq_users_mobile": MobileTakenError,
     "uq_facilities_registration_number": RegistrationNumberTakenError,
+    "uq_devices_bag_id": DeviceAlreadyAttachedError,
 }
 
 _CONCURRENT_CHANGE = "This record was changed by someone else. Reload and try again."
@@ -494,6 +497,54 @@ class SqlStatsRepository(_Repo):
         return {action: int(n) for action, n in (await self._s.execute(q)).all()}
 
 
+class SqlTelemetryRepository(_Repo):
+    async def add_device(self, device: TelemetryDevice) -> None:
+        await self._add(device)
+
+    async def device_for_bag(self, bag_id: UUID, *, lock: bool = False) -> TelemetryDevice | None:
+        q = select(TelemetryDevice).where(TelemetryDevice.bag_id == bag_id)
+        if lock:
+            q = q.with_for_update()
+        return await self._s.scalar(q)
+
+    async def devices_at(self, facility_id: UUID | None) -> list[tuple[TelemetryDevice, BloodBag]]:
+        q = select(TelemetryDevice, BloodBag).join(BloodBag, BloodBag.id == TelemetryDevice.bag_id)
+        if facility_id is not None:
+            q = q.where(BloodBag.current_facility_id == facility_id)
+        q = q.where(BloodBag.status != "discarded").order_by(BloodBag.public_id)
+        return [(d, b) for d, b in (await self._s.execute(q)).all()]
+
+    async def running_devices(self, *, limit: int) -> list[TelemetryDevice]:
+        """Devices the background simulator should tick (concurrent tickers skip locked)."""
+        q = (
+            select(TelemetryDevice)
+            .where(TelemetryDevice.sim_running.is_(True), TelemetryDevice.battery_pct > 0)
+            .order_by(TelemetryDevice.last_seen_at.nulls_first(), TelemetryDevice.id)
+            .limit(limit)
+            .with_for_update(skip_locked=True)
+        )
+        return list(await self._s.scalars(q))
+
+    async def add_reading(self, reading: TelemetryReading) -> None:
+        await self._add(reading)
+
+    async def readings(self, device_pk: UUID, *, limit: int) -> list[TelemetryReading]:
+        q = (
+            select(TelemetryReading)
+            .where(TelemetryReading.device_pk == device_pk)
+            .order_by(TelemetryReading.seq.desc())
+            .limit(limit)
+        )
+        return list(reversed(list(await self._s.scalars(q))))
+
+    async def reading_range(self, device_pk: UUID) -> tuple[float | None, float | None]:
+        q = select(
+            func.min(TelemetryReading.temperature_c), func.max(TelemetryReading.temperature_c)
+        ).where(TelemetryReading.device_pk == device_pk)
+        lo, hi = (await self._s.execute(q)).one()
+        return lo, hi
+
+
 class SqlUnitOfWork:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
@@ -509,6 +560,7 @@ class SqlUnitOfWork:
         self.requests = SqlRequestRepository(session)
         self.outbox = SqlOutboxRepository(session)
         self.stats = SqlStatsRepository(session)
+        self.telemetry = SqlTelemetryRepository(session)
 
     async def commit(self) -> None:
         try:

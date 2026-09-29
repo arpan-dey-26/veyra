@@ -13,7 +13,7 @@ EXPECTED_TABLES = {
     "identity.facility_invites", "network.facilities", "network.facility_memberships",
     "network.donors", "audit.audit_logs", "network.donations", "trace.blood_bags",
     "trace.bag_events", "network.blood_requests", "network.request_allocations",
-    "network.outbox_events",
+    "network.outbox_events", "telemetry.devices", "telemetry.readings",
 }  # fmt: skip
 
 

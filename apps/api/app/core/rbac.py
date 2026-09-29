@@ -48,6 +48,8 @@ class Permission(StrEnum):
     BLOOD_REQUEST_RESPOND = "blood_request:respond"
     BAG_TRANSITION = "bag:transition"
     DONATION_RECORD = "donation:record:own_facility"
+    # Phase 5: drive the SIMULATED telemetry of bags the facility currently holds (demo only)
+    TELEMETRY_SIMULATE = "telemetry:simulate:own_facility"
     TRANSPORT_READ = "transport:read"
     # Admin
     USER_READ = "user:read"
@@ -81,6 +83,7 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.BLOOD_REQUEST_READ_OWN,
             _P.EMERGENCY_CREATE,
             _P.BAG_RECEIVE,
+            _P.TELEMETRY_SIMULATE,
             _P.BAG_TRACE_READ,
             _P.NETWORK_AVAILABILITY_READ,
             _P.EVENTS_SUBSCRIBE,
@@ -99,6 +102,7 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.BAG_TRANSITION,
             _P.BAG_TRACE_READ,
             _P.DONATION_RECORD,
+            _P.TELEMETRY_SIMULATE,
             _P.TRANSPORT_READ,
             _P.EVENTS_SUBSCRIBE,
             _P.NOTIFICATION_READ_SELF,

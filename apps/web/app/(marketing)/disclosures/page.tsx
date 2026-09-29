@@ -29,7 +29,7 @@ const ITEMS = [
   {
     subject: "Temperature sensors",
     label: "Simulated" as const,
-    body: "Cold-chain telemetry comes from a software simulator, not physical IoT devices.",
+    body: "Cold-chain telemetry comes from a software simulator: simulated device ids, RFID tags, battery and readings, with prototype thresholds. There are no physical IoT devices. This is simulated IoT telemetry for a student engineering prototype and is not a certified medical monitoring system.",
   },
   {
     subject: "Blockchain",

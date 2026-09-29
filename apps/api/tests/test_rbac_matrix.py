@@ -1,4 +1,4 @@
-"""RBAC matrix: every Phase 1-4 endpoint x every role (+ anonymous) → expected status.
+"""RBAC matrix: every Phase 1-5 endpoint x every role (+ anonymous) → expected status.
 
 This is the contract for the security boundary. Adding an endpoint means adding a row.
 """
@@ -214,6 +214,73 @@ MATRIX: list[tuple[str, str, dict[str, object] | None, dict[str, int]]] = [
         "/api/v1/forecast/model",
         None,
         {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    # ---------------------------------------------------------------- Phase 5
+    (
+        "GET",
+        f"/api/v1/bags/{_BAG}/device",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "GET",
+        f"/api/v1/bags/{_BAG}/telemetry",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "GET",
+        f"/api/v1/bags/{_BAG}/telemetry/summary",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "GET",
+        f"/api/v1/bags/{_BAG}/cold-chain",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "GET",
+        "/api/v1/telemetry/monitored",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    (
+        "POST",
+        f"/api/v1/simulator/bags/{_BAG}/attach",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/simulator/bags/{_BAG}/start",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/simulator/bags/{_BAG}/pause",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/simulator/bags/{_BAG}/excursion",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/simulator/bags/{_BAG}/recover",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/simulator/bags/{_BAG}/tick",
+        {"count": 1},
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 403},
     ),
     (
         "GET",

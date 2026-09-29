@@ -49,6 +49,9 @@ export const EVENT_LABEL: Record<string, string> = {
   DISPATCHED: "Dispatched",
   RECEIVED: "Received",
   DISCARDED: "Discarded",
+  DEVICE_ATTACHED: "Temperature monitoring started (simulated device)",
+  TEMP_EXCURSION: "Temperature excursion (simulated)",
+  TEMP_RECOVERED: "Temperature recovered (simulated)",
 };
 
 const dateTime = new Intl.DateTimeFormat("en-IN", {

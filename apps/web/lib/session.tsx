@@ -86,3 +86,8 @@ export function useSession(): SessionValue {
   if (!ctx) throw new Error("useSession must be used inside <SessionProvider>");
   return ctx;
 }
+
+/** Like useSession, but returns null outside a provider (for components also rendered standalone). */
+export function useOptionalSession(): SessionValue | null {
+  return useContext(SessionContext);
+}

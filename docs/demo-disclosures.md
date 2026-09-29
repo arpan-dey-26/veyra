@@ -9,7 +9,7 @@ VEYRA is a prototype. This file is the canonical list of what is **not** real. T
 | Bag trace chain | Tamper-evident (database) | Each bag's events are append-only (DB trigger) and SHA-256 hash-chained inside PostgreSQL. **Not anchored on any blockchain yet** (Phase 8). |
 | Component shelf lives | Prototype defaults | Whole blood 35 d, PRBC 42 d, FFP/cryo 365 d, platelets 5 d, 90-day donation interval. Verify against current national guidelines before real use. |
 | Demand forecasts | Synthetic data | Real model outputs, trained on a documented **synthetic** dataset. Never random numbers. |
-| Temperature sensors | Simulated | Software simulator. **No physical IoT devices.** |
+| Temperature sensors | Simulated | Software simulator: simulated device ids, RFID tags, battery and readings, with prototype thresholds. **No physical IoT devices.** This is simulated IoT telemetry for a student engineering prototype and is not a certified medical monitoring system. |
 | Blockchain | Demo | Local development chain (Hardhat). **Not a production blockchain.** |
 | Phone verification | Demo | "Demo verification only. The last 4 digits of your mobile number are used for prototype verification instead of a real OTP." **Refused at startup in production.** |
 | ZK eligibility | Demo | Technical prototype. **Not a medical certification or clinical decision system.** |

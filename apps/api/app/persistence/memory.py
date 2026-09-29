@@ -29,6 +29,8 @@ from app.modules.identity.models import (
 )
 from app.modules.outbox.models import OutboxEvent
 from app.modules.requests.models import BloodRequest, RequestAllocation
+from app.modules.telemetry.errors import DeviceAlreadyAttachedError
+from app.modules.telemetry.models import TelemetryDevice, TelemetryReading
 from app.persistence.repositories import InventoryCount, UnitOfWork
 from app.persistence.sql import UowFactory
 
@@ -50,6 +52,9 @@ class MemoryDatabase:
     allocations: list[RequestAllocation] = field(default_factory=list)
     outbox: list[OutboxEvent] = field(default_factory=list)
     outbox_ids: count[int] = field(default_factory=lambda: count(1))
+    devices: dict[UUID, TelemetryDevice] = field(default_factory=dict)
+    readings: list[TelemetryReading] = field(default_factory=list)
+    reading_ids: count[int] = field(default_factory=lambda: count(1))
 
 
 class _MemUsers:
@@ -480,6 +485,47 @@ class _MemStats:
         return out
 
 
+class _MemTelemetry:
+    def __init__(self, db: MemoryDatabase) -> None:
+        self._db = db
+
+    async def add_device(self, device: TelemetryDevice) -> None:
+        if any(d.bag_id == device.bag_id for d in self._db.devices.values()):
+            raise DeviceAlreadyAttachedError()
+        self._db.devices[device.id] = device
+
+    async def device_for_bag(self, bag_id: UUID, *, lock: bool = False) -> TelemetryDevice | None:
+        return next((d for d in self._db.devices.values() if d.bag_id == bag_id), None)
+
+    async def devices_at(self, facility_id: UUID | None) -> list[tuple[TelemetryDevice, BloodBag]]:
+        out = []
+        for d in self._db.devices.values():
+            bag = self._db.bags[d.bag_id]
+            if bag.status == "discarded":
+                continue
+            if facility_id is None or bag.current_facility_id == facility_id:
+                out.append((d, bag))
+        return sorted(out, key=lambda pair: pair[1].public_id)
+
+    async def running_devices(self, *, limit: int) -> list[TelemetryDevice]:
+        return [d for d in self._db.devices.values() if d.sim_running and d.battery_pct > 0][:limit]
+
+    async def add_reading(self, reading: TelemetryReading) -> None:
+        if reading.id is None:
+            reading.id = next(self._db.reading_ids)
+        self._db.readings.append(reading)
+
+    async def readings(self, device_pk: UUID, *, limit: int) -> list[TelemetryReading]:
+        rows = sorted(
+            (r for r in self._db.readings if r.device_pk == device_pk), key=lambda r: r.seq
+        )
+        return rows[-limit:]
+
+    async def reading_range(self, device_pk: UUID) -> tuple[float | None, float | None]:
+        temps = [r.temperature_c for r in self._db.readings if r.device_pk == device_pk]
+        return (min(temps), max(temps)) if temps else (None, None)
+
+
 class MemoryUnitOfWork:
     def __init__(self, db: MemoryDatabase) -> None:
         self.users = _MemUsers(db)
@@ -494,6 +540,7 @@ class MemoryUnitOfWork:
         self.requests = _MemRequests(db)
         self.outbox = _MemOutbox(db)
         self.stats = _MemStats(db)
+        self.telemetry = _MemTelemetry(db)
 
     async def commit(self) -> None:
         return None

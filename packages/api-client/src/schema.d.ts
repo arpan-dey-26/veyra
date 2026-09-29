@@ -227,6 +227,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/bags/{public_id}/cold-chain": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Excursions and cold-chain trace entries (simulated) */
+        get: operations["cold_chain_api_v1_bags__public_id__cold_chain_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bags/{public_id}/device": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Simulated device */
+        get: operations["device_api_v1_bags__public_id__device_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/bags/{public_id}/discard": {
         parameters: {
             query?: never;
@@ -238,6 +272,40 @@ export interface paths {
         put?: never;
         /** Discard a bag held by my facility */
         post: operations["discard_bag_api_v1_bags__public_id__discard_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bags/{public_id}/telemetry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Readings (simulated) */
+        get: operations["telemetry_api_v1_bags__public_id__telemetry_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bags/{public_id}/telemetry/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Current cold-chain state (simulated) */
+        get: operations["telemetry_summary_api_v1_bags__public_id__telemetry_summary_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -624,6 +692,123 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/simulator/bags/{public_id}/attach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Attach
+         * @description Attach a SIMULATED smart-bag device (no hardware).
+         */
+        post: operations["attach_api_v1_simulator_bags__public_id__attach_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulator/bags/{public_id}/excursion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Excursion
+         * @description Inject a simulated warm excursion (warning, then critical on later readings).
+         */
+        post: operations["excursion_api_v1_simulator_bags__public_id__excursion_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulator/bags/{public_id}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pause */
+        post: operations["pause_api_v1_simulator_bags__public_id__pause_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulator/bags/{public_id}/recover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Recover
+         * @description Restore normal temperature over the next readings.
+         */
+        post: operations["recover_api_v1_simulator_bags__public_id__recover_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulator/bags/{public_id}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start
+         * @description Background readings every VEYRA_TELEMETRY_TICK_SECONDS.
+         */
+        post: operations["start_api_v1_simulator_bags__public_id__start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulator/bags/{public_id}/tick": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tick
+         * @description Generate ``count`` readings now (deterministic).
+         */
+        post: operations["tick_api_v1_simulator_bags__public_id__tick_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stream": {
         parameters: {
             query?: never;
@@ -633,6 +818,23 @@ export interface paths {
         };
         /** Live events (Server-Sent Events) */
         get: operations["stream_api_v1_stream_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/telemetry/monitored": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Smart bags at my facility (admins: the network) — simulated */
+        get: operations["monitored_api_v1_telemetry_monitored_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -962,6 +1164,52 @@ export interface components {
             /** Valid */
             valid: boolean;
         };
+        /** ColdChainEvent */
+        ColdChainEvent: {
+            /** Event Type */
+            event_type: string;
+            /** Meta */
+            meta: {
+                [key: string]: unknown;
+            };
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /** Row Hash */
+            row_hash: string;
+            /** Seq */
+            seq: number;
+        };
+        /** ColdChainReport */
+        ColdChainReport: {
+            /** Chain Valid */
+            chain_valid: boolean;
+            /**
+             * Cold Chain Status
+             * @enum {string}
+             */
+            cold_chain_status: "unknown" | "normal" | "warning" | "critical";
+            /** Component */
+            component: string;
+            /**
+             * Disclaimer
+             * @default Simulated IoT telemetry — prototype. This is simulated IoT telemetry for a student engineering prototype and is not a certified medical monitoring system.
+             */
+            disclaimer: string;
+            /** Excursions */
+            excursions: components["schemas"]["ExcursionOut"][];
+            /** Public Id */
+            public_id: string;
+            source: components["schemas"]["SourceMeta"];
+            thresholds: components["schemas"]["ThresholdsOut"];
+            /**
+             * Trace Events
+             * @description Cold-chain entries in the bag's append-only, hash-chained trace
+             */
+            trace_events: components["schemas"]["ColdChainEvent"][];
+        };
         /**
          * Component
          * @enum {string}
@@ -1156,6 +1404,41 @@ export interface components {
              */
             label: string;
         };
+        /** DeviceOut */
+        DeviceOut: {
+            /**
+             * Attached At
+             * Format: date-time
+             */
+            attached_at: string;
+            /** Battery Pct */
+            battery_pct: number;
+            /** Device Id */
+            device_id: string;
+            /**
+             * Device Status
+             * @enum {string}
+             */
+            device_status: "awaiting" | "online" | "low_battery" | "paused" | "offline";
+            /** Last Seen At */
+            last_seen_at: string | null;
+            /** Public Id */
+            public_id: string;
+            /** Readings Count */
+            readings_count: number;
+            /**
+             * Rfid
+             * @description Simulated RFID/EPC identifier (no real tag)
+             */
+            rfid: string;
+            /** Sim Mode */
+            sim_mode: string;
+            /** Sim Running */
+            sim_running: boolean;
+            /** Simulated */
+            simulated: boolean;
+            source: components["schemas"]["SourceMeta"];
+        };
         /** DiscardRequest */
         DiscardRequest: {
             /** Note */
@@ -1307,6 +1590,27 @@ export interface components {
             gbm: components["schemas"]["MetricSet"];
             /** Horizon */
             horizon: string;
+        };
+        /** ExcursionOut */
+        ExcursionOut: {
+            /** Duration Seconds */
+            duration_seconds: number;
+            /** Ended At */
+            ended_at: string | null;
+            /** Peak C */
+            peak_c: number;
+            /** Readings */
+            readings: number;
+            /**
+             * Severity
+             * @enum {string}
+             */
+            severity: "warning" | "critical";
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
         };
         /** ExpiryBucket */
         ExpiryBucket: {
@@ -1732,6 +2036,64 @@ export interface components {
             /** Version */
             version: string;
         };
+        /** MonitoredBag */
+        MonitoredBag: {
+            /** Bag Status */
+            bag_status: string;
+            /** Battery Pct */
+            battery_pct: number;
+            /** Blood Group */
+            blood_group: string;
+            /**
+             * Cold Chain Status
+             * @enum {string}
+             */
+            cold_chain_status: "unknown" | "normal" | "warning" | "critical";
+            /** Component */
+            component: string;
+            /** Current C */
+            current_c: number | null;
+            /** Device Id */
+            device_id: string;
+            /**
+             * Device Status
+             * @enum {string}
+             */
+            device_status: "awaiting" | "online" | "low_battery" | "paused" | "offline";
+            /** Excursion Duration Seconds */
+            excursion_duration_seconds: number | null;
+            /** Last Reading At */
+            last_reading_at: string | null;
+            /** Public Id */
+            public_id: string;
+            /** Sim Running */
+            sim_running: boolean;
+        };
+        /** MonitoredList */
+        MonitoredList: {
+            /** Bags */
+            bags: components["schemas"]["MonitoredBag"][];
+            /**
+             * Counts
+             * @description normal / warning / critical / offline / paused / awaiting
+             */
+            counts: {
+                [key: string]: number;
+            };
+            /**
+             * Disclaimer
+             * @default Simulated IoT telemetry — prototype. This is simulated IoT telemetry for a student engineering prototype and is not a certified medical monitoring system.
+             */
+            disclaimer: string;
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "facility" | "network";
+            /** Simulator Enabled */
+            simulator_enabled: boolean;
+            source: components["schemas"]["SourceMeta"];
+        };
         /** MovementDay */
         MovementDay: {
             /**
@@ -1913,6 +2275,25 @@ export interface components {
              */
             status: "ready" | "degraded";
         };
+        /** ReadingOut */
+        ReadingOut: {
+            /** Battery Pct */
+            battery_pct: number;
+            /**
+             * Recorded At
+             * Format: date-time
+             */
+            recorded_at: string;
+            /** Seq */
+            seq: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "normal" | "warning" | "critical";
+            /** Temperature C */
+            temperature_c: number;
+        };
         /** RecordDonationRequest */
         RecordDonationRequest: {
             /**
@@ -2032,6 +2413,18 @@ export interface components {
             /** Total */
             total: number;
         };
+        /** SimulatorResult */
+        SimulatorResult: {
+            device: components["schemas"]["DeviceOut"];
+            /** Generated */
+            generated: number;
+            summary: components["schemas"]["TelemetrySummary"];
+            /**
+             * Transitions
+             * @description Cold-chain events raised by this action
+             */
+            transitions: string[];
+        };
         /**
          * SourceKind
          * @description What kind of source produced the data.
@@ -2088,6 +2481,97 @@ export interface components {
              * @description Real usable units on hand (facility scope only)
              */
             stock_available?: number | null;
+        };
+        /** TelemetrySeries */
+        TelemetrySeries: {
+            /** Component */
+            component: string;
+            /**
+             * Disclaimer
+             * @default Simulated IoT telemetry — prototype. This is simulated IoT telemetry for a student engineering prototype and is not a certified medical monitoring system.
+             */
+            disclaimer: string;
+            /** Public Id */
+            public_id: string;
+            /** Readings */
+            readings: components["schemas"]["ReadingOut"][];
+            source: components["schemas"]["SourceMeta"];
+            thresholds: components["schemas"]["ThresholdsOut"];
+        };
+        /** TelemetrySummary */
+        TelemetrySummary: {
+            /** Battery Pct */
+            battery_pct: number;
+            /**
+             * Cold Chain Status
+             * @enum {string}
+             */
+            cold_chain_status: "unknown" | "normal" | "warning" | "critical";
+            /** Component */
+            component: string;
+            /** Current C */
+            current_c: number | null;
+            /** Device Id */
+            device_id: string;
+            /**
+             * Device Status
+             * @enum {string}
+             */
+            device_status: "awaiting" | "online" | "low_battery" | "paused" | "offline";
+            /**
+             * Disclaimer
+             * @default Simulated IoT telemetry — prototype. This is simulated IoT telemetry for a student engineering prototype and is not a certified medical monitoring system.
+             */
+            disclaimer: string;
+            /** Excursion Active */
+            excursion_active: boolean;
+            /** Excursion Duration Seconds */
+            excursion_duration_seconds: number | null;
+            /** Excursion Severity */
+            excursion_severity: string | null;
+            /** Excursion Started At */
+            excursion_started_at: string | null;
+            /** Last Reading At */
+            last_reading_at: string | null;
+            /** Max C */
+            max_c: number | null;
+            /** Min C */
+            min_c: number | null;
+            /** Public Id */
+            public_id: string;
+            /** Readings Count */
+            readings_count: number;
+            source: components["schemas"]["SourceMeta"];
+            thresholds: components["schemas"]["ThresholdsOut"];
+        };
+        /** ThresholdsOut */
+        ThresholdsOut: {
+            /** Critical High */
+            critical_high: number;
+            /** Critical Low */
+            critical_low: number;
+            /** Label */
+            label: string;
+            /** Nominal C */
+            nominal_c: number;
+            /** Normal High */
+            normal_high: number;
+            /** Normal Low */
+            normal_low: number;
+            /**
+             * Note
+             * @default Prototype thresholds, not clinical guidance.
+             */
+            note: string;
+        };
+        /** TickRequest */
+        TickRequest: {
+            /**
+             * Count
+             * @description Readings to generate now
+             * @default 1
+             */
+            count: number;
         };
         /**
          * UpdateDonorProfileRequest
@@ -2647,6 +3131,70 @@ export interface operations {
             };
         };
     };
+    cold_chain_api_v1_bags__public_id__cold_chain_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ColdChainReport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    device_api_v1_bags__public_id__device_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     discard_bag_api_v1_bags__public_id__discard_post: {
         parameters: {
             query?: never;
@@ -2670,6 +3218,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BagOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    telemetry_api_v1_bags__public_id__telemetry_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelemetrySeries"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    telemetry_summary_api_v1_bags__public_id__telemetry_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelemetrySummary"];
                 };
             };
             /** @description Validation Error */
@@ -3391,6 +4005,202 @@ export interface operations {
             };
         };
     };
+    attach_api_v1_simulator_bags__public_id__attach_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulatorResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    excursion_api_v1_simulator_bags__public_id__excursion_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulatorResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pause_api_v1_simulator_bags__public_id__pause_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulatorResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recover_api_v1_simulator_bags__public_id__recover_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulatorResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_api_v1_simulator_bags__public_id__start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulatorResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    tick_api_v1_simulator_bags__public_id__tick_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TickRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulatorResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     stream_api_v1_stream_get: {
         parameters: {
             query?: {
@@ -3423,6 +4233,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    monitored_api_v1_telemetry_monitored_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonitoredList"];
                 };
             };
         };

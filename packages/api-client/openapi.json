@@ -726,6 +726,105 @@
         "title": "ChainStatus",
         "type": "object"
       },
+      "ColdChainEvent": {
+        "properties": {
+          "event_type": {
+            "title": "Event Type",
+            "type": "string"
+          },
+          "meta": {
+            "additionalProperties": true,
+            "title": "Meta",
+            "type": "object"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "row_hash": {
+            "title": "Row Hash",
+            "type": "string"
+          },
+          "seq": {
+            "title": "Seq",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "seq",
+          "event_type",
+          "occurred_at",
+          "meta",
+          "row_hash"
+        ],
+        "title": "ColdChainEvent",
+        "type": "object"
+      },
+      "ColdChainReport": {
+        "properties": {
+          "chain_valid": {
+            "title": "Chain Valid",
+            "type": "boolean"
+          },
+          "cold_chain_status": {
+            "enum": [
+              "unknown",
+              "normal",
+              "warning",
+              "critical"
+            ],
+            "title": "Cold Chain Status",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "disclaimer": {
+            "default": "Simulated IoT telemetry \u2014 prototype. This is simulated IoT telemetry for a student engineering prototype and is not a certified medical monitoring system.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "excursions": {
+            "items": {
+              "$ref": "#/components/schemas/ExcursionOut"
+            },
+            "title": "Excursions",
+            "type": "array"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/ThresholdsOut"
+          },
+          "trace_events": {
+            "description": "Cold-chain entries in the bag's append-only, hash-chained trace",
+            "items": {
+              "$ref": "#/components/schemas/ColdChainEvent"
+            },
+            "title": "Trace Events",
+            "type": "array"
+          }
+        },
+        "required": [
+          "public_id",
+          "component",
+          "cold_chain_status",
+          "thresholds",
+          "excursions",
+          "trace_events",
+          "chain_valid",
+          "source"
+        ],
+        "title": "ColdChainReport",
+        "type": "object"
+      },
       "Component": {
         "enum": [
           "WHOLE_BLOOD",
@@ -1167,6 +1266,90 @@
         "title": "DemoDisclosure",
         "type": "object"
       },
+      "DeviceOut": {
+        "properties": {
+          "attached_at": {
+            "format": "date-time",
+            "title": "Attached At",
+            "type": "string"
+          },
+          "battery_pct": {
+            "title": "Battery Pct",
+            "type": "number"
+          },
+          "device_id": {
+            "title": "Device Id",
+            "type": "string"
+          },
+          "device_status": {
+            "enum": [
+              "awaiting",
+              "online",
+              "low_battery",
+              "paused",
+              "offline"
+            ],
+            "title": "Device Status",
+            "type": "string"
+          },
+          "last_seen_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Seen At"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "readings_count": {
+            "title": "Readings Count",
+            "type": "integer"
+          },
+          "rfid": {
+            "description": "Simulated RFID/EPC identifier (no real tag)",
+            "title": "Rfid",
+            "type": "string"
+          },
+          "sim_mode": {
+            "title": "Sim Mode",
+            "type": "string"
+          },
+          "sim_running": {
+            "title": "Sim Running",
+            "type": "boolean"
+          },
+          "simulated": {
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          }
+        },
+        "required": [
+          "public_id",
+          "device_id",
+          "rfid",
+          "simulated",
+          "battery_pct",
+          "device_status",
+          "last_seen_at",
+          "readings_count",
+          "sim_running",
+          "sim_mode",
+          "attached_at",
+          "source"
+        ],
+        "title": "DeviceOut",
+        "type": "object"
+      },
       "DiscardRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1512,6 +1695,57 @@
           "gbm"
         ],
         "title": "Evaluation",
+        "type": "object"
+      },
+      "ExcursionOut": {
+        "properties": {
+          "duration_seconds": {
+            "title": "Duration Seconds",
+            "type": "integer"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended At"
+          },
+          "peak_c": {
+            "title": "Peak C",
+            "type": "number"
+          },
+          "readings": {
+            "title": "Readings",
+            "type": "integer"
+          },
+          "severity": {
+            "enum": [
+              "warning",
+              "critical"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "started_at",
+          "ended_at",
+          "duration_seconds",
+          "severity",
+          "peak_c",
+          "readings"
+        ],
+        "title": "ExcursionOut",
         "type": "object"
       },
       "ExpiryBucket": {
@@ -2430,6 +2664,157 @@
         "title": "ModelInfo",
         "type": "object"
       },
+      "MonitoredBag": {
+        "properties": {
+          "bag_status": {
+            "title": "Bag Status",
+            "type": "string"
+          },
+          "battery_pct": {
+            "title": "Battery Pct",
+            "type": "number"
+          },
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "cold_chain_status": {
+            "enum": [
+              "unknown",
+              "normal",
+              "warning",
+              "critical"
+            ],
+            "title": "Cold Chain Status",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "current_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current C"
+          },
+          "device_id": {
+            "title": "Device Id",
+            "type": "string"
+          },
+          "device_status": {
+            "enum": [
+              "awaiting",
+              "online",
+              "low_battery",
+              "paused",
+              "offline"
+            ],
+            "title": "Device Status",
+            "type": "string"
+          },
+          "excursion_duration_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Excursion Duration Seconds"
+          },
+          "last_reading_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Reading At"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "sim_running": {
+            "title": "Sim Running",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "public_id",
+          "blood_group",
+          "component",
+          "bag_status",
+          "device_id",
+          "device_status",
+          "cold_chain_status",
+          "current_c",
+          "last_reading_at",
+          "battery_pct",
+          "excursion_duration_seconds",
+          "sim_running"
+        ],
+        "title": "MonitoredBag",
+        "type": "object"
+      },
+      "MonitoredList": {
+        "properties": {
+          "bags": {
+            "items": {
+              "$ref": "#/components/schemas/MonitoredBag"
+            },
+            "title": "Bags",
+            "type": "array"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "normal / warning / critical / offline / paused / awaiting",
+            "title": "Counts",
+            "type": "object"
+          },
+          "disclaimer": {
+            "default": "Simulated IoT telemetry \u2014 prototype. This is simulated IoT telemetry for a student engineering prototype and is not a certified medical monitoring system.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "facility",
+              "network"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "simulator_enabled": {
+            "title": "Simulator Enabled",
+            "type": "boolean"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          }
+        },
+        "required": [
+          "scope",
+          "counts",
+          "bags",
+          "simulator_enabled",
+          "source"
+        ],
+        "title": "MonitoredList",
+        "type": "object"
+      },
       "MovementDay": {
         "properties": {
           "day": {
@@ -2853,6 +3238,45 @@
         "title": "ReadinessResponse",
         "type": "object"
       },
+      "ReadingOut": {
+        "properties": {
+          "battery_pct": {
+            "title": "Battery Pct",
+            "type": "number"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "seq": {
+            "title": "Seq",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "normal",
+              "warning",
+              "critical"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "temperature_c": {
+            "title": "Temperature C",
+            "type": "number"
+          }
+        },
+        "required": [
+          "seq",
+          "recorded_at",
+          "temperature_c",
+          "battery_pct",
+          "status"
+        ],
+        "title": "ReadingOut",
+        "type": "object"
+      },
       "RecordDonationRequest": {
         "additionalProperties": false,
         "properties": {
@@ -3151,6 +3575,36 @@
         "title": "RoleCount",
         "type": "object"
       },
+      "SimulatorResult": {
+        "properties": {
+          "device": {
+            "$ref": "#/components/schemas/DeviceOut"
+          },
+          "generated": {
+            "title": "Generated",
+            "type": "integer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/TelemetrySummary"
+          },
+          "transitions": {
+            "description": "Cold-chain events raised by this action",
+            "items": {
+              "type": "string"
+            },
+            "title": "Transitions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "device",
+          "summary",
+          "generated",
+          "transitions"
+        ],
+        "title": "SimulatorResult",
+        "type": "object"
+      },
       "SourceKind": {
         "description": "What kind of source produced the data.",
         "enum": [
@@ -3303,6 +3757,263 @@
           "signal"
         ],
         "title": "SummaryRow",
+        "type": "object"
+      },
+      "TelemetrySeries": {
+        "properties": {
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "disclaimer": {
+            "default": "Simulated IoT telemetry \u2014 prototype. This is simulated IoT telemetry for a student engineering prototype and is not a certified medical monitoring system.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "readings": {
+            "items": {
+              "$ref": "#/components/schemas/ReadingOut"
+            },
+            "title": "Readings",
+            "type": "array"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/ThresholdsOut"
+          }
+        },
+        "required": [
+          "public_id",
+          "component",
+          "thresholds",
+          "readings",
+          "source"
+        ],
+        "title": "TelemetrySeries",
+        "type": "object"
+      },
+      "TelemetrySummary": {
+        "properties": {
+          "battery_pct": {
+            "title": "Battery Pct",
+            "type": "number"
+          },
+          "cold_chain_status": {
+            "enum": [
+              "unknown",
+              "normal",
+              "warning",
+              "critical"
+            ],
+            "title": "Cold Chain Status",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "current_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current C"
+          },
+          "device_id": {
+            "title": "Device Id",
+            "type": "string"
+          },
+          "device_status": {
+            "enum": [
+              "awaiting",
+              "online",
+              "low_battery",
+              "paused",
+              "offline"
+            ],
+            "title": "Device Status",
+            "type": "string"
+          },
+          "disclaimer": {
+            "default": "Simulated IoT telemetry \u2014 prototype. This is simulated IoT telemetry for a student engineering prototype and is not a certified medical monitoring system.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "excursion_active": {
+            "title": "Excursion Active",
+            "type": "boolean"
+          },
+          "excursion_duration_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Excursion Duration Seconds"
+          },
+          "excursion_severity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Excursion Severity"
+          },
+          "excursion_started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Excursion Started At"
+          },
+          "last_reading_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Reading At"
+          },
+          "max_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max C"
+          },
+          "min_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min C"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "readings_count": {
+            "title": "Readings Count",
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/ThresholdsOut"
+          }
+        },
+        "required": [
+          "public_id",
+          "component",
+          "device_id",
+          "cold_chain_status",
+          "device_status",
+          "current_c",
+          "min_c",
+          "max_c",
+          "last_reading_at",
+          "battery_pct",
+          "readings_count",
+          "excursion_active",
+          "excursion_started_at",
+          "excursion_duration_seconds",
+          "excursion_severity",
+          "thresholds",
+          "source"
+        ],
+        "title": "TelemetrySummary",
+        "type": "object"
+      },
+      "ThresholdsOut": {
+        "properties": {
+          "critical_high": {
+            "title": "Critical High",
+            "type": "number"
+          },
+          "critical_low": {
+            "title": "Critical Low",
+            "type": "number"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "nominal_c": {
+            "title": "Nominal C",
+            "type": "number"
+          },
+          "normal_high": {
+            "title": "Normal High",
+            "type": "number"
+          },
+          "normal_low": {
+            "title": "Normal Low",
+            "type": "number"
+          },
+          "note": {
+            "default": "Prototype thresholds, not clinical guidance.",
+            "title": "Note",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "nominal_c",
+          "normal_low",
+          "normal_high",
+          "critical_low",
+          "critical_high"
+        ],
+        "title": "ThresholdsOut",
+        "type": "object"
+      },
+      "TickRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "count": {
+            "default": 1,
+            "description": "Readings to generate now",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "TickRequest",
         "type": "object"
       },
       "UpdateDonorProfileRequest": {
@@ -4186,6 +4897,96 @@
         ]
       }
     },
+    "/api/v1/bags/{public_id}/cold-chain": {
+      "get": {
+        "operationId": "cold_chain_api_v1_bags__public_id__cold_chain_get",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColdChainReport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Excursions and cold-chain trace entries (simulated)",
+        "tags": [
+          "telemetry"
+        ]
+      }
+    },
+    "/api/v1/bags/{public_id}/device": {
+      "get": {
+        "operationId": "device_api_v1_bags__public_id__device_get",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Simulated device",
+        "tags": [
+          "telemetry"
+        ]
+      }
+    },
     "/api/v1/bags/{public_id}/discard": {
       "post": {
         "operationId": "discard_bag_api_v1_bags__public_id__discard_post",
@@ -4239,6 +5040,108 @@
         "tags": [
           "inventory",
           "trace"
+        ]
+      }
+    },
+    "/api/v1/bags/{public_id}/telemetry": {
+      "get": {
+        "operationId": "telemetry_api_v1_bags__public_id__telemetry_get",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 120,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TelemetrySeries"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Readings (simulated)",
+        "tags": [
+          "telemetry"
+        ]
+      }
+    },
+    "/api/v1/bags/{public_id}/telemetry/summary": {
+      "get": {
+        "operationId": "telemetry_summary_api_v1_bags__public_id__telemetry_summary_get",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TelemetrySummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Current cold-chain state (simulated)",
+        "tags": [
+          "telemetry"
         ]
       }
     },
@@ -5370,6 +6273,291 @@
         ]
       }
     },
+    "/api/v1/simulator/bags/{public_id}/attach": {
+      "post": {
+        "description": "Attach a SIMULATED smart-bag device (no hardware).",
+        "operationId": "attach_api_v1_simulator_bags__public_id__attach_post",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulatorResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Attach",
+        "tags": [
+          "telemetry simulator (demo)"
+        ]
+      }
+    },
+    "/api/v1/simulator/bags/{public_id}/excursion": {
+      "post": {
+        "description": "Inject a simulated warm excursion (warning, then critical on later readings).",
+        "operationId": "excursion_api_v1_simulator_bags__public_id__excursion_post",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulatorResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Excursion",
+        "tags": [
+          "telemetry simulator (demo)"
+        ]
+      }
+    },
+    "/api/v1/simulator/bags/{public_id}/pause": {
+      "post": {
+        "operationId": "pause_api_v1_simulator_bags__public_id__pause_post",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulatorResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Pause",
+        "tags": [
+          "telemetry simulator (demo)"
+        ]
+      }
+    },
+    "/api/v1/simulator/bags/{public_id}/recover": {
+      "post": {
+        "description": "Restore normal temperature over the next readings.",
+        "operationId": "recover_api_v1_simulator_bags__public_id__recover_post",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulatorResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Recover",
+        "tags": [
+          "telemetry simulator (demo)"
+        ]
+      }
+    },
+    "/api/v1/simulator/bags/{public_id}/start": {
+      "post": {
+        "description": "Background readings every VEYRA_TELEMETRY_TICK_SECONDS.",
+        "operationId": "start_api_v1_simulator_bags__public_id__start_post",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulatorResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start",
+        "tags": [
+          "telemetry simulator (demo)"
+        ]
+      }
+    },
+    "/api/v1/simulator/bags/{public_id}/tick": {
+      "post": {
+        "description": "Generate ``count`` readings now (deterministic).",
+        "operationId": "tick_api_v1_simulator_bags__public_id__tick_post",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TickRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulatorResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Tick",
+        "tags": [
+          "telemetry simulator (demo)"
+        ]
+      }
+    },
     "/api/v1/stream": {
       "get": {
         "operationId": "stream_api_v1_stream_get",
@@ -5443,6 +6631,27 @@
         "summary": "Live events (Server-Sent Events)",
         "tags": [
           "events"
+        ]
+      }
+    },
+    "/api/v1/telemetry/monitored": {
+      "get": {
+        "operationId": "monitored_api_v1_telemetry_monitored_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoredList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Smart bags at my facility (admins: the network) \u2014 simulated",
+        "tags": [
+          "telemetry"
         ]
       }
     },

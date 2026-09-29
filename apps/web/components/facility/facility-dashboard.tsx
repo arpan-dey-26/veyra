@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ComingInPhase, PageHeader } from "@/components/app/page-header";
 import { FacilityOverview } from "@/components/dashboard/facility-overview";
 import { ForecastPanel } from "@/components/forecast/forecast-panel";
+import { SmartBagMonitor } from "@/components/telemetry/cold-chain";
 import { TraceSearch } from "@/components/network/bag-trace";
 import { DonationDesk } from "@/components/network/donation-desk";
 import { IncomingRequests } from "@/components/network/incoming-requests";
@@ -31,7 +32,6 @@ const UPCOMING = {
   BLOOD_BANK: [
     { phase: 5, title: "Donor outreach", description: "Invite eligible donors of the groups you are short of." },
     { phase: 8, title: "Signed QR & anchoring", description: "Signed QR labels and on-chain anchoring of the trace hashes." },
-    { phase: 9, title: "Cold-chain monitoring", description: "Temperature telemetry and excursion alerts for storage and transport." },
   ],
 } as const;
 
@@ -47,6 +47,7 @@ const TABS = {
   BLOOD_BANK: [
     { id: "overview", label: "Overview" },
     { id: "inventory", label: "Inventory" },
+    { id: "coldchain", label: "Cold chain" },
     { id: "donations", label: "Donation desk" },
     { id: "incoming", label: "Incoming requests" },
     { id: "forecast", label: "Forecast" },
@@ -148,6 +149,7 @@ function FacilityWorkspace({ kind }: { kind: "HOSPITAL" | "BLOOD_BANK" }) {
         )}
         {tab === "forecast" && <ForecastPanel kind={kind} />}
         {tab === "inventory" && <InventoryOverview canDiscard />}
+        {tab === "coldchain" && <SmartBagMonitor />}
         {tab === "stock" && <InventoryOverview canDiscard={false} />}
         {tab === "donations" && <DonationDesk />}
         {tab === "incoming" && <IncomingRequests />}

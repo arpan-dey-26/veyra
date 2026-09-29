@@ -14,7 +14,8 @@ import app.modules.donors.models
 import app.modules.facilities.models
 import app.modules.identity.models
 import app.modules.outbox.models
-import app.modules.requests.models  # noqa: F401
+import app.modules.requests.models
+import app.modules.telemetry.models  # noqa: F401
 from app.core.db import Base
 
 MODEL_MODULES: tuple[str, ...] = (
@@ -26,6 +27,7 @@ MODEL_MODULES: tuple[str, ...] = (
     "app.modules.identity.models",
     "app.modules.outbox.models",
     "app.modules.requests.models",
+    "app.modules.telemetry.models",
 )
 
 metadata = Base.metadata

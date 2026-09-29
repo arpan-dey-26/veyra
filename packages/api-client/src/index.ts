@@ -61,6 +61,16 @@ export type ForecastSummaryRow = Schemas["SummaryRow"];
 export type ForecastPoint = Schemas["ForecastPointOut"];
 export type DemandSignal = Schemas["DemandSignal"];
 export type ModelCard = Schemas["ModelCard"];
+// Phase 5: simulated IoT telemetry & cold chain (prototype)
+export type TelemetryDevice = Schemas["DeviceOut"];
+export type TelemetrySeries = Schemas["TelemetrySeries"];
+export type TelemetryReading = Schemas["ReadingOut"];
+export type TelemetrySummary = Schemas["TelemetrySummary"];
+export type ColdChainReport = Schemas["ColdChainReport"];
+export type ColdChainThresholds = Schemas["ThresholdsOut"];
+export type MonitoredList = Schemas["MonitoredList"];
+export type MonitoredBag = Schemas["MonitoredBag"];
+export type SimulatorResult = Schemas["SimulatorResult"];
 
 /** A live event from `GET /api/v1/stream` (Server-Sent Events, fed by the outbox). */
 export interface NetworkEvent {

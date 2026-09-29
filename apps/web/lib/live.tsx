@@ -33,6 +33,11 @@ export const TOPICS = [
   "request.fulfilled",
   "request.rejected",
   "request.cancelled",
+  // Phase 5: simulated IoT telemetry / cold chain
+  "telemetry.updated",
+  "temperature.warning",
+  "temperature.critical",
+  "temperature.recovered",
 ] as const;
 
 /**

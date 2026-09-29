@@ -67,6 +67,10 @@ class Settings(BaseSettings):
     # Simulated partner blood banks (DEMO). None = enabled exactly when not in production.
     enable_mock_blood_banks: bool | None = None
     outbox_relay_interval_seconds: float = Field(default=0.5, gt=0)
+    # Simulated IoT telemetry (Phase 5, DEMO). None = enabled exactly when not in production.
+    enable_telemetry_simulator: bool | None = None
+    # Background simulator cadence for devices set to "running" (0 disables the ticker).
+    telemetry_tick_seconds: float = Field(default=15.0, ge=0)
 
     @property
     def is_production(self) -> bool:
@@ -86,6 +90,12 @@ class Settings(BaseSettings):
         if self.enable_mock_blood_banks is None:
             return self.demo_mode
         return self.enable_mock_blood_banks
+
+    @property
+    def telemetry_simulator_enabled(self) -> bool:
+        if self.enable_telemetry_simulator is None:
+            return self.demo_mode
+        return self.enable_telemetry_simulator
 
     @property
     def secure_cookies(self) -> bool:
@@ -111,6 +121,8 @@ class Settings(BaseSettings):
             )
         if self.enable_mock_blood_banks:
             raise ValueError("Simulated (mock) blood banks cannot be enabled in production")
+        if self.enable_telemetry_simulator:
+            raise ValueError("The simulated IoT telemetry simulator cannot run in production")
         if any("*" in o for o in self.cors_allowed_origins):
             raise ValueError("Wildcard CORS origins are not allowed in production")
         return self

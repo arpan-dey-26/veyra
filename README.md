@@ -6,7 +6,17 @@ VEYRA is a prototype of an intelligent blood-supply network. It connects donors,
 
 ## Current phase
 
-**Phase 4: ML demand forecasting (synthetic, prototype).**
+**Phase 5: simulated IoT blood-bag telemetry & cold-chain traceability (prototype).**
+
+- A simulated smart-bag device (device id `SIM-XXXX-XXXX`, simulated RFID, battery, last seen) can be attached to a bag. A deterministic demo simulator takes readings, runs live, pauses, injects an excursion and restores normal temperature. No hardware is involved.
+- Prototype thresholds per component (normal / warning / critical). Current, min, max, excursion start, duration and recovery are tracked.
+- Excursions and recoveries are recorded in the bag's append-only, SHA-256 hash-chained trace without changing the bag's lifecycle status.
+- Scoped reads: `/bags/{id}/telemetry`, `/telemetry/summary`, `/cold-chain`, `/device`, plus `/telemetry/monitored`. Separate CSRF-protected simulator endpoints under `/simulator/bags/{id}/…` are open only to the facility holding the bag and are disabled in production.
+- Live SSE topics: `telemetry.updated`, `temperature.warning`, `temperature.critical`, `temperature.recovered`.
+- There is a blood-bank **Cold chain** tab, a telemetry panel on `/bags/[publicId]`, and an admin network card.
+- Labelled everywhere: **"Simulated IoT telemetry — prototype"**. It is not a certified medical monitoring system. See the [Phase 5 report](docs/phase-reports/phase-5.md).
+
+Phase 4, still in place: ML demand forecasting (synthetic, prototype).
 
 - Deterministic synthetic demand generator, a transparent seasonal baseline and a pure-Python gradient-boosted model, compared on a chronological split. The model artifact is versioned and reproducible (`uv run python -m app.scripts.train_forecast --check`).
 - Scoped read-only API: `/forecast/demand`, `/forecast/summary`, `/forecast/model`.
@@ -30,7 +40,7 @@ Phase 2, still in place:
 
 Phase 1 (still in place): donor registration with **demo** phone verification (last 4 digits of the mobile, labelled, never presented as OTP), Argon2id passwords, rotating refresh sessions, CSRF protection, permission + scope RBAC, admin facility onboarding and staff invitations.
 
-See the [Phase 4 report](docs/phase-reports/phase-4.md), [Phase 3 report](docs/phase-reports/phase-3.md), [Phase 2 report](docs/phase-reports/phase-2.md), [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
+See the [Phase 5 report](docs/phase-reports/phase-5.md), [Phase 4 report](docs/phase-reports/phase-4.md), [Phase 3 report](docs/phase-reports/phase-3.md), [Phase 2 report](docs/phase-reports/phase-2.md), [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
 
 Demo sign-ins after `scripts\bootstrap.cmd` (**DEMO ONLY**, password `veyra-demo-console-2026` for all three):
 
