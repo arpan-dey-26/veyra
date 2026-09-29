@@ -54,7 +54,9 @@ const RESULT = {
 };
 const res = (status: number) => new Response(null, { status });
 
-beforeEach(() => GET.mockReset());
+beforeEach(() => {
+  GET.mockReset();
+});
 
 describe("bag scanner", () => {
   it("falls back to manual entry when the camera can't be used (jsdom)", () => {
@@ -86,7 +88,7 @@ describe("bag scanner", () => {
     expect(GET).not.toHaveBeenCalled();
     fireEvent.change(screen.getByLabelText("Bag ID or QR text"), { target: { value: "  " } });
     fireEvent.click(screen.getByRole("button", { name: "Look up" }));
-    expect(screen.getByRole("alert")).toHaveTextContent("Enter a bag ID");
+    expect(screen.getByText("Enter a bag ID like VYR-7F3K-2QXM.")).toHaveAttribute("role", "alert");
   });
 
   it("shows not-found for bags outside the caller's scope and retries other failures", async () => {

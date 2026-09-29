@@ -7,12 +7,14 @@ from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from datetime import datetime
 from uuid import UUID
 
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy import case, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm.exc import StaleDataError
 
-from app.core.errors import AppError, ConflictError
+from app.core.errors import AppError, ConflictError, problem
 from app.modules.audit.models import AuditLog
 from app.modules.bags.models import BagEvent, BloodBag
 from app.modules.camps.errors import AlreadyRegisteredError
@@ -56,6 +58,22 @@ def _domain_error(exc: IntegrityError) -> AppError:
         if constraint in message:
             return error()
     return ConflictError()
+
+
+def register_persistence_errors(app: FastAPI) -> None:
+    """Concurrency/constraint errors that escape a repository (e.g. raised by an autoflush
+    inside a later query, not by an explicit flush) are conflicts, not server errors: the
+    unit of work has already rolled back. Maps them exactly like ``_flush`` does."""
+
+    @app.exception_handler(StaleDataError)
+    async def _stale(_: Request, exc: StaleDataError) -> JSONResponse:
+        err = ConflictError(_CONCURRENT_CHANGE)
+        return problem(err.status, err.code, err.title, err.detail)
+
+    @app.exception_handler(IntegrityError)
+    async def _integrity(_: Request, exc: IntegrityError) -> JSONResponse:
+        err = _domain_error(exc)
+        return problem(err.status, err.code, err.title, err.detail)
 
 
 class _Repo:

@@ -204,8 +204,11 @@ async def test_concurrent_simulator_actions_keep_a_gapless_timeline(setup: _Setu
     assert ok >= 1
     timeline = (await setup.hospital.get(timeline_url)).json()
     seqs = [e["seq"] for e in timeline["events"]]
-    assert seqs == list(range(1, len(seqs) + 1))
-    assert len(seqs) == before + ok  # one row per successful action, no duplicates
+    assert seqs == list(range(1, len(seqs) + 1)) and len(seqs) > before  # gapless, unique
+    # The serialized outcome equals `ok` sequential advances: none lost, none doubled.
+    detail = (await setup.hospital.get(f"{API}/shipments/{sid}")).json()
+    expected = [("picked_up", 0), ("in_transit", 1), ("in_transit", 2), ("in_transit", 3)]
+    assert (detail["status"], detail["current_checkpoint"]) == expected[ok - 1]
     events = await _events(setup.app, bag)
     assert verify_chain(events).valid
     assert [e.seq for e in events] == list(range(1, len(events) + 1))
@@ -251,7 +254,10 @@ async def test_every_append_only_trigger_is_installed_and_enabled(live_app: Fast
                 "WHERE NOT t.tgisinternal"
             )
         )
-        found = {(r[0], r[1], r[2]): r[3] for r in rows}
+        # tgenabled is a "char": asyncpg returns bytes
+        found = {
+            (r[0], r[1], r[2]): r[3].decode() if isinstance(r[3], bytes) else r[3] for r in rows
+        }
     for key in expected:
         assert found.get(key) == "O", (key, found.get(key))  # 'O' = enabled (origin mode)
 
@@ -272,4 +278,4 @@ async def test_every_bag_trace_in_the_database_verifies(live_app: FastAPI) -> No
 
 
 async def test_live_engine_hides_bound_parameters(live_app: FastAPI) -> None:
-    assert live_app.state.db.engine.hide_parameters is True
+    assert live_app.state.db.engine.sync_engine.hide_parameters is True

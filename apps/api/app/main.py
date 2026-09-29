@@ -40,7 +40,7 @@ from app.modules.system.router import ops_router
 from app.modules.telemetry.router import router as telemetry_router
 from app.modules.telemetry.router import simulator as telemetry_simulator_router
 from app.modules.telemetry.ticker import run_ticker
-from app.persistence.sql import sql_uow_factory
+from app.persistence.sql import register_persistence_errors, sql_uow_factory
 from app.providers.bloodbank import build_bloodbank_providers
 from app.providers.verification import build_verification_provider
 
@@ -131,6 +131,7 @@ def create_app(settings: Settings | None = None, *, with_infra: bool = True) -> 
     app.state.bloodbank_providers = build_bloodbank_providers(settings)
 
     register_error_handlers(app)
+    register_persistence_errors(app)
 
     # Middleware order: last added runs first.
     app.add_middleware(

@@ -56,7 +56,9 @@ function route(matrix: () => unknown, chk: () => unknown) {
   GET.mockImplementation((path: string) => Promise.resolve(path.endsWith("/matrix") ? matrix() : chk()));
 }
 
-beforeEach(() => GET.mockReset());
+beforeEach(() => {
+  GET.mockReset();
+});
 
 describe("compatibility page", () => {
   it("shows the disclaimer, the matrix and an API verdict", async () => {

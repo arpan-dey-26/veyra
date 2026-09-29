@@ -371,12 +371,12 @@ def test_database_errors_never_carry_bound_parameters_into_logs() -> None:
     from app.core.db import Database
 
     db = Database("postgresql+asyncpg://u:p@localhost:1/x")
-    assert db.engine.hide_parameters is True
+    assert db.engine.sync_engine.hide_parameters is True
     err = DBAPIError(
         "INSERT INTO identity.users (email) VALUES ($1)",
         ("arpan@example.in",),
         Exception("value too long"),
-        hide_parameters=db.engine.hide_parameters,
+        hide_parameters=db.engine.sync_engine.hide_parameters,
     )
     assert "arpan@example.in" not in str(err)
 
@@ -399,3 +399,32 @@ def test_log_formatter_redacts_identity_and_secret_fields() -> None:
     for key in ("password", "token", "email", "mobile", "Authorization"):
         assert out[key] == "[REDACTED]", key
     assert out["rid"] == "ok"
+
+
+# ---------------------------------------------------------------- 8.5 concurrency → 409
+
+
+async def test_a_concurrent_change_surfacing_in_autoflush_is_a_409_not_a_500(
+    api_app: FastAPI, make_client: Any
+) -> None:
+    """Audit finding (PostgreSQL race): two simultaneous receipts of one shipment. The loser's
+    optimistic-version conflict surfaced from an *autoflush* inside a later query, bypassing
+    the repository's mapping, so the client got 500 instead of 409. Such errors now map to the
+    same conflict problem (the unit of work has already rolled back)."""
+    from sqlalchemy.exc import IntegrityError
+    from sqlalchemy.orm.exc import StaleDataError
+
+    async def stale() -> None:
+        raise StaleDataError("UPDATE statement on table 'blood_bags' expected 1 row; 0 matched")
+
+    async def dup() -> None:
+        raise IntegrityError("INSERT", {}, Exception("uq_camp_registrations_camp_id_donor_id"))
+
+    api_app.add_api_route("/__test/stale", stale, methods=["GET"])
+    api_app.add_api_route("/__test/dup", dup, methods=["GET"])
+    client = make_client()
+    r = await client.get("/__test/stale")
+    assert (r.status_code, r.json()["code"]) == (409, "conflict")
+    assert "blood_bags" not in r.text  # no SQL details leak
+    d = await client.get("/__test/dup")
+    assert (d.status_code, d.json()["code"]) == (409, "already_registered")
