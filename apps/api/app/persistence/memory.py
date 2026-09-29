@@ -417,6 +417,9 @@ class _MemOutbox:
     async def list_after(self, cursor: int, *, limit: int) -> list[OutboxEvent]:
         return [e for e in self._db.outbox if e.id > cursor][:limit]
 
+    async def last_id(self) -> int:
+        return max((e.id for e in self._db.outbox), default=0)
+
     async def claim_unpublished(self, *, limit: int) -> list[OutboxEvent]:
         return [e for e in self._db.outbox if e.published_at is None][:limit]
 

@@ -431,6 +431,9 @@ class SqlOutboxRepository(_Repo):
         )
         return list(rows)
 
+    async def last_id(self) -> int:
+        return int(await self._s.scalar(select(func.max(OutboxEvent.id))) or 0)
+
     async def claim_unpublished(self, *, limit: int) -> list[OutboxEvent]:
         """Lock a batch for this relay; concurrent relays skip locked rows (no double publish)."""
         rows = await self._s.scalars(

@@ -465,8 +465,36 @@ async def test_shipment_events_are_scoped_replayable_and_unique(
 
 def test_every_trace_event_type_fits_the_column() -> None:
     """Regression: SHIPMENT_IN_TRANSIT etc. must fit trace.bag_events.event_type."""
+    from sqlalchemy import String
+
     from app.modules.bags.domain import BagEventType
     from app.modules.bags.models import BagEvent
 
-    width = BagEvent.__table__.c.event_type.type.length
-    assert all(len(t.value) <= width for t in BagEventType), width
+    column_type = BagEvent.__table__.c.event_type.type
+    assert isinstance(column_type, String) and column_type.length is not None
+    assert all(len(t.value) <= column_type.length for t in BagEventType), column_type.length
+
+
+async def test_replay_is_not_crowded_out_by_other_facilities_events(
+    net: Net, memdb: MemoryDatabase, clock: MutableClock
+) -> None:
+    """Regression: a long-lived outbox must not hide the caller's events behind others'."""
+    from uuid import uuid4
+
+    from app.modules.outbox.models import OutboxEvent
+    from app.modules.outbox.router import REPLAY_LIMIT
+
+    for i in range(REPLAY_LIMIT + 50):  # another facility's traffic
+        memdb.outbox.append(
+            OutboxEvent(
+                id=next(memdb.outbox_ids), event_id=uuid4(), topic="inventory.updated",
+                aggregate_type="facility", aggregate_id=f"x{i}", audience=["someone-else"],
+                payload={}, created_at=clock.now(), published_at=clock.now(), attempts=0,
+            )
+        )  # fmt: skip
+    s, _, _ = await dispatch_shipment(net)
+    for after in ("0", "1"):
+        text = (
+            await net.hospital.get(f"{API}/stream", params={"once": "true", "after": after})
+        ).text
+        assert "event: shipment.created" in text and str(s["id"]) in text, after

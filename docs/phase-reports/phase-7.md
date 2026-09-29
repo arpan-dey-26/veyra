@@ -22,6 +22,10 @@ migrations/versions/0005_logistics_shipments.py
   - It may contain several bags from the same dispatch.
 - **The plain dispatch (`{}`, strict FEFO) is unchanged and creates no shipment.** Phase 2 behaviour stays exactly the same: its trace length, its event list, and the E2E that receives straight away.
 - **Custody:** the bag lifecycle is unchanged. DISPATCHED makes the bag `in_transit`, and RECEIVED (through the existing receive workflow) makes it `received`. The source bank keeps custody until receipt, so it drives the demo transport and the cold-chain simulator during transit.
+- **Migration `0006`** widens `trace.bag_events.event_type` from 16 to 32 characters. The shipment event names, such as `SHIPMENT_IN_TRANSIT`, are longer than 16.
+  - Widening keeps every stored row and trace hash unchanged.
+  - The downgrade narrows the column only when no stored event needs the width.
+  - The first Windows PostgreSQL run caught the overflow; the in-memory store doesn't enforce lengths. A regression test now checks that every event type fits the column.
 - **Migration `0005`**, reversible:
   - three tables in the existing `network` schema, with an append-only trigger on the timeline
   - the bag-event CHECK widened for the shipment observation types; downgrade restores it `NOT VALID`
@@ -126,6 +130,10 @@ Responses include the remaining minutes and the reasons behind the ETA. The ETA 
   - plus `shipment.cold_chain_alert`
 - **Audience:** the source bank and the destination hospital. Admins see all.
 - Last-Event-ID replay, ordering, de-duplication and scoping are unchanged and tested.
+- **Replay fix,** found by the second Windows run, where the unchanged Phase 2 E2E step `stream?once=true&after=0` failed.
+  - **Cause:** in a long-lived database the outbox grows with every run. The replay took the first 500 rows *before* filtering by audience, so other facilities' events crowded out the caller's own.
+  - **Now:** the replay filters by audience first (scanning at most 5,000 rows per request) and returns up to 500 of the caller's events. `after=0` means the recent history window, the last 2,000 outbox rows, not the whole table. Explicit cursors (`after=N`, `Last-Event-ID`) keep their exact semantics.
+  - A regression test covers it.
 
 ## Security, privacy and audit
 - **Payloads** carry facility ids, request and shipment references, status, ETA and the fictional courier. There is no donor, patient or user identity (tested on every endpoint and event).

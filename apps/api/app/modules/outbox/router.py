@@ -22,7 +22,11 @@ from app.persistence.sql import UowFactory
 router = APIRouter(tags=["events"])
 
 HEARTBEAT_SECONDS = 15.0
-REPLAY_LIMIT = 500
+REPLAY_LIMIT = 500  # events visible to the caller, per replay
+REPLAY_SCAN_LIMIT = 5000  # outbox rows examined per replay (bounded work)
+# `after=0` asks for "everything": that is the recent history window, not the whole table,
+# which grows without bound in a long-lived database.
+REPLAY_WINDOW = 2000
 
 
 def format_sse(message: BrokerMessage) -> str:
@@ -45,9 +49,25 @@ def get_broker(request: Request) -> EventBroker:
 
 
 async def _replay(factory: UowFactory, ctx: AuthContext, after: int) -> list[BrokerMessage]:
+    """Events after ``after`` that the caller may see (oldest first).
+
+    Filtering happens before the limit, so other facilities' events never crowd out the
+    caller's own. ``after=0`` starts at the retention window (the last REPLAY_WINDOW rows).
+    """
+    out: list[BrokerMessage] = []
     async with factory() as uow:
-        rows = await uow.outbox.list_after(after, limit=REPLAY_LIMIT)
-    return [m for m in map(to_message, rows) if visible_to(ctx, m)]
+        cursor = after
+        if after == 0:
+            cursor = max(0, await uow.outbox.last_id() - REPLAY_WINDOW)
+        scanned = 0
+        while len(out) < REPLAY_LIMIT and scanned < REPLAY_SCAN_LIMIT:
+            rows = await uow.outbox.list_after(cursor, limit=REPLAY_LIMIT)
+            if not rows:
+                break
+            scanned += len(rows)
+            cursor = rows[-1].id
+            out.extend(m for m in map(to_message, rows) if visible_to(ctx, m))
+    return out[:REPLAY_LIMIT]
 
 
 @router.get(
