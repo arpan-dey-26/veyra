@@ -5,6 +5,15 @@
 ## Phase 4 final gate
 Real Windows bootstrap: **`OVERALL: PASS (36/36 steps passed)`**. The run is saved as `docs/phase-reports/phase-4-verification.log`.
 
+## Phase 5 gate
+Real Windows bootstrap, 2026-09-29 11:32 IST: **`OVERALL: PASS (37/37 steps passed)`**. The run is saved as `docs/phase-reports/phase-5-verification.log`.
+
+- The E2E step drove bag `VYR-8WZT-20B3` with simulated device `SIM-69EC-258C` through 8 simulated readings, peaking at 8.66 °C.
+- The first attempt reached 18/37 for two reasons:
+  - Docker Desktop was not running, so every Docker and E2E step failed.
+  - The new telemetry web test mocked `@/lib/live` without `useLiveRefresh`. It now spreads the real module and overrides only `useLive`.
+- A Phase 3 LiveNetwork test also failed once in that attempt. It passed on the re-run with no change.
+
 ## Architecture
 
 ```
