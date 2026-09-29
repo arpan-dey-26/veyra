@@ -1,0 +1,668 @@
+VEYRA Phase 0 verification - 2026-09-29T16:29:57.8646265+05:30
+
+==> toolchain: node >= 22
+> node --version
+v22.17.0
+   (0.1s)
+
+==> toolchain: pnpm
+> pnpm --version
+10.28.0
+   (0.4s)
+
+==> toolchain: uv
+> uv --version
+uv 0.12.19 (bea138450 2026-09-24 x86_64-pc-windows-msvc)
+   (0.0s)
+
+==> pnpm install
+> pnpm install
+Scope: all 4 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+Done in 819ms using pnpm v10.28.0
+   (0.9s)
+
+==> pin dependency versions
+> node scripts/pin-versions.mjs
+pinned 0 dependencies
+> pnpm install
+Scope: all 4 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+Done in 819ms using pnpm v10.28.0
+   (1.0s)
+
+==> uv sync (python 3.12)
+> uv python install 3.12
+Python 3.12 is already installed
+> uv sync --python 3.12
+Resolved 48 packages in 1ms
+Checked 46 packages in 3ms
+   (0.1s)
+
+==> export OpenAPI schema
+> uv run python -m app.scripts.export_openapi ../../packages/api-client/openapi.json
+wrote ..\..\packages\api-client\openapi.json
+   (2.1s)
+
+==> generate @veyra/api-client
+> pnpm --filter @veyra/api-client generate
+
+> @veyra/api-client@0.0.0 generate C:\Users\Dell\Desktop\veyra\packages\api-client
+> openapi-typescript ./openapi.json -o ./src/schema.d.ts
+
+Γ£¿ openapi-typescript 7.13.0
+≡ƒÜÇ ./openapi.json ΓåÆ ./src/schema.d.ts [254.5ms]
+   (1.5s)
+
+==> api-client is current (--check)
+> pnpm --filter @veyra/api-client check
+
+> @veyra/api-client@0.0.0 check C:\Users\Dell\Desktop\veyra\packages\api-client
+> openapi-typescript ./openapi.json -o ./src/schema.d.ts --check
+
+Γ£¿ openapi-typescript 7.13.0
+   (1.4s)
+
+==> api: ruff format
+> uv run ruff format .
+148 files left unchanged
+> uv run ruff format --check .
+148 files already formatted
+   (0.2s)
+
+==> api: ruff check
+> uv run ruff check .
+All checks passed!
+   (0.1s)
+
+==> api: mypy
+> uv run mypy app
+Success: no issues found in 113 source files
+   (1.8s)
+
+==> api: pytest (unit)
+> uv run pytest -v -m not integration
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\Dell\Desktop\veyra\apps\api
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.15.1, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 531 items / 12 deselected / 519 selected
+
+tests\test_auth_flow.py ....................                             [  3%]
+tests\test_config.py ......                                              [  5%]
+tests\test_core_primitives.py ..........                                 [  6%]
+tests\test_donors_facilities.py ...........                              [  9%]
+tests\test_errors_and_middleware.py .........                            [ 10%]
+tests\test_models_registry.py ...                                        [ 11%]
+tests\test_phase2_network.py ...........................                 [ 16%]
+tests\test_phase2_units.py ..........                                    [ 18%]
+tests\test_phase3_dashboard.py ..........                                [ 20%]
+tests\test_phase4_forecast.py ......................                     [ 24%]
+tests\test_phase5_telemetry.py .........................                 [ 29%]
+tests\test_phase6_operations.py ......................                   [ 33%]
+tests\test_phase7_logistics.py .............                             [ 36%]
+tests\test_rbac_matrix.py .............................................. [ 45%]
+........................................................................ [ 58%]
+........................................................................ [ 72%]
+........................................................................ [ 86%]
+.....................................                                    [ 93%]
+tests\test_security_units.py ........................                    [ 98%]
+tests\test_sql_uow.py ...                                                [ 99%]
+tests\test_system.py .....                                               [100%]
+
+===================== 519 passed, 12 deselected in 54.87s =====================
+   (57.0s)
+
+==> ml: forecast model reproducible (retrain == committed artifact)
+> uv run python -m app.scripts.train_forecast --check
+Model artifact reproducible (fingerprint 91c00e7596a926d6).
+   (5.5s)
+
+==> pnpm typecheck
+> pnpm run typecheck
+
+> veyra@ typecheck C:\Users\Dell\Desktop\veyra
+> pnpm -r --no-bail typecheck
+
+Scope: 3 of 4 workspace projects
+packages/api-client typecheck$ tsc --noEmit
+packages/design-tokens typecheck$ tsc --noEmit
+packages/api-client typecheck: Done
+packages/design-tokens typecheck: Done
+apps/web typecheck$ next typegen && tsc --noEmit
+apps/web typecheck: Generating route types...
+apps/web typecheck: Γ£ô Types generated successfully
+apps/web typecheck: Done
+   (5.2s)
+
+==> pnpm lint
+> pnpm run lint
+
+> veyra@ lint C:\Users\Dell\Desktop\veyra
+> pnpm -r --no-bail lint
+
+Scope: 3 of 4 workspace projects
+packages/design-tokens lint$ tsc --noEmit
+packages/api-client lint$ tsc --noEmit
+packages/api-client lint: Done
+packages/design-tokens lint: Done
+apps/web lint$ eslint .
+apps/web lint: Done
+   (11.6s)
+
+==> pnpm test
+> pnpm run test
+
+> veyra@ test C:\Users\Dell\Desktop\veyra
+> pnpm -r --no-bail test
+
+Scope: 3 of 4 workspace projects
+packages/api-client test$ vitest run
+packages/design-tokens test$ vitest run
+packages/design-tokens test: [1m[30m[46m RUN [49m[39m[22m [36mv5.0.2 [39m[90mC:/Users/Dell/Desktop/veyra/packages/design-tokens[39m
+packages/api-client test: [1m[30m[46m RUN [49m[39m[22m [36mv5.0.2 [39m[90mC:/Users/Dell/Desktop/veyra/packages/api-client[39m
+packages/design-tokens test:  [32mΓ£ô[39m src/tokens.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+packages/design-tokens test: [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+packages/design-tokens test: [2m      Tests [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+packages/design-tokens test: [2m   Start at [22m 16:31:28
+packages/design-tokens test: [2m   Duration [22m 249ms[2m (transform 57%, import 27%, tests 9%, worker 7%)[22m
+packages/design-tokens test: Done
+packages/api-client test:  [32mΓ£ô[39m src/index.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+packages/api-client test:  [32mΓ£ô[39m src/session.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+packages/api-client test: [2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+packages/api-client test: [2m      Tests [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+packages/api-client test: [2m   Start at [22m 16:31:28
+packages/api-client test: [2m   Duration [22m 316ms[2m (transform 44%, tests 33%, import 17%, worker 5%)[22m
+packages/api-client test: Done
+apps/web test$ vitest run
+apps/web test: [33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+apps/web test:   - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+apps/web test: Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+apps/web test: [1m[30m[46m RUN [49m[39m[22m [36mv5.0.2 [39m[90mC:/Users/Dell/Desktop/veyra/apps/web[39m
+apps/web test:  [32mΓ£ô[39m lib/lib.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+apps/web test:  [32mΓ£ô[39m components/ui/ui.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 360[2mms[22m[39m
+apps/web test:  [32mΓ£ô[39m components/system/api-status.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 426[2mms[22m[39m
+apps/web test:    [32mΓ£ô[39m ApiStatus [2m(3)[22m
+apps/web test:      [33m[2mΓ£ô[22m[39m shows unreachable state with request id and retries[33m 320[2mms[22m[39m
+apps/web test:  [32mΓ£ô[39m components/shell/shell.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 469[2mms[22m[39m
+apps/web test:    [32mΓ£ô[39m DemoRibbon [2m(4)[22m
+apps/web test:      [33m[2mΓ£ô[22m[39m is shown in dev[33m 315[2mms[22m[39m
+apps/web test:  [32mΓ£ô[39m components/network/network.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 738[2mms[22m[39m
+apps/web test:    [32mΓ£ô[39m TraceSearch [2m(1)[22m
+apps/web test:      [33m[2mΓ£ô[22m[39m navigates only for valid bag ids[33m 328[2mms[22m[39m
+apps/web test:  [32mΓ£ô[39m components/forecast/forecast.test.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 1147[2mms[22m[39m
+apps/web test:    [32mΓ£ô[39m ForecastChart [2m(3)[22m
+apps/web test:      [33m[2mΓ£ô[22m[39m draws history, forecast and interval with a legend and an accessible label[33m 405[2mms[22m[39m
+apps/web test:  [32mΓ£ô[39m components/logistics/logistics.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 1171[2mms[22m[39m
+apps/web test:    [32mΓ£ô[39m ShipmentsPanel [2m(2)[22m
+apps/web test:      [33m[2mΓ£ô[22m[39m shows a skeleton, then counts and a scrollable table with text statuses[33m 395[2mms[22m[39m
+apps/web test:  [32mΓ£ô[39m components/operations/operations.test.tsx [2m([22m[2m17 tests[22m[2m)[22m[33m 1220[2mms[22m[39m
+apps/web test:    [32mΓ£ô[39m EmergencyQueue [2m(6)[22m
+apps/web test:      [33m[2mΓ£ô[22m[39m shows a loading skeleton, then requests ordered with band, score, age and status[33m 364[2mms[22m[39m
+apps/web test:  [32mΓ£ô[39m components/telemetry/telemetry.test.tsx [2m([22m[2m20 tests[22m[2m)[22m[33m 1218[2mms[22m[39m
+apps/web test:    [32mΓ£ô[39m TelemetryChart [2m(3)[22m
+apps/web test:      [33m[2mΓ£ô[22m[39m offers a table view with each reading's status[33m 353[2mms[22m[39m
+apps/web test: [90mstderr[2m | components/auth/auth.test.tsx[2m > [22m[2mVerifyForm[2m > [22m[2mexplains how to continue when there is no challenge
+apps/web test: [22m[39mAn update to SessionProvider inside a test was not wrapped in act(...).
+apps/web test: When testing, code that causes React state updates should be wrapped into act(...):
+apps/web test: act(() => {
+apps/web test:   /* fire events that update state */
+apps/web test: });
+apps/web test: /* assert on the output */
+apps/web test: This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+apps/web test:  [32mΓ£ô[39m components/auth/auth.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 1309[2mms[22m[39m
+apps/web test:    [32mΓ£ô[39m RegisterForm [2m(3)[22m
+apps/web test:      [33m[2mΓ£ô[22m[39m submits all nine fields and continues to verification[33m 310[2mms[22m[39m
+apps/web test:  [32mΓ£ô[39m components/dashboard/dashboard.test.tsx [2m([22m[2m24 tests[22m[2m)[22m[33m 1115[2mms[22m[39m
+apps/web test:    [32mΓ£ô[39m chart components [2m(4)[22m
+apps/web test:      [33m[2mΓ£ô[22m[39m BarList offers a table view with every value[33m 319[2mms[22m[39m
+apps/web test: [2m Test Files [22m [1m[32m11 passed[39m[22m[90m (11)[39m
+apps/web test: [2m      Tests [22m [1m[32m137 passed[39m[22m[90m (137)[39m
+apps/web test: [2m   Start at [22m 16:31:28
+apps/web test: [2m   Duration [22m 6.50s[2m (environment 57%, setup 17%, tests 15%, transform 7%, import 3%, worker 1%)[22m
+apps/web test: Done
+   (8.5s)
+
+==> pnpm build
+> pnpm run build
+
+> veyra@ build C:\Users\Dell\Desktop\veyra
+> pnpm -r --no-bail build
+
+Scope: 3 of 4 workspace projects
+apps/web build$ next build
+apps/web build: Γû▓ Next.js 16.3.6 (Turbopack)
+apps/web build: Γ£ô Running next.config.ts took 37ms
+apps/web build:   Creating an optimized production build ...
+apps/web build: Γ£ô Compiled successfully in 829ms
+apps/web build:   Running TypeScript ...
+apps/web build:   Finished TypeScript in 3.0s ...
+apps/web build:   Collecting page data using 15 workers ...
+apps/web build:   Generating static pages using 15 workers (0/14) ...
+apps/web build:   Generating static pages using 15 workers (3/14) 
+apps/web build:   Generating static pages using 15 workers (6/14) 
+apps/web build:   Generating static pages using 15 workers (10/14) 
+apps/web build: Γ£ô Generating static pages using 15 workers (14/14) in 543ms
+apps/web build:   Finalizing page optimization ...
+apps/web build: Route (app)
+apps/web build: Γöî Γùï /
+apps/web build: Γö£ Γùï /_not-found
+apps/web build: Γö£ Γùï /admin
+apps/web build: Γö£ ╞Æ /bags/[publicId]
+apps/web build: Γö£ Γùï /blood-bank
+apps/web build: Γö£ Γùï /dashboard
+apps/web build: Γö£ Γùï /disclosures
+apps/web build: Γö£ Γùï /donor
+apps/web build: Γö£ Γùï /hospital
+apps/web build: Γö£ ╞Æ /invite/[token]
+apps/web build: Γö£ Γùï /network
+apps/web build: Γö£ Γùï /register
+apps/web build: Γö£ ╞Æ /shipments/[id]
+apps/web build: Γö£ Γùï /sign-in
+apps/web build: Γö£ Γùï /system
+apps/web build: Γöö Γùï /verify
+apps/web build: Γùï  (Static)   prerendered as static content
+apps/web build: ╞Æ  (Dynamic)  server-rendered on demand
+apps/web build: Done
+   (10.1s)
+
+==> docker: engine running
+> docker version --format {{.Server.Version}}
+29.8.0
+   (0.1s)
+
+==> docker: compose config valid
+> docker compose -f infra/docker-compose.yml config --quiet
+   (0.2s)
+
+==> docker: postgres + redis healthy
+> docker compose -f infra/docker-compose.yml up -d --wait postgres redis
+ Container veyra-redis-1 Running 
+ Container veyra-postgres-1 Running 
+ Container veyra-postgres-1 Waiting 
+ Container veyra-redis-1 Waiting 
+ Container veyra-redis-1 Healthy 
+ Container veyra-postgres-1 Healthy 
+   (0.8s)
+
+==> api: alembic upgrade head (real Postgres)
+> uv run alembic upgrade head
+   (1.3s)
+
+==> api: alembic check (models == migrations)
+> uv run alembic check
+No new upgrade operations detected.
+   (1.6s)
+
+==> api: pytest (integration, real Postgres + Redis)
+> uv run pytest -v -m integration
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\Dell\Desktop\veyra\apps\api
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.15.1, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 531 items / 519 deselected / 12 selected
+
+tests\test_integration_infra.py .                                        [  8%]
+tests\test_integration_phase1.py ...                                     [ 33%]
+tests\test_integration_phase2.py ...                                     [ 58%]
+tests\test_integration_phase3.py .                                       [ 66%]
+tests\test_integration_phase4.py .                                       [ 75%]
+tests\test_integration_phase5.py .                                       [ 83%]
+tests\test_integration_phase6.py .                                       [ 91%]
+tests\test_integration_phase7.py .                                       [100%]
+
+===================== 12 passed, 519 deselected in 7.98s ======================
+   (10.7s)
+
+==> docker: full stack build + up
+> docker compose -f infra/docker-compose.yml up -d --build --wait
+ Image veyra-api Building 
+ Image veyra-web Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.07kB done
+#1 DONE 0.0s
+
+#2 [web internal] load build definition from web.Dockerfile
+#2 transferring dockerfile: 1.02kB done
+#2 DONE 0.0s
+
+#3 [api internal] load build definition from api.Dockerfile
+#3 transferring dockerfile: 727B done
+#3 DONE 0.0s
+
+#4 [auth] library/node:pull token for registry-1.docker.io
+#4 DONE 0.0s
+
+#5 [auth] library/python:pull token for registry-1.docker.io
+#5 DONE 0.0s
+
+#6 [api internal] load metadata for docker.io/library/python:3.12-slim
+#6 ...
+
+#7 [api internal] load metadata for ghcr.io/astral-sh/uv:latest
+#7 DONE 1.1s
+
+#8 [web internal] load metadata for docker.io/library/node:22-alpine
+#8 DONE 1.6s
+
+#6 [api internal] load metadata for docker.io/library/python:3.12-slim
+#6 DONE 1.6s
+
+#9 [api internal] load .dockerignore
+#9 transferring context: 178B done
+#9 DONE 0.0s
+
+#10 [api internal] load build context
+#10 DONE 0.0s
+
+#11 [web deps 1/8] FROM docker.io/library/node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
+#11 resolve docker.io/library/node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 0.0s done
+#11 DONE 0.0s
+
+#12 [api] FROM ghcr.io/astral-sh/uv:latest@sha256:100047e74f30778ab704942321a09750d6158739573ff58bf3924085cc6cd2d8
+#12 resolve ghcr.io/astral-sh/uv:latest@sha256:100047e74f30778ab704942321a09750d6158739573ff58bf3924085cc6cd2d8 0.0s done
+#12 DONE 0.0s
+
+#13 [api base 1/7] FROM docker.io/library/python:3.12-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f
+#13 resolve docker.io/library/python:3.12-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f 0.0s done
+#13 DONE 0.1s
+
+#10 [api internal] load build context
+#10 transferring context: 99.57kB 0.0s done
+#10 DONE 0.1s
+
+#14 [api base 2/7] COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+#14 CACHED
+
+#15 [api base 3/7] WORKDIR /app
+#15 CACHED
+
+#16 [api base 4/7] COPY apps/api/pyproject.toml apps/api/uv.lock* ./
+#16 CACHED
+
+#17 [api base 5/7] RUN uv sync --no-dev --no-install-project $( [ -f uv.lock ] && echo --frozen )
+#17 CACHED
+
+#18 [api base 6/7] COPY apps/api/ ./
+#18 DONE 0.1s
+
+#19 [web internal] load build context
+#19 transferring context: 2.95MB 1.0s done
+#19 DONE 1.0s
+
+#20 [web deps 4/8] COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
+#20 CACHED
+
+#21 [web deps 7/8] COPY packages/design-tokens/package.json packages/design-tokens/
+#21 CACHED
+
+#22 [web deps 2/8] RUN corepack enable
+#22 CACHED
+
+#23 [web deps 5/8] COPY apps/web/package.json apps/web/
+#23 CACHED
+
+#24 [web deps 6/8] COPY packages/api-client/package.json packages/api-client/
+#24 CACHED
+
+#25 [web deps 3/8] WORKDIR /repo
+#25 CACHED
+
+#26 [web deps 8/8] RUN pnpm install --frozen-lockfile
+#26 CACHED
+
+#27 [web build 1/2] COPY . .
+#27 DONE 0.1s
+
+#28 [api base 7/7] RUN useradd --create-home --uid 10001 veyra && chown -R veyra /app
+#28 ...
+
+#29 [web build 2/2] RUN pnpm --filter @veyra/web build
+#29 0.630 
+#29 0.630 > @veyra/web@0.0.0 build /repo/apps/web
+#29 0.630 > next build
+#29 0.630 
+#29 1.179 Γû▓ Next.js 16.3.6 (Turbopack)
+#29 1.218 Γ£ô Running next.config.ts took 39ms
+#29 1.240 
+#29 1.277   Creating an optimized production build ...
+#29 6.544 Γ£ô Compiled successfully in 5.0s
+#29 6.558   Running TypeScript ...
+#29 ...
+
+#28 [api base 7/7] RUN useradd --create-home --uid 10001 veyra && chown -R veyra /app
+#28 DONE 10.7s
+
+#30 [api] exporting to image
+#30 exporting layers
+#30 exporting layers 4.4s done
+#30 exporting manifest sha256:ecbfc81544d28d4d6185de51d1d33b91de63aedc46e1a9bf05b9f63841eb51e3 0.0s done
+#30 exporting config sha256:62e9721e64a30adecb80f9cc2f64a45a6921d8df2da0c6e26ac44d6af951565e 0.0s done
+#30 exporting attestation manifest sha256:bb45f8faabddaf10d7bbf86571b6dd2767a285cdfe8d604973943c4483a235a6 0.0s done
+#30 exporting manifest list sha256:f72eded615958b25587643822817975bb3924855d71880af51e8fa4905180eb6 0.0s done
+#30 naming to docker.io/library/veyra-api:latest done
+#30 unpacking to docker.io/library/veyra-api:latest
+#30 ...
+
+#29 [web build 2/2] RUN pnpm --filter @veyra/web build
+#29 15.11   Finished TypeScript in 8.5s ...
+#29 15.11   Collecting page data using 15 workers ...
+#29 ...
+
+#30 [api] exporting to image
+#30 unpacking to docker.io/library/veyra-api:latest 1.0s done
+#30 DONE 5.5s
+
+#31 [api] resolving provenance for metadata file
+#31 DONE 0.0s
+
+#29 [web build 2/2] RUN pnpm --filter @veyra/web build
+#29 16.82   Generating static pages using 15 workers (0/14) ...
+#29 17.16   Generating static pages using 15 workers (3/14) 
+#29 17.16   Generating static pages using 15 workers (6/14) 
+#29 17.36   Generating static pages using 15 workers (10/14) 
+#29 17.36 Γ£ô Generating static pages using 15 workers (14/14) in 541ms
+#29 17.36   Finalizing page optimization ...
+#29 17.65 
+#29 17.65 Route (app)
+#29 17.65 Γöî Γùï /
+#29 17.65 Γö£ Γùï /_not-found
+#29 17.65 Γö£ Γùï /admin
+#29 17.65 Γö£ ╞Æ /bags/[publicId]
+#29 17.65 Γö£ Γùï /blood-bank
+#29 17.65 Γö£ Γùï /dashboard
+#29 17.65 Γö£ Γùï /disclosures
+#29 17.65 Γö£ Γùï /donor
+#29 17.65 Γö£ Γùï /hospital
+#29 17.65 Γö£ ╞Æ /invite/[token]
+#29 17.65 Γö£ Γùï /network
+#29 17.65 Γö£ Γùï /register
+#29 17.65 Γö£ ╞Æ /shipments/[id]
+#29 17.65 Γö£ Γùï /sign-in
+#29 17.65 Γö£ Γùï /system
+#29 17.65 Γöö Γùï /verify
+#29 17.65 
+#29 17.65 
+#29 17.65 Γùï  (Static)   prerendered as static content
+#29 17.65 ╞Æ  (Dynamic)  server-rendered on demand
+#29 17.65 
+#29 DONE 17.8s
+
+#32 [web run 2/5] WORKDIR /app
+#32 CACHED
+
+#33 [web run 3/5] RUN adduser -D -u 10001 veyra
+#33 CACHED
+
+#34 [web run 4/5] COPY --from=build --chown=veyra /repo/apps/web/.next/standalone ./
+#34 DONE 0.2s
+
+#35 [web run 5/5] COPY --from=build --chown=veyra /repo/apps/web/.next/static ./apps/web/.next/static
+#35 DONE 0.1s
+
+#36 [web] exporting to image
+#36 exporting layers 1.8s done
+#36 exporting manifest sha256:759b6cb9ab16d4c9c3d310f92cd2cf9251f3d8dc43dddc012abdb282c5b1950f 0.0s done
+#36 exporting config sha256:4492c5a1e4f86ec27a13f47e4186f23434d38288420a04c7e5aa004f5ece3322 0.0s done
+#36 exporting attestation manifest sha256:fab546de47350d167edc77877f7f51ec04cf8f441129da6f316cbccb478eb106 0.0s done
+#36 exporting manifest list sha256:65d47c439b619f0728100885f7ddb3799755978bd8ef0783e442c7c5b1336e4f 0.0s done
+#36 naming to docker.io/library/veyra-web:latest done
+#36 unpacking to docker.io/library/veyra-web:latest
+#36 unpacking to docker.io/library/veyra-web:latest 0.6s done
+#36 DONE 2.5s
+
+#37 [web] resolving provenance for metadata file
+#37 DONE 0.0s
+ Image veyra-api Built 
+ Image veyra-web Built 
+ Container veyra-postgres-1 Running 
+ Container veyra-redis-1 Running 
+ Container veyra-api-1 Recreate 
+ Container veyra-api-1 Recreated 
+ Container veyra-web-1 Recreate 
+ Container veyra-web-1 Recreated 
+ Container veyra-postgres-1 Waiting 
+ Container veyra-redis-1 Waiting 
+ Container veyra-postgres-1 Healthy 
+ Container veyra-redis-1 Healthy 
+ Container veyra-api-1 Starting 
+ Container veyra-api-1 Started 
+ Container veyra-api-1 Waiting 
+ Container veyra-api-1 Healthy 
+ Container veyra-web-1 Starting 
+ Container veyra-web-1 Started 
+ Container veyra-redis-1 Waiting 
+ Container veyra-api-1 Waiting 
+ Container veyra-web-1 Waiting 
+ Container veyra-postgres-1 Waiting 
+ Container veyra-redis-1 Healthy 
+ Container veyra-postgres-1 Healthy 
+ Container veyra-web-1 Healthy 
+ Container veyra-api-1 Healthy 
+   (40.6s)
+
+==> docker: seed demo admin + demo facilities
+> docker compose -f infra/docker-compose.yml exec -T -e VEYRA_DEMO_ADMIN_PASSWORD api uv run --no-sync python -m app.scripts.seed_demo
+[DEMO] Admin already exists: admin@veyra.demo (password unchanged)
+[DEMO] Facility staff bank@veyra.demo: already exists (password unchanged)
+[DEMO] Facility staff hospital@veyra.demo: already exists (password unchanged)
+   demo admin:    admin@veyra.demo    / veyra-demo-console-2026  (DEMO ONLY)
+   demo bank:     bank@veyra.demo     / veyra-demo-console-2026  (DEMO ONLY)
+   demo hospital: hospital@veyra.demo / veyra-demo-console-2026  (DEMO ONLY)
+   (1.7s)
+
+==> e2e: API /healthz
+   200 OK  http://localhost:8000/healthz
+   (0.1s)
+
+==> e2e: API /readyz (db + redis)
+   200 OK  http://localhost:8000/readyz
+   (0.1s)
+
+==> e2e: web home page
+   200 OK  http://localhost:3000/
+   (0.1s)
+
+==> e2e: web -> API proxy /api/v1/meta
+   200 OK  http://localhost:3000/api/v1/meta
+   (0.0s)
+
+==> e2e: web pages render (register, sign-in, verify)
+   200 OK  http://localhost:3000/register
+   200 OK  http://localhost:3000/sign-in
+   200 OK  http://localhost:3000/verify
+   (0.3s)
+
+==> e2e: donor register -> demo verify -> me -> update -> logout (via web proxy)
+   donor journey OK (smoke-52a990e4@example.in)
+   (0.5s)
+
+==> e2e: demo admin can sign in
+   (0.2s)
+
+==> e2e: phase 2 donation -> request -> FEFO dispatch -> receive -> trace -> SSE
+   network journey OK (request RQ-FGX1X4XN, bag VYR-NC89-DXMD)
+   (2.2s)
+
+==> e2e: phase 3 dashboards + live network graph (scoped, via web proxy)
+   200 OK  http://localhost:3000/
+   dashboards OK (bank on hand 17, hospital open 2, graph 62 nodes)
+   (0.8s)
+
+==> e2e: phase 4 synthetic ML forecast (scoped, disclaimer, RBAC, via web proxy)
+   200 OK  http://localhost:3000/hospital
+   200 OK  http://localhost:3000/blood-bank
+   forecast OK (model veyra-demand-gbm v1.0.0 91c00e7596a926d6; O+ PRBC 7d = 52.3 units, signal normal)
+   (2.5s)
+
+==> e2e: phase 5 simulated IoT cold chain (excursion -> trace -> SSE, scoped)
+   200 OK  http://localhost:3000/blood-bank
+   200 OK  http://localhost:3000/bags/VYR-5MKQ-CA5M
+   cold chain OK (bag VYR-5MKQ-CA5M, device SIM-E6A1-6584, peak 8.61 C, 8 simulated readings)
+   (9.6s)
+
+==> e2e: phase 6 emergency operations (priority, recommendation, confirmed dispatch, scoped)
+   200 OK  http://localhost:3000/blood-bank
+   operations OK (request RQ-33B93MYH band immediate score 68; dispatched VYR-RPTC-82KC, skipped critical VYR-WT1A-JD6B; ETA 26 min simulated)
+   (10.5s)
+
+==> e2e: phase 7 simulated logistics (shipment, checkpoints, delay, cold chain, human receipt)
+   200 OK  http://localhost:3000/shipments/01a0ecd5-5423-7087-830b-199a309d7b31
+   logistics OK (shipment SH-BVTN9V84 for RQ-6PKKGCHM: Demo Courier Echo, 5 checkpoints, +18 min simulated delay, received)
+   (11.5s)
+
+===== SUMMARY =====
+toolchain: node >= 22                            PASS
+toolchain: pnpm                                  PASS
+toolchain: uv                                    PASS
+pnpm install                                     PASS
+pin dependency versions                          PASS
+uv sync (python 3.12)                            PASS
+export OpenAPI schema                            PASS
+generate @veyra/api-client                       PASS
+api-client is current (--check)                  PASS
+api: ruff format                                 PASS
+api: ruff check                                  PASS
+api: mypy                                        PASS
+api: pytest (unit)                               PASS
+ml: forecast model reproducible (retrain == committed artifact) PASS
+pnpm typecheck                                   PASS
+pnpm lint                                        PASS
+pnpm test                                        PASS
+pnpm build                                       PASS
+docker: engine running                           PASS
+docker: compose config valid                     PASS
+docker: postgres + redis healthy                 PASS
+api: alembic upgrade head (real Postgres)        PASS
+api: alembic check (models == migrations)        PASS
+api: pytest (integration, real Postgres + Redis) PASS
+docker: full stack build + up                    PASS
+docker: seed demo admin + demo facilities        PASS
+e2e: API /healthz                                PASS
+e2e: API /readyz (db + redis)                    PASS
+e2e: web home page                               PASS
+e2e: web -> API proxy /api/v1/meta               PASS
+e2e: web pages render (register, sign-in, verify) PASS
+e2e: donor register -> demo verify -> me -> update -> logout (via web proxy) PASS
+e2e: demo admin can sign in                      PASS
+e2e: phase 2 donation -> request -> FEFO dispatch -> receive -> trace -> SSE PASS
+e2e: phase 3 dashboards + live network graph (scoped, via web proxy) PASS
+e2e: phase 4 synthetic ML forecast (scoped, disclaimer, RBAC, via web proxy) PASS
+e2e: phase 5 simulated IoT cold chain (excursion -> trace -> SSE, scoped) PASS
+e2e: phase 6 emergency operations (priority, recommendation, confirmed dispatch, scoped) PASS
+e2e: phase 7 simulated logistics (shipment, checkpoints, delay, cold chain, human receipt) PASS
+
+OVERALL: PASS  (39/39 steps passed)
+Stack left running: http://localhost:3000  (stop: docker compose -f infra/docker-compose.yml down)
+Demo logins (DEMO ONLY, password veyra-demo-console-2026): admin@veyra.demo, bank@veyra.demo, hospital@veyra.demo
+Log: C:\Users\Dell\Desktop\veyra\docs\phase-reports\phase-0-verification.log
