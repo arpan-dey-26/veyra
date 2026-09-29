@@ -761,7 +761,7 @@ I kept your order with **three deliberate adjustments**, each with a reason:
 
 1. **Design system foundations move into Phase 0/1.** Auth screens are the first UI anyone sees; building them without tokens means restyling them later.
 2. **Provider ports (Mock + Internal blood-bank provider) are created in Phase 2**, not Phase 7. The core network and the agent (Phase 6) need them. Phase 7 becomes "hardening + provider registry fan-out + external-ready adapter + admin provider config".
-3. **The bag lifecycle data model (bags, events, custody, hash chain) lands in Phase 2.** Phase 8 adds QR, the public trace page and on-chain anchoring on top. Traceability is the spine of the domain, and bolting it on later would force a schema restructure.
+3. **The bag lifecycle data model (bags, events, custody, hash chain) lands in Phase 2.** Phase 8 added QR scanning and printable QR labels on top (on-chain anchoring remains future work). Traceability is the spine of the domain, and bolting it on later would force a schema restructure.
 
 | Phase | Day | Scope | Exit criteria |
 |---|---|---|---|
@@ -812,3 +812,14 @@ Existing functionality verified · Known issues · Technical debt introduced · 
 ## Approval record
 
 - 2026-09-28: architecture approved by Arpan; product name set to VEYRA; revised roadmap adopted; build location = local folder on user's computer.
+
+## Phase 8 addendum: compatibility, camps, QR (as built)
+
+- **`compatibility` module:** `engine.py` is pure and deterministic. It holds the one copy of the ABO/Rh rules (red-cell, whole-blood, plasma and platelet rule families) for the five components. `router.py` serves `/compatibility/matrix` and `/compatibility/check`, read-only under the `compatibility:read` permission (hospital, blood bank, admin). It has no persistence and no side effects, and nothing in allocation or dispatch calls it.
+- **`camps` module:** two additive tables, `network.camps` and `network.camp_registrations` (migration `0007`), behind a `CampRepository` port with SQL and memory adapters.
+  - The service owns an explicit transition table.
+  - Registration capacity is kept under a camp row lock (`SELECT … FOR UPDATE`), plus a unique `(camp_id, donor_id)` index.
+  - Donation linking goes through `camps/hooks.py`, called from the existing donation service *before* anything is written, so every donation control still applies.
+  - Permissions: `camp:manage:own_facility` (bank), `camp:manage:network` (admin), `camp:register:self` (donor), `camp:read:public`.
+  - Outbox topic `camp.updated` goes to the organizing facility only, with counts and never donor identity.
+- **QR:** `bags/qr.py` is a dependency-free QR encoder (byte mode, level M, versions 1-4). It was verified against an independent decoder and pinned by a golden digest test. `/bags/scan` parses a label or typed id (`parse_scan`) and then reuses the trace's `_visible_bag` scope check. `/bags/{id}/qr` returns the module matrix. The web scanner uses the browser `BarcodeDetector` when present, with manual entry otherwise. Frames never leave the browser.

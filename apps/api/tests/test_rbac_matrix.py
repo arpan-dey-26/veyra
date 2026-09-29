@@ -1,4 +1,4 @@
-"""RBAC matrix: every Phase 1-7 endpoint x every role (+ anonymous) → expected status.
+"""RBAC matrix: every Phase 1-8 endpoint x every role (+ anonymous) → expected status.
 
 This is the contract for the security boundary. Adding an endpoint means adding a row.
 """
@@ -392,6 +392,109 @@ MATRIX: list[tuple[str, str, dict[str, object] | None, dict[str, int]]] = [
         f"/api/v1/simulator/shipments/{_UUID}/arrive",
         None,
         {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    # Phase 8: compatibility reference, camps, QR scanning
+    (
+        "GET",
+        "/api/v1/compatibility/matrix",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    (
+        "GET",
+        "/api/v1/compatibility/check?donor_group=O-&recipient_group=A%2B&component=PRBC",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    (
+        "GET",
+        "/api/v1/camps",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    (
+        "GET",
+        "/api/v1/camps/dashboard",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    (
+        "POST",
+        "/api/v1/camps",
+        {},
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 422, "ADMIN": 422},
+    ),
+    (
+        "GET",
+        "/api/v1/camps/public",
+        None,
+        {"ANON": 401, "DONOR": 200, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    (
+        "GET",
+        f"/api/v1/camps/public/{_UUID}",
+        None,
+        {"ANON": 401, "DONOR": 404, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "GET",
+        "/api/v1/camps/me/registrations",
+        None,
+        {"ANON": 401, "DONOR": 200, "HOSPITAL": 403, "BLOOD_BANK": 403, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        f"/api/v1/camps/{_UUID}",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "PATCH",
+        f"/api/v1/camps/{_UUID}",
+        {"venue": "Matrix Hall"},
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "POST",
+        f"/api/v1/camps/{_UUID}/actions/publish",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "GET",
+        f"/api/v1/camps/{_UUID}/registrations",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "POST",
+        f"/api/v1/camps/{_UUID}/registrations/{_UUID}/attend",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "POST",
+        f"/api/v1/camps/{_UUID}/register",
+        None,
+        {"ANON": 401, "DONOR": 404, "HOSPITAL": 403, "BLOOD_BANK": 403, "ADMIN": 403},
+    ),
+    (
+        "POST",
+        f"/api/v1/camps/{_UUID}/register/cancel",
+        None,
+        {"ANON": 401, "DONOR": 404, "HOSPITAL": 403, "BLOOD_BANK": 403, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        f"/api/v1/bags/scan?payload=veyra:bag:{_BAG}",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "GET",
+        f"/api/v1/bags/{_BAG}/qr",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
     ),
     (
         "GET",

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { PageHeader } from "@/components/app/page-header";
+import { BagQrCard } from "@/components/scan/bag-qr";
 import { BagTelemetryPanel } from "@/components/telemetry/cold-chain";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -204,11 +205,7 @@ export function BagTraceView({ publicId }: { publicId: string }) {
             </div>
             <p className="mt-3 text-xs text-ink-subtle">{chain.note}</p>
           </Card>
-          <Card>
-            <CardLabel>QR label</CardLabel>
-            <p className="mt-2 font-mono text-sm break-all">{bag.qr_payload}</p>
-            <p className="mt-1 text-xs text-ink-subtle">Printed on the bag; scanning it opens this trace.</p>
-          </Card>
+          <BagQrCard publicId={bag.public_id} payload={bag.qr_payload} />
         </div>
       </div>
       {me && (

@@ -114,7 +114,7 @@ describe("BagTraceView", () => {
       { seq: 1, event_type: "COLLECTED", occurred_at: "2026-09-27T09:00:00Z", from_facility: null, to_facility: "Central Blood Bank", meta: {}, prev_hash: "0".repeat(64), row_hash: "a".repeat(64) },
       { seq: 2, event_type: "DISPATCHED", occurred_at: "2026-09-28T09:00:00Z", from_facility: "Central Blood Bank", to_facility: "City Hospital", meta: { request: "RQ-1" }, prev_hash: "a".repeat(64), row_hash: "b".repeat(64) },
     ],
-    chain: { valid, length: 2, head_hash: valid ? "b".repeat(64) : null, note: "Not anchored on a blockchain yet (planned for Phase 8)." },
+    chain: { valid, length: 2, head_hash: valid ? "b".repeat(64) : null, note: "Not anchored on a blockchain (possible future work)." },
   });
 
   it("renders the custody trail and a verified chain", async () => {

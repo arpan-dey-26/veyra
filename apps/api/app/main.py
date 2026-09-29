@@ -21,6 +21,8 @@ from app.core.readiness import Check
 from app.core.security import AccessTokenCodec, PasswordHasher
 from app.modules.admin.router import router as admin_router
 from app.modules.bags.router import router as bags_router
+from app.modules.camps.router import router as camps_router
+from app.modules.compatibility.router import router as compatibility_router
 from app.modules.dashboard.router import router as dashboard_router
 from app.modules.donations.router import router as donations_router
 from app.modules.donors.router import router as donors_router
@@ -160,6 +162,8 @@ def create_app(settings: Settings | None = None, *, with_infra: bool = True) -> 
         operations_router,
         logistics_router,
         logistics_simulator_router,
+        compatibility_router,
+        camps_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
     return app

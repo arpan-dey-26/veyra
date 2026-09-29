@@ -210,6 +210,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/bags/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resolve a scanned bag QR (or typed id) to the caller's scoped bag view */
+        get: operations["scan_bag_api_v1_bags_scan_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/bags/{public_id}": {
         parameters: {
             query?: never;
@@ -278,6 +295,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/bags/{public_id}/qr": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The bag label QR (public id only) as a module matrix */
+        get: operations["bag_qr_api_v1_bags__public_id__qr_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/bags/{public_id}/telemetry": {
         parameters: {
             query?: never;
@@ -304,6 +338,229 @@ export interface paths {
         };
         /** Current cold-chain state (simulated) */
         get: operations["telemetry_summary_api_v1_bags__public_id__telemetry_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/camps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Camps I manage (own bank; admins: network) */
+        get: operations["list_camps_api_v1_camps_get"];
+        put?: never;
+        /** Create a camp (planned) */
+        post: operations["create_camp_api_v1_camps_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/camps/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Camp dashboard (scoped) */
+        get: operations["camp_dashboard_api_v1_camps_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/camps/me/registrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My camp registrations */
+        get: operations["my_registrations_api_v1_camps_me_registrations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/camps/public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Published camps (search / filter) */
+        get: operations["public_camps_api_v1_camps_public_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/camps/public/{camp_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Published camp detail */
+        get: operations["public_camp_api_v1_camps_public__camp_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/camps/{camp_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Camp management detail + stats */
+        get: operations["get_camp_api_v1_camps__camp_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit a camp (planned / published / registration open) */
+        patch: operations["update_camp_api_v1_camps__camp_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/camps/{camp_id}/actions/{action}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Lifecycle: publish, open-registration, start, complete, cancel */
+        post: operations["camp_action_api_v1_camps__camp_id__actions__action__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/camps/{camp_id}/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Donor: register for a camp with open registration */
+        post: operations["register_api_v1_camps__camp_id__register_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/camps/{camp_id}/register/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Donor: cancel my registration */
+        post: operations["cancel_registration_api_v1_camps__camp_id__register_cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/camps/{camp_id}/registrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Registrations for a camp I manage (no medical data) */
+        get: operations["camp_registrations_api_v1_camps__camp_id__registrations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/camps/{camp_id}/registrations/{registration_id}/attend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Staff confirm a registered donor attended (not an eligibility decision) */
+        post: operations["confirm_attendance_api_v1_camps__camp_id__registrations__registration_id__attend_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/compatibility/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Is a donor group compatible with a recipient group for a component? (reference) */
+        get: operations["check_api_v1_compatibility_check_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/compatibility/matrix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** ABO/Rh compatibility reference matrix (informational prototype, not clinical) */
+        get: operations["matrix_api_v1_compatibility_matrix_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1451,6 +1708,67 @@ export interface components {
             /** Volume Ml */
             volume_ml: number;
         };
+        /** BagQr */
+        BagQr: {
+            /** Disclaimer */
+            disclaimer: string;
+            /**
+             * Error Correction
+             * @default M
+             * @constant
+             */
+            error_correction: "M";
+            /**
+             * Modules
+             * @description Rows of '1' (dark) / '0' (light)
+             */
+            modules: string[];
+            /** Payload */
+            payload: string;
+            /** Public Id */
+            public_id: string;
+            /**
+             * Size
+             * @description Modules per side (quiet zone not included)
+             */
+            size: number;
+        };
+        /**
+         * BagScanResult
+         * @description What an authorized scanner may see. Never donor or patient identity.
+         */
+        BagScanResult: {
+            bag: components["schemas"]["BagOut"];
+            chain: components["schemas"]["ChainStatus"];
+            cold_chain: components["schemas"]["ScanColdChain"];
+            /** Disclaimer */
+            disclaimer: string;
+            /** Events */
+            events: number;
+            /** Last Event At */
+            last_event_at: string | null;
+            /** Last Event Type */
+            last_event_type: string | null;
+            /** Lifecycle Status */
+            lifecycle_status: string;
+            /**
+             * Location
+             * @description Facility currently holding the bag
+             */
+            location: string;
+            /** Public Id */
+            public_id: string;
+            /** Qr Payload */
+            qr_payload: string;
+            shipment: components["schemas"]["ScanShipment"] | null;
+            /** Trace Path */
+            trace_path: string;
+            /**
+             * Usable
+             * @description Available and unexpired (still needs human checks)
+             */
+            usable: boolean;
+        };
         /** BagTrace */
         BagTrace: {
             bag: components["schemas"]["BagOut"];
@@ -1516,6 +1834,216 @@ export interface components {
             /** Urgency */
             urgency: string;
         };
+        /** CampCreate */
+        CampCreate: {
+            /** Capacity */
+            capacity: number;
+            /** City */
+            city: string;
+            /** Contact Email */
+            contact_email?: string | null;
+            /** Contact Name */
+            contact_name: string;
+            /** Contact Phone */
+            contact_phone?: string | null;
+            /** Description */
+            description?: string | null;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /**
+             * Organizer Facility Id
+             * @description Admins only: the organizing blood bank
+             */
+            organizer_facility_id?: string | null;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /** State */
+            state: string;
+            /** Title */
+            title: string;
+            /** Venue */
+            venue: string;
+        };
+        /** CampDashboard */
+        CampDashboard: {
+            /** Active */
+            active: number;
+            /** Bags Collected */
+            bags_collected: number;
+            /** Cancelled */
+            cancelled: number;
+            /** Completed */
+            completed: number;
+            /**
+             * Disclaimer
+             * @default Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.
+             */
+            disclaimer: string;
+            /** Donations Recorded */
+            donations_recorded: number;
+            /** Next Camps */
+            next_camps: components["schemas"]["CampOut"][];
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "facility" | "network";
+            /** Total Attended */
+            total_attended: number;
+            /** Total Capacity */
+            total_capacity: number;
+            /** Total Registered */
+            total_registered: number;
+            /** Upcoming */
+            upcoming: number;
+        };
+        /** CampList */
+        CampList: {
+            /** Camps */
+            camps: components["schemas"]["CampOut"][];
+            /**
+             * Disclaimer
+             * @default Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.
+             */
+            disclaimer: string;
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "facility" | "network";
+        };
+        /**
+         * CampOut
+         * @description Management view (organizing blood bank or admin).
+         */
+        CampOut: {
+            /** Allowed Actions */
+            allowed_actions: ("publish" | "open-registration" | "start" | "complete" | "cancel")[];
+            /** Cancel Reason */
+            cancel_reason: string | null;
+            /** Capacity */
+            capacity: number;
+            /** City */
+            city: string;
+            /** Code */
+            code: string;
+            /** Contact Email */
+            contact_email: string | null;
+            /** Contact Name */
+            contact_name: string;
+            /** Contact Phone */
+            contact_phone: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description: string | null;
+            /**
+             * Disclaimer
+             * @default Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.
+             */
+            disclaimer: string;
+            /** Editable */
+            editable: boolean;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Organizer Facility Id
+             * Format: uuid
+             */
+            organizer_facility_id: string;
+            /** Organizer Name */
+            organizer_name: string;
+            /** Registered Count */
+            registered_count: number;
+            /** Registration Open */
+            registration_open: boolean;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /** State */
+            state: string;
+            stats: components["schemas"]["CampStats"];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "planned" | "published" | "registration_open" | "ongoing" | "completed" | "cancelled";
+            /** Title */
+            title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Venue */
+            venue: string;
+        };
+        /** CampStats */
+        CampStats: {
+            /** Attended */
+            attended: number;
+            /** Bags Collected */
+            bags_collected: number;
+            /** Cancelled */
+            cancelled: number;
+            /** Donations Recorded */
+            donations_recorded: number;
+            /** No Show */
+            no_show: number;
+            /** Registered */
+            registered: number;
+            /** Seats Left */
+            seats_left: number;
+        };
+        /** CampUpdate */
+        CampUpdate: {
+            /** Capacity */
+            capacity?: number | null;
+            /** City */
+            city?: string | null;
+            /** Contact Email */
+            contact_email?: string | null;
+            /** Contact Name */
+            contact_name?: string | null;
+            /** Contact Phone */
+            contact_phone?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Ends At */
+            ends_at?: string | null;
+            /** Starts At */
+            starts_at?: string | null;
+            /** State */
+            state?: string | null;
+            /** Title */
+            title?: string | null;
+            /** Venue */
+            venue?: string | null;
+        };
+        /** CancelCamp */
+        CancelCamp: {
+            /** Reason */
+            reason?: string | null;
+        };
         /** CandidateBag */
         CandidateBag: {
             /** Blood Group */
@@ -1566,7 +2094,7 @@ export interface components {
             length: number;
             /**
              * Note
-             * @default Tamper-evident SHA-256 chain stored in the VEYRA database. It is not anchored on a blockchain yet (planned for Phase 8).
+             * @default Tamper-evident SHA-256 chain stored in the VEYRA database. It is not anchored on a blockchain (possible future work).
              */
             note: string;
             /** Valid */
@@ -1682,6 +2210,77 @@ export interface components {
              */
             trace_events: components["schemas"]["ColdChainEvent"][];
         };
+        /** CompatibilityCheck */
+        CompatibilityCheck: {
+            /** Compatible */
+            compatible: boolean;
+            /** Compatible Donors For Recipient */
+            compatible_donors_for_recipient: string[];
+            /** Compatible Recipients For Donor */
+            compatible_recipients_for_donor: string[];
+            /**
+             * Component
+             * @enum {string}
+             */
+            component: "WHOLE_BLOOD" | "PRBC" | "PLATELETS" | "FFP" | "CRYO";
+            /** Component Label */
+            component_label: string;
+            /**
+             * Disclaimer
+             * @default Informational prototype reference only; final transfusion decisions require authorized clinical confirmation.
+             */
+            disclaimer: string;
+            /** Donor Group */
+            donor_group: string;
+            /**
+             * Informational Only
+             * @default true
+             */
+            informational_only: boolean;
+            /**
+             * Label
+             * @default Prototype ABO/Rh compatibility reference (simplified, not clinical)
+             */
+            label: string;
+            /** Reason */
+            reason: string;
+            /** Recipient Group */
+            recipient_group: string;
+            /**
+             * Requires Clinical Confirmation
+             * @default true
+             */
+            requires_clinical_confirmation: boolean;
+            /**
+             * Result
+             * @enum {string}
+             */
+            result: "compatible" | "not_compatible";
+            /** Rule */
+            rule: string;
+        };
+        /** CompatibilityMatrix */
+        CompatibilityMatrix: {
+            /** Blood Groups */
+            blood_groups: string[];
+            /** Components */
+            components: components["schemas"]["ComponentMatrix"][];
+            /**
+             * Disclaimer
+             * @default Informational prototype reference only; final transfusion decisions require authorized clinical confirmation.
+             */
+            disclaimer: string;
+            /**
+             * Informational Only
+             * @default true
+             */
+            informational_only: boolean;
+            /**
+             * Label
+             * @default Prototype ABO/Rh compatibility reference (simplified, not clinical)
+             */
+            label: string;
+        };
         /**
          * Component
          * @enum {string}
@@ -1697,6 +2296,25 @@ export interface components {
             shelf_life_days: number;
             /** Storage */
             storage: string;
+        };
+        /** ComponentMatrix */
+        ComponentMatrix: {
+            /**
+             * Component
+             * @enum {string}
+             */
+            component: "WHOLE_BLOOD" | "PRBC" | "PLATELETS" | "FFP" | "CRYO";
+            /** Label */
+            label: string;
+            /** Rh Considered */
+            rh_considered: boolean;
+            /** Rows */
+            rows: components["schemas"]["MatrixRow"][];
+            /**
+             * Rule
+             * @description Plain-language summary of the simplified reference rule
+             */
+            rule: string;
         };
         /** CourierOut */
         CourierOut: {
@@ -2501,6 +3119,13 @@ export interface components {
             events: string[];
             shipment: components["schemas"]["ShipmentDetail"];
         };
+        /** MatrixRow */
+        MatrixRow: {
+            /** Compatible Donors */
+            compatible_donors: string[];
+            /** Recipient Group */
+            recipient_group: string;
+        };
         /** MeResponse */
         MeResponse: {
             donor?: components["schemas"]["DonorSummary"] | null;
@@ -2745,6 +3370,43 @@ export interface components {
             interval_days: number;
             /** Last Donation At */
             last_donation_at: string | null;
+        };
+        /** MyRegistration */
+        MyRegistration: {
+            /** Attended At */
+            attended_at: string | null;
+            camp: components["schemas"]["PublicCampOut"];
+            /** Can Cancel */
+            can_cancel: boolean;
+            /** Cancelled At */
+            cancelled_at: string | null;
+            /** Donation Recorded */
+            donation_recorded: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Registered At
+             * Format: date-time
+             */
+            registered_at: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "registered" | "cancelled" | "attended" | "no_show";
+        };
+        /** MyRegistrations */
+        MyRegistrations: {
+            /**
+             * Disclaimer
+             * @default Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.
+             */
+            disclaimer: string;
+            /** Registrations */
+            registrations: components["schemas"]["MyRegistration"][];
         };
         /** NetworkEdge */
         NetworkEdge: {
@@ -2996,6 +3658,77 @@ export interface components {
              */
             score: number;
         };
+        /** PublicCampList */
+        PublicCampList: {
+            /** Camps */
+            camps: components["schemas"]["PublicCampOut"][];
+            /**
+             * Disclaimer
+             * @default Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.
+             */
+            disclaimer: string;
+        };
+        /**
+         * PublicCampOut
+         * @description What donors (and hospitals) see: no registrations, no other donors.
+         */
+        PublicCampOut: {
+            /** Capacity */
+            capacity: number;
+            /** City */
+            city: string;
+            /** Code */
+            code: string;
+            /** Contact Email */
+            contact_email: string | null;
+            /** Contact Name */
+            contact_name: string;
+            /** Contact Phone */
+            contact_phone: string | null;
+            /** Description */
+            description: string | null;
+            /**
+             * Disclaimer
+             * @default Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.
+             */
+            disclaimer: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** My Registration Status */
+            my_registration_status?: ("registered" | "cancelled" | "attended" | "no_show") | null;
+            /** Organizer Name */
+            organizer_name: string;
+            /** Registered Count */
+            registered_count: number;
+            /** Registration Open */
+            registration_open: boolean;
+            /** Seats Left */
+            seats_left: number;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /** State */
+            state: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "planned" | "published" | "registration_open" | "ongoing" | "completed" | "cancelled";
+            /** Title */
+            title: string;
+            /** Venue */
+            venue: string;
+        };
         /** ReadinessResponse */
         ReadinessResponse: {
             /** Checks */
@@ -3104,6 +3837,11 @@ export interface components {
              */
             blood_group: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
             /**
+             * Camp Registration Id
+             * @description Phase 8: link to an attended camp registration (optional)
+             */
+            camp_registration_id?: string | null;
+            /**
              * Collected At
              * @description Defaults to now; may not be in the future or >48 h old
              */
@@ -3160,6 +3898,59 @@ export interface components {
         RegisterResponse: {
             user: components["schemas"]["UserOut"];
             verification: components["schemas"]["VerificationOut"];
+        };
+        /** RegistrationList */
+        RegistrationList: {
+            /**
+             * Camp Id
+             * Format: uuid
+             */
+            camp_id: string;
+            /** Code */
+            code: string;
+            /**
+             * Disclaimer
+             * @default Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.
+             */
+            disclaimer: string;
+            /** Registrations */
+            registrations: components["schemas"]["RegistrationOut"][];
+        };
+        /**
+         * RegistrationOut
+         * @description Staff view of one registration: identification for the desk, no medical data.
+         */
+        RegistrationOut: {
+            /** Attended At */
+            attended_at: string | null;
+            /** Cancelled At */
+            cancelled_at: string | null;
+            /** Donation Id */
+            donation_id: string | null;
+            /**
+             * Donor Id
+             * Format: uuid
+             */
+            donor_id: string;
+            /** Donor Name */
+            donor_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Mobile Masked */
+            mobile_masked: string;
+            /**
+             * Registered At
+             * Format: date-time
+             */
+            registered_at: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "registered" | "cancelled" | "attended" | "no_show";
         };
         /** RegistrationReference */
         RegistrationReference: {
@@ -3268,6 +4059,55 @@ export interface components {
              * @enum {string}
              */
             scope: "facility" | "network";
+        };
+        /** ScanColdChain */
+        ScanColdChain: {
+            /** Current C */
+            current_c: number | null;
+            /** Excursion Active */
+            excursion_active: boolean;
+            /** Last Reading At */
+            last_reading_at: string | null;
+            /** Monitored */
+            monitored: boolean;
+            /**
+             * Simulated
+             * @default true
+             */
+            simulated: boolean;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "unmonitored" | "unknown" | "normal" | "warning" | "critical";
+        };
+        /** ScanShipment */
+        ScanShipment: {
+            /** Delay Active */
+            delay_active: boolean;
+            /** Destination Name */
+            destination_name: string;
+            /**
+             * Eta At
+             * Format: date-time
+             */
+            eta_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Reference */
+            reference: string;
+            /**
+             * Simulated
+             * @default true
+             */
+            simulated: boolean;
+            /** Source Name */
+            source_name: string;
+            /** Status */
+            status: string;
         };
         /** ShipmentBagOut */
         ShipmentBagOut: {
@@ -4279,6 +5119,38 @@ export interface operations {
             };
         };
     };
+    scan_bag_api_v1_bags_scan_get: {
+        parameters: {
+            query: {
+                /** @description QR content or bag id */
+                payload: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BagScanResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     bag_trace_api_v1_bags__public_id__get: {
         parameters: {
             query?: never;
@@ -4411,6 +5283,38 @@ export interface operations {
             };
         };
     };
+    bag_qr_api_v1_bags__public_id__qr_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Bag label id, e.g. VYR-7F3K-2QXM */
+                public_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BagQr"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     telemetry_api_v1_bags__public_id__telemetry_get: {
         parameters: {
             query?: {
@@ -4464,6 +5368,465 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TelemetrySummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_camps_api_v1_camps_get: {
+        parameters: {
+            query?: {
+                status?: ("planned" | "published" | "registration_open" | "ongoing" | "completed" | "cancelled") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_camp_api_v1_camps_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    camp_dashboard_api_v1_camps_dashboard_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampDashboard"];
+                };
+            };
+        };
+    };
+    my_registrations_api_v1_camps_me_registrations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyRegistrations"];
+                };
+            };
+        };
+    };
+    public_camps_api_v1_camps_public_get: {
+        parameters: {
+            query?: {
+                q?: string | null;
+                city?: string | null;
+                status?: ("published" | "registration_open" | "ongoing") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicCampList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_camp_api_v1_camps_public__camp_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                camp_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicCampOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_camp_api_v1_camps__camp_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                camp_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_camp_api_v1_camps__camp_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                camp_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    camp_action_api_v1_camps__camp_id__actions__action__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                camp_id: string;
+                action: "publish" | "open-registration" | "start" | "complete" | "cancel";
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CancelCamp"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    register_api_v1_camps__camp_id__register_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                camp_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyRegistration"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_registration_api_v1_camps__camp_id__register_cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                camp_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyRegistration"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    camp_registrations_api_v1_camps__camp_id__registrations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                camp_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegistrationList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_attendance_api_v1_camps__camp_id__registrations__registration_id__attend_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                camp_id: string;
+                registration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegistrationList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_api_v1_compatibility_check_get: {
+        parameters: {
+            query: {
+                donor_group: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+                recipient_group: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+                component: "WHOLE_BLOOD" | "PRBC" | "PLATELETS" | "FFP" | "CRYO";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompatibilityCheck"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    matrix_api_v1_compatibility_matrix_get: {
+        parameters: {
+            query?: {
+                component?: ("WHOLE_BLOOD" | "PRBC" | "PLATELETS" | "FFP" | "CRYO") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompatibilityMatrix"];
                 };
             };
             /** @description Validation Error */

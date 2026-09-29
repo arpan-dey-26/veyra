@@ -31,8 +31,10 @@ export function IncomingRequests() {
       })
       .then(({ data, error: e, response }) => {
         if (!active) return;
-        if (data) setItems(data.data);
-        else setError(toFailure(e, response).message);
+        if (data) {
+          setItems(data.data);
+          setError(null); // a later refresh recovers from an earlier failure
+        } else setError(toFailure(e, response).message);
       });
     return () => {
       active = false;
@@ -66,7 +68,18 @@ export function IncomingRequests() {
     reload();
   }
 
-  if (error) return <ErrorState description={error} />;
+  if (error) {
+    return (
+      <ErrorState
+        description={error}
+        action={
+          <Button size="sm" variant="secondary" onClick={reload}>
+            Try again
+          </Button>
+        }
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">

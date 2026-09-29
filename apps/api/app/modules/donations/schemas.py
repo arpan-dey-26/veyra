@@ -52,6 +52,9 @@ class RecordDonationRequest(BaseModel):
         default=None, description="Defaults to now; may not be in the future or >48 h old"
     )
     notes: str | None = Field(default=None, max_length=500)
+    camp_registration_id: UUID | None = Field(
+        default=None, description="Phase 8: link to an attended camp registration (optional)"
+    )
 
     @field_validator("components")
     @classmethod

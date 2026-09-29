@@ -112,9 +112,28 @@ def is_bag_public_id(value: str) -> bool:
     )
 
 
+QR_PREFIX = "veyra:bag:"
+QR_DISCLAIMER = (
+    "QR is a traceability identifier, not an authentication credential or medical authorization."
+)
+
+
 def qr_payload(public_id: str) -> str:
-    """Content encoded in the bag's QR label (signed tokens arrive in Phase 8)."""
-    return f"veyra:bag:{public_id}"
+    """Content encoded in the bag's QR label: the PUBLIC bag id only (no donor, patient,
+    token or medical data). Knowing it grants nothing: every lookup is authenticated and
+    scoped like the trace itself."""
+    return f"{QR_PREFIX}{public_id}"
+
+
+def parse_scan(payload: str) -> str | None:
+    """A scanned QR payload or a typed id → the canonical public id, or None if malformed."""
+    value = payload.strip()
+    if len(value) > 64:
+        return None
+    if value.lower().startswith(QR_PREFIX):
+        value = value[len(QR_PREFIX) :]
+    value = value.strip().upper()
+    return value if is_bag_public_id(value) else None
 
 
 def expiry_for(component: Component, collected_at: datetime) -> datetime:

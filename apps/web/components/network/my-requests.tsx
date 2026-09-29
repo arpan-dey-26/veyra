@@ -26,8 +26,10 @@ export function MyRequests({ highlight }: { highlight?: string | null }) {
       .GET("/api/v1/requests", { params: { query: { limit: 50 } } })
       .then(({ data, error: e, response }) => {
         if (!active) return;
-        if (data) setItems(data.data);
-        else setError(toFailure(e, response).message);
+        if (data) {
+          setItems(data.data);
+          setError(null); // a later refresh recovers from an earlier failure
+        } else setError(toFailure(e, response).message);
       });
     return () => {
       active = false;
@@ -44,7 +46,18 @@ export function MyRequests({ highlight }: { highlight?: string | null }) {
     reload();
   }
 
-  if (error) return <ErrorState description={error} />;
+  if (error) {
+    return (
+      <ErrorState
+        description={error}
+        action={
+          <Button size="sm" variant="secondary" onClick={reload}>
+            Try again
+          </Button>
+        }
+      />
+    );
+  }
   if (items === null) return <Skeleton className="h-40" />;
   if (items.length === 0) {
     return <EmptyState title="No requests yet" description="Requests you send to blood banks are tracked here." />;

@@ -238,8 +238,8 @@ async def apply(
         await record_event(uow, clock, s, "COURIER_ASSIGNED", actor_id=actor_id)
     elif action == "pickup":
         s.status, s.current_checkpoint, s.picked_up_at = "picked_up", 0, now
-        s.checkpoints = L.reach(s.checkpoints, 0, now)
-        s.eta_at = now + timedelta(minutes=L.remaining_travel(s.checkpoints, 0))
+        s.checkpoints = L.reach(L.replan(s.checkpoints, 0, now), 0, now)
+        s.eta_at = L.destination_eta(s.checkpoints)
         await record_event(
             uow, clock, s, "SHIPMENT_PICKED_UP", actor_id=actor_id,
             meta={"checkpoint": 0}, topic="shipment.picked_up",
@@ -248,8 +248,8 @@ async def apply(
     elif action in ("depart", "checkpoint"):
         seq = s.current_checkpoint + 1
         s.status, s.current_checkpoint = "in_transit", seq
-        s.checkpoints = L.reach(s.checkpoints, seq, now)
-        s.eta_at = now + timedelta(minutes=L.remaining_travel(s.checkpoints, seq))
+        s.checkpoints = L.reach(L.replan(s.checkpoints, seq, now), seq, now)
+        s.eta_at = L.destination_eta(s.checkpoints)
         meta = {"checkpoint": seq, "checkpoint_name": s.checkpoints[seq]["name"]}
         if action == "depart":
             await record_event(
@@ -277,7 +277,9 @@ async def apply(
         s.status = s.status_before_delay or "in_transit"
         s.status_before_delay, s.delay_active = None, False
         earliest = now + timedelta(minutes=L.remaining_travel(s.checkpoints, s.current_checkpoint))
-        s.eta_at = max(s.eta_at, earliest)
+        if earliest > s.eta_at:  # the delay lasted longer than announced: re-anchor to now
+            s.checkpoints = L.replan(s.checkpoints, s.current_checkpoint, now)
+            s.eta_at = L.destination_eta(s.checkpoints)
         await record_event(
             uow, clock, s, "SHIPMENT_RESUMED", actor_id=actor_id,
             meta={"total_delay_minutes": s.delay_minutes}, topic="shipment.resumed",

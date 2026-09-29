@@ -7,7 +7,14 @@ from fastapi import APIRouter, Depends, Path, Query
 from app.core.clock import Clock
 from app.core.pagination import MAX_PAGE_SIZE, Page, PageMeta
 from app.core.rbac import AuthContext, Permission
-from app.modules.bags.schemas import BagOut, BagTrace, DiscardRequest, InventorySummary
+from app.modules.bags.schemas import (
+    BagOut,
+    BagQr,
+    BagScanResult,
+    BagTrace,
+    DiscardRequest,
+    InventorySummary,
+)
 from app.modules.bags.service import BagService
 from app.modules.donations.schemas import BloodGroup
 from app.modules.identity.deps import csrf_protect, get_clock, require
@@ -54,6 +61,34 @@ async def inventory_bags(
         offset=offset,
     )
     return Page[BagOut](data=rows, meta=PageMeta(total=total, limit=limit, offset=offset))
+
+
+@router.get(
+    "/bags/scan",
+    response_model=BagScanResult,
+    tags=["trace"],
+    summary="Resolve a scanned bag QR (or typed id) to the caller's scoped bag view",
+)
+async def scan_bag(
+    payload: str = Query(min_length=1, max_length=64, description="QR content or bag id"),
+    ctx: AuthContext = Depends(require(Permission.BAG_TRACE_READ)),
+    service: BagService = Depends(get_bag_service),
+) -> BagScanResult:
+    return await service.scan(ctx, payload)
+
+
+@router.get(
+    "/bags/{public_id}/qr",
+    response_model=BagQr,
+    tags=["trace"],
+    summary="The bag label QR (public id only) as a module matrix",
+)
+async def bag_qr(
+    public_id: str = PUBLIC_ID,
+    ctx: AuthContext = Depends(require(Permission.BAG_TRACE_READ)),
+    service: BagService = Depends(get_bag_service),
+) -> BagQr:
+    return await service.qr(ctx, public_id)
 
 
 @router.get(

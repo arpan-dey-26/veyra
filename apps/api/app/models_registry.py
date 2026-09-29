@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import app.modules.audit.models
 import app.modules.bags.models
+import app.modules.camps.models
 import app.modules.donations.models
 import app.modules.donors.models
 import app.modules.facilities.models
@@ -22,6 +23,7 @@ from app.core.db import Base
 MODEL_MODULES: tuple[str, ...] = (
     "app.modules.audit.models",
     "app.modules.bags.models",
+    "app.modules.camps.models",
     "app.modules.donations.models",
     "app.modules.donors.models",
     "app.modules.facilities.models",

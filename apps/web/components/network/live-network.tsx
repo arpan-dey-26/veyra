@@ -5,6 +5,7 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import { LiveIndicator } from "@/components/network/live-indicator";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardLabel } from "@/components/ui/card";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/states";
 import { api } from "@/lib/api";
@@ -63,6 +64,7 @@ export function LiveNetwork({
         knownIds.current = new Set(graph.nodes.map((n) => n.id));
         dispatch({ type: "graph", graph });
         setLoaded(true);
+        setError(null); // a later refresh recovers from an earlier failure
       } else {
         setError(toFailure(e, response).message);
       }
@@ -90,7 +92,19 @@ export function LiveNetwork({
   const { nodes, height } = useMemo(() => layout(state.nodes), [state.nodes]);
   const pos = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
 
-  if (error) return <ErrorState title="Network view unavailable" description={error} />;
+  if (error) {
+    return (
+      <ErrorState
+        title="Network view unavailable"
+        description={error}
+        action={
+          <Button size="sm" variant="secondary" onClick={reload}>
+            Try again
+          </Button>
+        }
+      />
+    );
+  }
   if (!loaded) return <Skeleton className={compact ? "h-64 w-full" : "h-96 w-full"} />;
 
   return (

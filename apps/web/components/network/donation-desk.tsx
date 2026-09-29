@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardLabel } from "@/components/ui/card";
 import { Field, InlineAlert, SelectInput, Spinner, TextInput } from "@/components/ui/field";
-import { EmptyState, Skeleton } from "@/components/ui/states";
+import { EmptyState, ErrorState, Skeleton } from "@/components/ui/states";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import {
@@ -36,14 +36,22 @@ export function DonationDesk() {
   const [lookupError, setLookupError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [recent, setRecent] = useState<DonationOut[] | null>(null);
+  const [recentError, setRecentError] = useState<string | null>(null);
   const [created, setCreated] = useState<DonationOut | null>(null);
 
   const [version, reloadRecent] = useReload();
 
   useEffect(() => {
     let active = true;
-    void api.GET("/api/v1/donations", { params: { query: { limit: 10 } } }).then(({ data }) => {
-      if (active && data) setRecent(data.data);
+    void api.GET("/api/v1/donations", { params: { query: { limit: 10 } } }).then(({ data, error, response }) => {
+      if (!active) return;
+      if (data) {
+        setRecent(data.data);
+        setRecentError(null);
+      } else {
+        // Without this the list stayed on its loading skeleton forever after a failure.
+        setRecentError(toFailure(error, response).message);
+      }
     });
     return () => {
       active = false;
@@ -105,7 +113,17 @@ export function DonationDesk() {
         <h2 id="recent-heading" className="text-lg font-medium">
           Recent donations
         </h2>
-        {recent === null ? (
+        {recentError && recent === null ? (
+          <ErrorState
+            title="Recent donations unavailable"
+            description={recentError}
+            action={
+              <Button size="sm" variant="secondary" onClick={reloadRecent}>
+                Try again
+              </Button>
+            }
+          />
+        ) : recent === null ? (
           <Skeleton className="h-40" />
         ) : recent.length === 0 ? (
           <EmptyState title="No donations yet" description="Recorded collections and their bags appear here." />

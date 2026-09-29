@@ -17,6 +17,8 @@ from uuid import UUID
 from app.core.errors import ConflictError
 from app.modules.audit.models import AuditLog
 from app.modules.bags.models import BagEvent, BloodBag
+from app.modules.camps.errors import AlreadyRegisteredError
+from app.modules.camps.models import Camp, CampRegistration
 from app.modules.donations.models import Donation
 from app.modules.donors.models import Donor
 from app.modules.facilities.models import Facility, FacilityMembership
@@ -59,6 +61,8 @@ class MemoryDatabase:
     shipment_bags: list[ShipmentBag] = field(default_factory=list)
     shipment_events: list[ShipmentEvent] = field(default_factory=list)
     reading_ids: count[int] = field(default_factory=lambda: count(1))
+    camps: dict[UUID, Camp] = field(default_factory=dict)
+    camp_registrations: dict[UUID, CampRegistration] = field(default_factory=dict)
 
 
 class _MemUsers:
@@ -616,6 +620,66 @@ class _MemShipments:
         )
 
 
+class _MemCamps:
+    def __init__(self, db: MemoryDatabase) -> None:
+        self._db = db
+
+    async def add(self, camp: Camp) -> None:
+        if any(c.code == camp.code for c in self._db.camps.values()):
+            raise ConflictError("Camp code already exists")
+        self._db.camps[camp.id] = camp
+
+    async def get(self, camp_id: UUID, *, lock: bool = False) -> Camp | None:
+        return self._db.camps.get(camp_id)
+
+    async def get_by_code(self, code: str) -> Camp | None:
+        return next((c for c in self._db.camps.values() if c.code == code), None)
+
+    async def list_camps(
+        self,
+        *,
+        organizer_facility_id: UUID | None,
+        statuses: tuple[str, ...] | None,
+        limit: int,
+    ) -> list[Camp]:
+        rows = [
+            c
+            for c in self._db.camps.values()
+            if (organizer_facility_id is None or c.organizer_facility_id == organizer_facility_id)
+            and (statuses is None or c.status in statuses)
+        ]
+        return sorted(rows, key=lambda c: (c.starts_at, c.id))[:limit]
+
+    async def add_registration(self, registration: CampRegistration) -> None:
+        if any(
+            r.camp_id == registration.camp_id and r.donor_id == registration.donor_id
+            for r in self._db.camp_registrations.values()
+        ):
+            raise AlreadyRegisteredError()
+        self._db.camp_registrations[registration.id] = registration
+
+    async def get_registration(self, registration_id: UUID) -> CampRegistration | None:
+        return self._db.camp_registrations.get(registration_id)
+
+    async def registration_for(self, camp_id: UUID, donor_id: UUID) -> CampRegistration | None:
+        return next(
+            (
+                r
+                for r in self._db.camp_registrations.values()
+                if r.camp_id == camp_id and r.donor_id == donor_id
+            ),
+            None,
+        )
+
+    async def registrations(self, camp_id: UUID) -> list[CampRegistration]:
+        rows = [r for r in self._db.camp_registrations.values() if r.camp_id == camp_id]
+        return sorted(rows, key=lambda r: (r.registered_at, r.id))
+
+    async def registrations_for_donor(self, donor_id: UUID) -> list[CampRegistration]:
+        rows = [r for r in self._db.camp_registrations.values() if r.donor_id == donor_id]
+        return sorted(rows, key=lambda r: (r.registered_at, r.id), reverse=True)
+
+
 class MemoryUnitOfWork:
     def __init__(self, db: MemoryDatabase) -> None:
         self.users = _MemUsers(db)
@@ -632,6 +696,7 @@ class MemoryUnitOfWork:
         self.stats = _MemStats(db)
         self.telemetry = _MemTelemetry(db)
         self.shipments = _MemShipments(db)
+        self.camps = _MemCamps(db)
 
     async def commit(self) -> None:
         return None

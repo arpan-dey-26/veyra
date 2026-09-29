@@ -15,8 +15,12 @@ import { useSession } from "@/lib/session";
 /** Top-level destinations per role. The API enforces access; this only hides dead links. */
 function navFor(role: string, home: string): { href: string; label: string }[] {
   const items = [{ href: home, label: "Overview" }];
-  if (role === "HOSPITAL" || role === "BLOOD_BANK" || role === "ADMIN") {
-    items.push({ href: "/network", label: "Live network" });
+  const staff = role === "HOSPITAL" || role === "BLOOD_BANK" || role === "ADMIN";
+  if (staff) items.push({ href: "/network", label: "Live network" });
+  if (role === "DONOR" || role === "BLOOD_BANK" || role === "ADMIN") items.push({ href: "/camps", label: "Camps" });
+  if (staff) {
+    items.push({ href: "/compatibility", label: "Compatibility" });
+    items.push({ href: "/scan", label: role === "ADMIN" ? "Bag trace" : "Bag scanner" });
   }
   return items;
 }

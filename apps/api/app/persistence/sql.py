@@ -15,6 +15,8 @@ from sqlalchemy.orm.exc import StaleDataError
 from app.core.errors import AppError, ConflictError
 from app.modules.audit.models import AuditLog
 from app.modules.bags.models import BagEvent, BloodBag
+from app.modules.camps.errors import AlreadyRegisteredError
+from app.modules.camps.models import Camp, CampRegistration
 from app.modules.donations.models import Donation
 from app.modules.donors.models import Donor
 from app.modules.facilities.models import Facility, FacilityMembership
@@ -42,6 +44,7 @@ _CONSTRAINT_ERRORS: dict[str, type[AppError]] = {
     "uq_users_mobile": MobileTakenError,
     "uq_facilities_registration_number": RegistrationNumberTakenError,
     "uq_devices_bag_id": DeviceAlreadyAttachedError,
+    "uq_camp_registrations_camp_id_donor_id": AlreadyRegisteredError,
 }
 
 _CONCURRENT_CHANGE = "This record was changed by someone else. Reload and try again."
@@ -639,6 +642,66 @@ class SqlTelemetryRepository(_Repo):
         return lo, hi
 
 
+class SqlCampRepository(_Repo):
+    async def add(self, camp: Camp) -> None:
+        await self._add(camp)
+
+    async def get(self, camp_id: UUID, *, lock: bool = False) -> Camp | None:
+        q = select(Camp).where(Camp.id == camp_id)
+        if lock:
+            q = q.with_for_update()
+        return await self._s.scalar(q)
+
+    async def get_by_code(self, code: str) -> Camp | None:
+        return await self._s.scalar(select(Camp).where(Camp.code == code))
+
+    async def list_camps(
+        self,
+        *,
+        organizer_facility_id: UUID | None,
+        statuses: tuple[str, ...] | None,
+        limit: int,
+    ) -> list[Camp]:
+        conds = []
+        if organizer_facility_id is not None:
+            conds.append(Camp.organizer_facility_id == organizer_facility_id)
+        if statuses is not None:
+            conds.append(Camp.status.in_(statuses))
+        rows = await self._s.scalars(
+            select(Camp).where(*conds).order_by(Camp.starts_at, Camp.id).limit(limit)
+        )
+        return list(rows)
+
+    async def add_registration(self, registration: CampRegistration) -> None:
+        await self._add(registration)
+
+    async def get_registration(self, registration_id: UUID) -> CampRegistration | None:
+        return await self._s.get(CampRegistration, registration_id)
+
+    async def registration_for(self, camp_id: UUID, donor_id: UUID) -> CampRegistration | None:
+        return await self._s.scalar(
+            select(CampRegistration).where(
+                CampRegistration.camp_id == camp_id, CampRegistration.donor_id == donor_id
+            )
+        )
+
+    async def registrations(self, camp_id: UUID) -> list[CampRegistration]:
+        rows = await self._s.scalars(
+            select(CampRegistration)
+            .where(CampRegistration.camp_id == camp_id)
+            .order_by(CampRegistration.registered_at, CampRegistration.id)
+        )
+        return list(rows)
+
+    async def registrations_for_donor(self, donor_id: UUID) -> list[CampRegistration]:
+        rows = await self._s.scalars(
+            select(CampRegistration)
+            .where(CampRegistration.donor_id == donor_id)
+            .order_by(CampRegistration.registered_at.desc(), CampRegistration.id.desc())
+        )
+        return list(rows)
+
+
 class SqlUnitOfWork:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
@@ -656,6 +719,7 @@ class SqlUnitOfWork:
         self.stats = SqlStatsRepository(session)
         self.telemetry = SqlTelemetryRepository(session)
         self.shipments = SqlShipmentRepository(session)
+        self.camps = SqlCampRepository(session)
 
     async def commit(self) -> None:
         try:

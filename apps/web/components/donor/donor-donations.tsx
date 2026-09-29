@@ -6,9 +6,11 @@ import { useEffect, useState } from "react";
 import { StatTile } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardLabel } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { EmptyState, Skeleton } from "@/components/ui/states";
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/network";
+import { useReload } from "@/lib/use-reload";
 
 /** The donor's own history: impact without ever naming the receiving hospital or patient. */
 /** Impact tiles from the donor's own history (counts only). */
@@ -30,24 +32,32 @@ export function DonorDonations({
 } = {}) {
   const [data, setData] = useState<MyDonations | null>(null);
   const [failed, setFailed] = useState(false);
+  const [version, reload] = useReload();
 
   useEffect(() => {
     let active = true;
     void api.GET("/api/v1/donors/me/donations").then(({ data: d }) => {
       if (!active) return;
-      if (d) setData(d);
-      else setFailed(true);
+      if (d) {
+        setData(d);
+        setFailed(false);
+      } else setFailed(true);
     });
     return () => {
       active = false;
     };
-  }, []);
+  }, [version]);
 
   if (failed) {
     return (
       <Card>
         <CardLabel>Donations</CardLabel>
-        <p className="mt-2 text-sm text-ink-muted">Your donation history couldn&apos;t be loaded. Refresh to try again.</p>
+        <p role="alert" className="mt-2 text-sm text-ink-muted">
+          Your donation history couldn&apos;t be loaded.
+        </p>
+        <Button size="sm" variant="secondary" className="mt-3" onClick={reload}>
+          Try again
+        </Button>
       </Card>
     );
   }

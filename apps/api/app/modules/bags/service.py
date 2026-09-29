@@ -19,17 +19,24 @@ from app.modules.bags.domain import (
     BagStatus,
     event_fields,
     event_hash,
+    parse_scan,
     qr_payload,
 )
+from app.modules.bags.domain import QR_DISCLAIMER as _QR_DISCLAIMER
 from app.modules.bags.models import BagEvent, BloodBag
+from app.modules.bags.qr import encode as encode_qr
 from app.modules.bags.schemas import (
     BagEventOut,
     BagOut,
+    BagQr,
+    BagScanResult,
     BagTrace,
     ChainStatus,
     ComponentInfo,
     InventoryRow,
     InventorySummary,
+    ScanColdChain,
+    ScanShipment,
 )
 from app.modules.outbox.service import emit
 from app.persistence.repositories import UnitOfWork
@@ -125,6 +132,10 @@ async def append_event(
     event.row_hash = event_hash(prev_hash, _fields(event))
     await uow.bags.add_event(event)
     return event
+
+
+class InvalidQrError(AppError):
+    status, code, title = 422, "invalid_qr", "Not a VEYRA bag QR code"
 
 
 class BagService:
@@ -257,6 +268,66 @@ class BagService:
                 for e in events
             ],
             chain=verify_chain(events),
+        )
+
+    async def scan(self, ctx: AuthContext, payload: str) -> BagScanResult:
+        """Resolve a scanned/typed QR to what ``ctx`` may see. The QR is only an identifier:
+        authentication, permission and custody scope are checked exactly as for the trace."""
+        public_id = parse_scan(payload)
+        if public_id is None:
+            raise InvalidQrError("Scan a VEYRA bag label, or type an id like VYR-7F3K-2QXM.")
+        bag, events = await self._visible_bag(ctx, public_id)
+        now = self._clock.now()
+        device = await self._uow.telemetry.device_for_bag(bag.id)
+        cold = ScanColdChain(
+            monitored=device is not None,
+            status=device.cold_chain_status if device else "unmonitored",
+            excursion_active=bool(device and device.excursion_started_at is not None),
+            current_c=device.last_temperature_c if device else None,
+            last_reading_at=device.last_seen_at if device else None,
+        )
+        s = await self._uow.shipments.for_bag(bag.id)
+        shipment = (
+            ScanShipment(
+                id=s.id,
+                reference=s.reference,
+                status=s.status,
+                source_name=await self.facility_name(s.source_facility_id) or "",
+                destination_name=await self.facility_name(s.destination_facility_id) or "",
+                eta_at=s.eta_at,
+                delay_active=s.delay_active,
+            )
+            if s is not None
+            else None
+        )
+        last = events[-1] if events else None
+        return BagScanResult(
+            public_id=bag.public_id,
+            qr_payload=qr_payload(bag.public_id),
+            bag=await self.bag_out(bag),
+            lifecycle_status=bag.status,
+            usable=bag.status == BagStatus.AVAILABLE.value and bag.expires_at > now,
+            location=await self.facility_name(bag.current_facility_id) or "",
+            cold_chain=cold,
+            shipment=shipment,
+            chain=verify_chain(events),
+            events=len(events),
+            last_event_type=last.event_type if last else None,
+            last_event_at=last.occurred_at if last else None,
+            trace_path=f"/bags/{bag.public_id}",
+            disclaimer=_QR_DISCLAIMER,
+        )
+
+    async def qr(self, ctx: AuthContext, public_id: str) -> BagQr:
+        bag, _ = await self._visible_bag(ctx, public_id)
+        payload = qr_payload(bag.public_id)
+        modules = encode_qr(payload)
+        return BagQr(
+            public_id=bag.public_id,
+            payload=payload,
+            size=len(modules),
+            modules=modules,
+            disclaimer=_QR_DISCLAIMER,
         )
 
     async def discard(

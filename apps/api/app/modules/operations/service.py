@@ -31,6 +31,7 @@ from app.modules.forecast.service import (
     FORECAST_GROUPS,
     facility_daily_mean,
 )
+from app.modules.logistics.models import Shipment
 from app.modules.operations import engine as E
 from app.modules.operations.schemas import (
     ActiveRoute,
@@ -125,6 +126,7 @@ class OperationsService:
         self._devices: dict[UUID | None, dict[str, E.DeviceView]] = {}
         self._device_rows: dict[UUID | None, list[tuple[TelemetryDevice, BloodBag]]] = {}
         self._bags: dict[tuple[UUID, str, str], list[BloodBag]] = {}
+        self._means: dict[tuple[UUID, str, str], float | None] = {}
         self._open: dict[UUID, list[BloodRequest]] = {}
 
     @property
@@ -209,7 +211,14 @@ class OperationsService:
         return {(c.blood_group, c.component): c.available for c in counts}
 
     def _mean(self, facility: Facility, group: str, component: str) -> float | None:
-        return facility_daily_mean(self._model, facility, group, component, self._today())
+        # Memoised per service instance (= per API request): a queue of many requests for the
+        # same group/component would otherwise regenerate the same synthetic series each time.
+        key = (facility.id, group, component)
+        if key not in self._means:
+            self._means[key] = facility_daily_mean(
+                self._model, facility, group, component, self._today()
+            )
+        return self._means[key]
 
     async def pressure_for(
         self,
@@ -324,16 +333,69 @@ class OperationsService:
         )
 
     async def route_for(self, req: BloodRequest) -> RouteOut | None:
+        """Route for a request. A live (Phase 7) shipment's ETA wins over the estimate, so the
+        Operations view and the shipment never disagree. Otherwise the estimate is anchored to
+        the dispatch time (not "now"), so a dispatched request's ETA doesn't drift hourly."""
         src = await self.facility(req.target_facility_id)
         dst = await self.facility(req.hospital_id)
         if src is None or dst is None:
             return None
-        return self._route_out(src, dst, req.urgency)
+        shipment = await self._uow.shipments.for_request(req.id)
+        if shipment is not None:
+            return self._shipment_route(src, dst, req.urgency, shipment)
+        at = req.updated_at if req.status == "dispatched" else None
+        return self._route_out(src, dst, req.urgency, at=at)
 
-    def _route_out(self, src: Facility, dst: Facility, urgency: str) -> RouteOut:
+    def _shipment_route(
+        self, src: Facility, dst: Facility, urgency: str, shipment: Shipment
+    ) -> RouteOut:
+        now = self._clock.now()
+        remaining = max(0, round((shipment.eta_at - now).total_seconds() / 60))
+        done = shipment.status in ("arrived", "received")
+        status: Literal["clear", "slow", "delayed"] = (
+            "delayed" if shipment.delay_active or (not done and now > shipment.eta_at) else "clear"
+        )
+        reasons = [
+            E.Reason(
+                "live_shipment",
+                f"Live simulated shipment {shipment.reference} ({shipment.status}); "
+                f"{shipment.distance_km} km schematic route",
+            )
+        ]
+        if shipment.delay_minutes:
+            reasons.append(
+                E.Reason(
+                    "shipment_delay",
+                    f"Includes +{shipment.delay_minutes} min simulated delay",
+                    tone="attention",
+                )
+            )
+        return RouteOut(
+            source_facility_id=src.id,
+            source_name=src.name,
+            destination_facility_id=dst.id,
+            destination_name=dst.name,
+            urgency=urgency,
+            distance_km=shipment.distance_km,
+            travel_minutes=remaining,
+            handover_minutes=0,
+            eta_minutes=0 if done else remaining,
+            status=status,
+            reasons=_reasons(reasons),
+            source=SourceMeta(
+                provider="veyra-logistics-sim",
+                kind=SourceKind.SIMULATED,
+                fetched_at=now,
+                note=E.ROUTING_LABEL + ". Live simulated shipment ETA (minutes remaining).",
+            ),
+        )
+
+    def _route_out(
+        self, src: Facility, dst: Facility, urgency: str, *, at: datetime | None = None
+    ) -> RouteOut:
         now = self._clock.now()
         r = E.simulated_route(
-            _place(src), _place(dst), urgency, hour_bucket=int(now.timestamp() // 3600)
+            _place(src), _place(dst), urgency, hour_bucket=int((at or now).timestamp() // 3600)
         )
         return RouteOut(
             source_facility_id=src.id,
@@ -577,12 +639,17 @@ class OperationsService:
         for req in rows:
             r = await self.route_for(req)
             if r is not None:
+                shipment = await self._uow.shipments.for_request(req.id)
                 routes.append(
                     ActiveRoute(
                         request_id=req.id,
                         reference=req.reference,
                         dispatched_at=req.updated_at,
-                        expected_at=req.updated_at + timedelta(minutes=r.eta_minutes),
+                        expected_at=(
+                            shipment.eta_at
+                            if shipment is not None
+                            else req.updated_at + timedelta(minutes=r.eta_minutes)
+                        ),
                         route=r,
                     )
                 )

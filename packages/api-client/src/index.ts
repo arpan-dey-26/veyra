@@ -96,6 +96,24 @@ export type ShipmentTimeline = Schemas["ShipmentTimeline"];
 export type ShipmentTimelineEvent = Schemas["TimelineEvent"];
 export type ShipmentTelemetry = Schemas["ShipmentTelemetry"];
 export type ShipmentColdChainBag = Schemas["ColdChainBag"];
+// Phase 8: compatibility reference, donation camps, bag QR scanning
+export type CompatibilityMatrix = Schemas["CompatibilityMatrix"];
+export type ComponentMatrix = Schemas["ComponentMatrix"];
+export type CompatibilityCheck = Schemas["CompatibilityCheck"];
+export type CampOut = Schemas["CampOut"];
+export type CampList = Schemas["CampList"];
+export type CampCreate = Schemas["CampCreate"];
+export type CampUpdate = Schemas["CampUpdate"];
+export type CampStats = Schemas["CampStats"];
+export type CampDashboard = Schemas["CampDashboard"];
+export type PublicCampOut = Schemas["PublicCampOut"];
+export type PublicCampList = Schemas["PublicCampList"];
+export type CampRegistrationOut = Schemas["RegistrationOut"];
+export type CampRegistrationList = Schemas["RegistrationList"];
+export type MyCampRegistration = Schemas["MyRegistration"];
+export type MyCampRegistrations = Schemas["MyRegistrations"];
+export type BagScanResult = Schemas["BagScanResult"];
+export type BagQr = Schemas["BagQr"];
 export type LogisticsResult = Schemas["LogisticsResult"];
 
 /** A live event from `GET /api/v1/stream` (Server-Sent Events, fed by the outbox). */

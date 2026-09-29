@@ -19,6 +19,7 @@ from app.modules.bags.domain import (
 )
 from app.modules.bags.models import BloodBag
 from app.modules.bags.service import BagService, append_event, require_facility
+from app.modules.camps.hooks import check_camp_donation, link_camp_donation
 from app.modules.donations.models import Donation
 from app.modules.donations.schemas import (
     DonationOut,
@@ -125,6 +126,13 @@ class DonationService:
                 f"The minimum interval between donations is {self._interval_days} days; "
                 f"this donor is eligible from {eligible_from.date().isoformat()}."
             )
+        # Phase 8: optionally link to a camp registration. Validated before anything is
+        # written; every normal control above (verified donor, interval, time) still applies.
+        camp_reg = (
+            await check_camp_donation(self._uow, ctx, req.camp_registration_id, donor.id)
+            if req.camp_registration_id
+            else None
+        )
 
         donation = Donation(
             id=uuid7(),
@@ -192,6 +200,8 @@ class DonationService:
             actor_id=ctx.user_id,
             meta={"bags": len(req.components), "blood_group_corrected": group_changed},
         )
+        if camp_reg is not None:
+            await link_camp_donation(self._uow, self._clock, ctx, camp_reg, donation.id)
         await self._uow.commit()
         return await self._donation_out(donation)
 

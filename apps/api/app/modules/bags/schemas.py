@@ -65,7 +65,7 @@ class ChainStatus(BaseModel):
     head_hash: str | None
     note: str = (
         "Tamper-evident SHA-256 chain stored in the VEYRA database. "
-        "It is not anchored on a blockchain yet (planned for Phase 8)."
+        "It is not anchored on a blockchain (possible future work)."
     )
 
 
@@ -80,3 +80,51 @@ class DiscardRequest(BaseModel):
 
     reason: Literal["expired", "damaged", "failed_screening", "other"]
     note: str | None = Field(default=None, max_length=300)
+
+
+class ScanColdChain(BaseModel):
+    monitored: bool
+    status: Literal["unmonitored", "unknown", "normal", "warning", "critical"]
+    excursion_active: bool
+    current_c: float | None
+    last_reading_at: datetime | None
+    simulated: bool = True
+
+
+class ScanShipment(BaseModel):
+    id: UUID
+    reference: str
+    status: str
+    source_name: str
+    destination_name: str
+    eta_at: datetime
+    delay_active: bool
+    simulated: bool = True
+
+
+class BagScanResult(BaseModel):
+    """What an authorized scanner may see. Never donor or patient identity."""
+
+    public_id: str
+    qr_payload: str
+    bag: BagOut
+    lifecycle_status: str
+    usable: bool = Field(description="Available and unexpired (still needs human checks)")
+    location: str = Field(description="Facility currently holding the bag")
+    cold_chain: ScanColdChain
+    shipment: ScanShipment | None
+    chain: ChainStatus
+    events: int
+    last_event_type: str | None
+    last_event_at: datetime | None
+    trace_path: str
+    disclaimer: str
+
+
+class BagQr(BaseModel):
+    public_id: str
+    payload: str
+    size: int = Field(description="Modules per side (quiet zone not included)")
+    modules: list[str] = Field(description="Rows of '1' (dark) / '0' (light)")
+    error_correction: Literal["M"] = "M"
+    disclaimer: str

@@ -395,7 +395,7 @@ describe("bag page integration", () => {
     events: [
       { seq: 1, event_type: "COLLECTED", occurred_at: "2026-09-27T09:00:00Z", from_facility: null, to_facility: "Central Blood Bank", meta: {}, prev_hash: "0".repeat(64), row_hash: "a".repeat(64) },
     ],
-    chain: { valid: true, length: 1, head_hash: "a".repeat(64), note: "Not anchored on a blockchain yet (planned for Phase 8)." },
+    chain: { valid: true, length: 1, head_hash: "a".repeat(64), note: "Not anchored on a blockchain (possible future work)." },
   };
   const me = (facilityId: string) => ({
     user: { id: "u1", email: "bank@demo.veyra", full_name: "Demo Bank", mobile: "+910000000000", role: "BLOOD_BANK", status: "active", is_demo: true, created_at: "2026-09-01T00:00:00Z", verified_at: null },

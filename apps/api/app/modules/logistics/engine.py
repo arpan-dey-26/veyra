@@ -196,6 +196,28 @@ def reschedule(
     return out
 
 
+def replan(checkpoints: list[dict[str, Any]], reached: int, now: datetime) -> list[dict[str, Any]]:
+    """Re-anchor every checkpoint after ``reached`` to ``now``, keeping the planned leg times.
+
+    Keeps the checkpoint schedule and the ETA consistent when progress happens earlier or
+    later than planned (the ETA is always the destination checkpoint's expected time). The
+    reached checkpoint keeps its planned time, so planned vs actual stays visible.
+    """
+    out = [dict(c) for c in checkpoints]
+    t = now
+    for seq in range(reached + 1, len(out)):
+        leg = datetime.fromisoformat(checkpoints[seq]["expected_at"]) - datetime.fromisoformat(
+            checkpoints[seq - 1]["expected_at"]
+        )
+        t += leg
+        out[seq]["expected_at"] = t.isoformat()
+    return out
+
+
+def destination_eta(checkpoints: list[dict[str, Any]]) -> datetime:
+    return datetime.fromisoformat(checkpoints[-1]["expected_at"])
+
+
 @dataclass(frozen=True)
 class Eta:
     eta_at: datetime

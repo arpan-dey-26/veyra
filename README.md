@@ -6,7 +6,23 @@ VEYRA is a prototype of an intelligent blood-supply network. It connects donors,
 
 ## Current phase
 
-**Phase 7: logistics, shipment tracking & delivery (simulated, prototype).**
+**Phase 8: product completion — blood compatibility matrix, donation camps, QR bag scanning.**
+
+- **Compatibility matrix** (`/compatibility`, API `/compatibility/matrix` and `/compatibility/check`): a deterministic ABO/Rh donor → recipient reference for Whole Blood, PRBC, Platelets, FFP and Cryoprecipitate. The rules live in one backend service and the web app only renders them. It is read-only for hospital, blood-bank and admin staff. It never approves, allocates or dispatches blood. *"Informational prototype reference only; final transfusion decisions require authorized clinical confirmation."*
+- **Donation camps** (`/camps`, API `/camps/*`):
+  - Lifecycle: planned → published → registration_open → ongoing → completed, with cancelled before the camp starts. Invalid transitions return 409.
+  - Blood banks manage their own camps and admins manage network-wide.
+  - Verified donors search, register and cancel. Capacity is enforced under a row lock, and there are no duplicate registrations.
+  - Staff confirm attendance. A camp donation is recorded through the normal donation desk, with verification, interval and collection-time controls.
+  - No medical data is collected. *"Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff."*
+- **QR bag scanning** (`/scan`, API `/bags/scan`, `/bags/{id}/qr`, plus "Show QR" on the bag page):
+  - The QR carries the public bag id only (`veyra:bag:VYR-XXXX-XXXX`), rendered by a dependency-free deterministic encoder.
+  - Camera scanning uses the browser's BarcodeDetector where available, with manual entry as the fallback. Frames are never stored or uploaded.
+  - Lookups are authenticated and custody-scoped exactly like the trace: anonymous 401, donor 403, unrelated facility 404.
+  - A scan shows lifecycle, location, cold chain, shipment and hash-chain status. *"QR is a traceability identifier, not an authentication credential or medical authorization."*
+- A Phase 7 audit fixed shipment ETA and checkpoint consistency, fixed Operations ETA drift, kept bound SQL parameters out of error logs, and made failed page loads recoverable. See the [Phase 8 report](docs/phase-reports/phase-8.md) and [what is real vs simulated](docs/phase-reports/phase-8.md#real-vs-simulated).
+
+Phase 7, still in place: **logistics, shipment tracking & delivery (simulated, prototype).**
 
 - A human-confirmed dispatch (recommended bags) creates a shipment. It goes created → pickup_pending → picked_up → in_transit (checkpoints) ⇄ delayed → arrived → received, through an explicit state machine where invalid transitions return 409.
 - It has a fictional simulated courier, a schematic five-checkpoint route ("Prototype logistics route — not a geographic map") and a deterministic "Simulated ETA — prototype", with visible delays.
@@ -54,13 +70,13 @@ Phase 2, still in place:
 - Blood-bank donation desk: find a verified donor, record a collection, create labelled bags (`VYR-XXXX-XXXX`, QR payload `veyra:bag:<id>`).
 - Facility inventory by blood group × component, with expiry (72 h warning) and discard.
 - Hospital blood requests: banded network availability (never exact stock), idempotent submission, first-expiry-first-out dispatch, receipt.
-- Append-only, SHA-256 hash-chained custody trail per bag (tamper-evident in the database; **not** a blockchain, on-chain anchoring is Phase 8).
+- Append-only, SHA-256 hash-chained custody trail per bag (tamper-evident in the database; **not** a blockchain; on-chain anchoring is possible future work).
 - Blood-bank provider port: internal banks, plus **simulated** partner banks (`MockBloodBankProvider`, labelled "Simulated", refused in production).
 - Transactional outbox → Server-Sent Events, with a live indicator in the UI.
 
 Phase 1 (still in place): donor registration with **demo** phone verification (last 4 digits of the mobile, labelled, never presented as OTP), Argon2id passwords, rotating refresh sessions, CSRF protection, permission + scope RBAC, admin facility onboarding and staff invitations.
 
-See the [Phase 7 report](docs/phase-reports/phase-7.md), [Phase 6 report](docs/phase-reports/phase-6.md), [Phase 5 report](docs/phase-reports/phase-5.md), [Phase 4 report](docs/phase-reports/phase-4.md), [Phase 3 report](docs/phase-reports/phase-3.md), [Phase 2 report](docs/phase-reports/phase-2.md), [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
+See the [Phase 8 report](docs/phase-reports/phase-8.md), [Phase 7 report](docs/phase-reports/phase-7.md), [Phase 6 report](docs/phase-reports/phase-6.md), [Phase 5 report](docs/phase-reports/phase-5.md), [Phase 4 report](docs/phase-reports/phase-4.md), [Phase 3 report](docs/phase-reports/phase-3.md), [Phase 2 report](docs/phase-reports/phase-2.md), [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
 
 Demo sign-ins after `scripts\bootstrap.cmd` (**DEMO ONLY**, password `veyra-demo-console-2026` for all three):
 

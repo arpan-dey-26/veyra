@@ -59,6 +59,13 @@ class Permission(StrEnum):
     # Phase 7: drive the SIMULATED logistics of shipments the bank dispatched (demo only)
     LOGISTICS_SIMULATE = "logistics:simulate:own_facility"
     TRANSPORT_READ = "transport:read"
+    # Phase 8: informational ABO/Rh compatibility reference (staff only; never allocates)
+    COMPATIBILITY_READ = "compatibility:read"
+    # Phase 8: donation camps (banks manage their own; admins network-wide via CAMP_MANAGE_ANY)
+    CAMP_MANAGE_OWN = "camp:manage:own_facility"
+    CAMP_MANAGE_ANY = "camp:manage:network"
+    CAMP_REGISTER_SELF = "camp:register:self"
+    CAMP_READ_PUBLIC = "camp:read:public"
     # Admin
     USER_READ = "user:read"
     USER_MANAGE = "user:manage"
@@ -78,6 +85,8 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.DONATION_READ_SELF,
             _P.ELIGIBILITY_READ_SELF,
             _P.NOTIFICATION_READ_SELF,
+            _P.CAMP_REGISTER_SELF,
+            _P.CAMP_READ_PUBLIC,
         }
     ),
     Role.HOSPITAL: frozenset(
@@ -98,6 +107,8 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.NETWORK_AVAILABILITY_READ,
             _P.EVENTS_SUBSCRIBE,
             _P.NOTIFICATION_READ_SELF,
+            _P.COMPATIBILITY_READ,
+            _P.CAMP_READ_PUBLIC,
         }
     ),
     Role.BLOOD_BANK: frozenset(
@@ -120,6 +131,9 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.TRANSPORT_READ,
             _P.EVENTS_SUBSCRIBE,
             _P.NOTIFICATION_READ_SELF,
+            _P.COMPATIBILITY_READ,
+            _P.CAMP_MANAGE_OWN,
+            _P.CAMP_READ_PUBLIC,
         }
     ),
     Role.ADMIN: frozenset(
@@ -133,6 +147,9 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.BAG_TRACE_READ,
             _P.EVENTS_SUBSCRIBE,
             _P.NOTIFICATION_READ_SELF,
+            _P.COMPATIBILITY_READ,
+            _P.CAMP_MANAGE_ANY,
+            _P.CAMP_READ_PUBLIC,
         }
     ),
 }

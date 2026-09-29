@@ -56,7 +56,11 @@ class TimestampMixin:
 
 class Database:
     def __init__(self, url: str, *, echo: bool = False) -> None:
-        self.engine: AsyncEngine = create_async_engine(url, echo=echo, pool_pre_ping=True)
+        # hide_parameters: a failing statement's bound values (emails, mobiles, names) must
+        # never reach the unhandled-error log through the exception text.
+        self.engine: AsyncEngine = create_async_engine(
+            url, echo=echo, pool_pre_ping=True, hide_parameters=True
+        )
         self.sessionmaker = async_sessionmaker(self.engine, expire_on_commit=False)
 
     async def session(self) -> AsyncIterator[AsyncSession]:

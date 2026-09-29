@@ -196,6 +196,42 @@ if ($SkipDocker) {
   Step "docker: postgres + redis healthy" { Invoke-Native docker ($compose + @("up", "-d", "--wait", "postgres", "redis")) }
   Step "api: alembic upgrade head (real Postgres)" { InDir "apps/api" { Invoke-Native uv @("run", "alembic", "upgrade", "head") } }
   Step "api: alembic check (models == migrations)" { InDir "apps/api" { Invoke-Native uv @("run", "alembic", "check") } }
+  Step "api: migrations round-trip on a scratch database (upgrade, downgrade base, upgrade, check, schema diff)" {
+    $scratch = "veyra_migcheck"
+    function Psql([string]$Sql) { Invoke-Native docker ($compose + @("exec", "-T", "postgres", "psql", "-U", "veyra", "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-q", "-c", $Sql)) }
+    function Schema([string]$Db) {
+      $prevEap = $ErrorActionPreference
+      $ErrorActionPreference = "Continue"
+      try { $out = & docker ($compose + @("exec", "-T", "postgres", "pg_dump", "-U", "veyra", "-s", "--no-owner", "--no-privileges", $Db)) 2>&1; $code = $LASTEXITCODE }
+      finally { $ErrorActionPreference = $prevEap }
+      if ($code -ne 0) { throw "pg_dump $Db exited with code $code" }
+      # Drop comments, blank lines and pg_dump's random \restrict tokens; keep every DDL line.
+      return @($out | ForEach-Object { "$_" } | Where-Object { $_ -ne "" -and $_ -notmatch '^--' -and $_ -notmatch '^\\(un)?restrict ' })
+    }
+    Psql "DROP DATABASE IF EXISTS $scratch"
+    Psql "CREATE DATABASE $scratch"
+    $prevUrl = $env:VEYRA_DATABASE_URL
+    $env:VEYRA_DATABASE_URL = "postgresql+asyncpg://veyra:veyra@localhost:55432/$scratch"
+    try {
+      InDir "apps/api" {
+        Invoke-Native uv @("run", "alembic", "upgrade", "head")
+        Invoke-Native uv @("run", "alembic", "downgrade", "base")
+        Invoke-Native uv @("run", "alembic", "upgrade", "head")
+        Invoke-Native uv @("run", "alembic", "check")
+      }
+    } finally {
+      if ($null -eq $prevUrl) { Remove-Item Env:VEYRA_DATABASE_URL -ErrorAction SilentlyContinue } else { $env:VEYRA_DATABASE_URL = $prevUrl }
+    }
+    $dev = Schema "veyra"
+    $fresh = Schema $scratch
+    $diff = @(Compare-Object -ReferenceObject $dev -DifferenceObject $fresh)
+    Psql "DROP DATABASE IF EXISTS $scratch"
+    if ($diff.Count -ne 0) {
+      $diff | Select-Object -First 20 | ForEach-Object { Log "   schema diff: $($_.SideIndicator) $($_.InputObject)" }
+      throw "dev schema differs from a fresh upgrade ($($diff.Count) lines)"
+    }
+    Log "   migrations OK: base -> head -> base -> head, alembic check clean, schema identical to the dev database ($($dev.Count) DDL lines)"
+  }
   Step "api: pytest (integration, real Postgres + Redis)" {
     $env:VEYRA_REQUIRE_INFRA = "1"
     try { InDir "apps/api" { Invoke-Native uv @("run", "pytest", "-v", "-m", "integration") } }
@@ -681,6 +717,122 @@ if ($SkipDocker) {
     $net = Invoke-Api Get "$base/shipments" $null $adm
     if ($net.scope -ne "network" -or -not (@($net.shipments) | Where-Object { $_.id -eq $sid })) { throw "admin network view" }
     Log "   logistics OK (shipment $($s.reference) for $($req.reference): $($det.courier.name), $(@($route.checkpoints).Count) checkpoints, +18 min simulated delay, received)"
+  }
+  Step "e2e: phase 8 compatibility + camps + QR (camp -> registration -> attendance -> donation -> QR -> shipment -> receipt -> trace)" {
+    $base = "http://localhost:3000/api/v1"
+    $pw = "veyra-demo-console-2026"
+    function Csrf($sess) { ($sess.Cookies.GetCookies("http://localhost:3000") | Where-Object Name -eq "veyra_csrf").Value }
+    function Status-Of([scriptblock]$Call) {
+      try { & $Call | Out-Null; return 200 } catch { if ("$_" -match "-> (\d{3})") { return [int]$Matches[1] } else { throw } }
+    }
+    $bank = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $hosp = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $adm = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $other = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $anon = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    Invoke-Api Post "$base/auth/login" @{ email = "bank@veyra.demo"; password = $pw } $bank | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "hospital@veyra.demo"; password = $pw } $hosp | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "admin@veyra.demo"; password = $pw } $adm | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "ops-e2e-unrelated@example.in"; password = "unrelated-hospital-smoke-2026" } $other | Out-Null
+    $bf = Invoke-Api Get "$base/facilities/me" $null $bank
+    $head = 0
+    while ($true) {
+      $page = (Invoke-WebRequest -Uri "$base/stream?once=true&after=$head" -WebSession $adm -UseBasicParsing).Content
+      $ids = @([regex]::Matches($page, "(?m)^id: (\d+)") | ForEach-Object { [int64]$_.Groups[1].Value })
+      if ($ids.Count -eq 0) { break }
+      $head = ($ids | Measure-Object -Maximum).Maximum
+    }
+    $hb = @{ "X-CSRF-Token" = (Csrf $bank) }
+    # 1-2. The blood bank creates a camp, publishes it and opens registration.
+    $tag = [Guid]::NewGuid().ToString("N").Substring(0, 8)
+    $start = (Get-Date).ToUniversalTime().AddDays(1)
+    $camp = Invoke-Api Post "$base/camps" @{ title = "Demo Camp $tag"; venue = "Community Hall (demo)"; city = "Kolkata"; state = "West Bengal";
+      starts_at = $start.ToString("yyyy-MM-ddTHH:mm:ssZ"); ends_at = $start.AddHours(6).ToString("yyyy-MM-ddTHH:mm:ssZ"); capacity = 25;
+      contact_name = "Camp Desk (demo)"; description = "Fictional demo camp." } $bank $hb
+    if ($camp.status -ne "planned" -or $camp.code -notlike "CMP-*") { throw "camp not created" }
+    if ($camp.disclaimer -ne "Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.") { throw "camp disclaimer" }
+    $cid = $camp.id
+    if ((Status-Of { Invoke-Api Post "$base/camps/$cid/actions/start" $null $bank $hb }) -ne 409) { throw "invalid camp transition allowed" }
+    Invoke-Api Post "$base/camps/$cid/actions/publish" $null $bank $hb | Out-Null
+    if ((Invoke-Api Post "$base/camps/$cid/actions/open-registration" $null $bank $hb).status -ne "registration_open") { throw "open registration" }
+    Assert-Http "http://localhost:3000/camps" ""
+    # 3-4. A verified donor finds the camp and registers (a second attempt is refused).
+    $d = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $mobile = "9" + ([UInt64]("0x" + [Guid]::NewGuid().ToString("N").Substring(0, 15)) % 1000000000).ToString("000000000")
+    $reg = Invoke-Api Post "$base/auth/register" @{ full_name = "Camp Demo Donor"; email = "camp-$tag@example.in"; mobile = $mobile;
+      blood_group = "A+"; address = "1 Demo Street"; city = "Kolkata"; state = "West Bengal"; pin_code = "700001";
+      password = "camp-demo-passphrase" } $d
+    Invoke-Api Post "$base/auth/verify" @{ challenge_id = $reg.verification.challenge_id; code = $mobile.Substring(6) } $d | Out-Null
+    $found = @((Invoke-Api Get "$base/camps/public?q=$tag" $null $d).camps)
+    if ($found.Count -ne 1 -or -not $found[0].registration_open) { throw "donor can't find the camp" }
+    $hd = @{ "X-CSRF-Token" = (Csrf $d) }
+    $my = Invoke-Api Post "$base/camps/$cid/register" $null $d $hd
+    if ($my.status -ne "registered") { throw "donor registration" }
+    if ((Status-Of { Invoke-Api Post "$base/camps/$cid/register" $null $d $hd }) -ne 409) { throw "duplicate registration allowed" }
+    if ((Status-Of { Invoke-Api Get "$base/camps/$cid" $null $d }) -ne 403) { throw "donor read camp management" }
+    if ((Status-Of { Invoke-Api Get "$base/camps/$cid/registrations" $null $other }) -ne 403) { throw "hospital read camp registrations" }
+    # 5-6. Staff start the camp, confirm attendance, record the donation at the normal desk.
+    Invoke-Api Post "$base/camps/$cid/actions/start" $null $bank $hb | Out-Null
+    Invoke-Api Post "$base/camps/$cid/registrations/$($my.id)/attend" $null $bank $hb | Out-Null
+    $donor = Invoke-Api Post "$base/donors/lookup" @{ mobile = $mobile } $bank $hb
+    $don = Invoke-Api Post "$base/donations" @{ donor_id = $donor.donor_id; blood_group = "A+"; volume_ml = 450; components = @("PRBC");
+      camp_registration_id = $my.id } $bank $hb
+    $bag = @($don.bags)[0].public_id
+    $stats = (Invoke-Api Get "$base/camps/$cid" $null $bank).stats
+    if ($stats.attended -ne 1 -or $stats.donations_recorded -ne 1 -or $stats.bags_collected -ne 1) { throw "camp statistics" }
+    # 7. The bag carries a public QR payload only.
+    if (@($don.bags)[0].qr_payload -ne "veyra:bag:$bag") { throw "bag QR payload" }
+    $qr = Invoke-Api Get "$base/bags/$bag/qr" $null $bank
+    if ($qr.size -ne 25 -or @($qr.modules).Count -ne 25 -or $qr.payload -ne "veyra:bag:$bag") { throw "bag QR matrix" }
+    if ($qr.disclaimer -ne "QR is a traceability identifier, not an authentication credential or medical authorization.") { throw "QR disclaimer" }
+    # 8. Compatibility reference (informational; never dispatches anything).
+    $chk = Invoke-Api Get "$base/compatibility/check?donor_group=A%2B&recipient_group=AB%2B&component=PRBC" $null $hosp
+    if (-not $chk.compatible -or -not $chk.requires_clinical_confirmation) { throw "compatibility check" }
+    if ($chk.disclaimer -ne "Informational prototype reference only; final transfusion decisions require authorized clinical confirmation.") { throw "compatibility disclaimer" }
+    $neg = Invoke-Api Get "$base/compatibility/check?donor_group=AB%2B&recipient_group=O-&component=PRBC" $null $bank
+    if ($neg.compatible) { throw "incompatible pair reported compatible" }
+    if (@((Invoke-Api Get "$base/compatibility/matrix" $null $adm).components).Count -ne 5) { throw "compatibility matrix" }
+    if ((Status-Of { Invoke-Api Get "$base/compatibility/matrix" $null $d }) -ne 403) { throw "donor read compatibility" }
+    Assert-Http "http://localhost:3000/compatibility" ""
+    # 9-12. QR scan: authorized view, trace valid, cold chain; the QR is never a credential.
+    Invoke-Api Post "$base/simulator/bags/$bag/attach" $null $bank $hb | Out-Null
+    Invoke-Api Post "$base/simulator/bags/$bag/tick" @{ count = 1 } $bank $hb | Out-Null
+    $scan = Invoke-Api Get "$base/bags/scan?payload=veyra:bag:$bag" $null $bank
+    if ($scan.public_id -ne $bag -or -not $scan.chain.valid -or -not $scan.cold_chain.monitored -or $null -ne $scan.shipment) { throw "scan (bank)" }
+    if ((Invoke-WebRequest -Uri "$base/bags/scan?payload=$bag" -WebSession $bank -UseBasicParsing).Content -like "*Camp Demo Donor*") { throw "scan leaked donor identity" }
+    if ((Status-Of { Invoke-Api Get "$base/bags/scan?payload=veyra:bag:$bag" $null $anon }) -ne 401) { throw "anonymous scan" }
+    if ((Status-Of { Invoke-Api Get "$base/bags/scan?payload=veyra:bag:$bag" $null $d }) -ne 403) { throw "donor scan" }
+    if ((Status-Of { Invoke-Api Get "$base/bags/scan?payload=veyra:bag:$bag" $null $other }) -ne 404) { throw "unrelated hospital scan" }
+    if ((Status-Of { Invoke-Api Get "$base/bags/scan?payload=not-a-bag" $null $bank }) -ne 422) { throw "malformed QR accepted" }
+    Assert-Http "http://localhost:3000/scan" ""
+    # 13-14. The existing dispatch -> shipment -> receipt workflow, seen through the same QR.
+    $hh = @{ "X-CSRF-Token" = (Csrf $hosp) }
+    $req = Invoke-Api Post "$base/requests" @{ provider = "internal"; target_ref = $bf.id; blood_group = "A+"; component = "PRBC"; units = 1;
+      urgency = "emergency"; needed_by = (Get-Date).ToUniversalTime().AddHours(2).ToString("yyyy-MM-ddTHH:mm:ssZ") } $hosp $hh
+    $ful = Invoke-Api Post "$base/requests/$($req.id)/fulfil" @{ bag_public_ids = @($bag) } $bank $hb
+    if ($ful.status -ne "dispatched") { throw "confirmed dispatch" }
+    $mid = Invoke-Api Get "$base/bags/scan?payload=veyra:bag:$bag" $null $hosp
+    if ($mid.lifecycle_status -ne "in_transit" -or $mid.shipment.status -ne "pickup_pending") { throw "scan shows shipment" }
+    $sid = $mid.shipment.id
+    foreach ($a in @("advance", "advance", "advance", "advance", "arrive")) { Invoke-Api Post "$base/simulator/shipments/$sid/$a" $null $bank $hb | Out-Null }
+    $rcv = Invoke-Api Post "$base/shipments/$sid/receive" $null $hosp $hh
+    if ($rcv.status -ne "received" -or $rcv.request_status -ne "fulfilled") { throw "receipt" }
+    # 15. The final trace remains valid and the camp completes.
+    $final = Invoke-Api Get "$base/bags/scan?payload=$bag" $null $hosp
+    if ($final.lifecycle_status -ne "received" -or $final.shipment.status -ne "received" -or -not $final.chain.valid) { throw "final scan" }
+    $trace = Invoke-Api Get "$base/bags/$bag" $null $hosp
+    $types = @($trace.events | ForEach-Object { $_.event_type })
+    foreach ($t in @("COLLECTED", "DEVICE_ATTACHED", "DISPATCHED", "SHIPMENT_CREATED", "SHIPMENT_ARRIVED", "RECEIVED", "SHIPMENT_RECEIVED")) {
+      if ($types -notcontains $t) { throw "trace missing $t" }
+    }
+    if (-not $trace.chain.valid) { throw "final trace chain" }
+    if ((Invoke-Api Post "$base/camps/$cid/actions/complete" $null $bank $hb).status -ne "completed") { throw "complete camp" }
+    # Live camp updates reach the organizing bank only.
+    $bsse = (Invoke-WebRequest -Uri "$base/stream?once=true&after=$head" -WebSession $bank -UseBasicParsing).Content
+    if ($bsse -notlike "*event: camp.updated*") { throw "SSE missing camp.updated" }
+    $osse = (Invoke-WebRequest -Uri "$base/stream?once=true&after=$head" -WebSession $other -UseBasicParsing).Content
+    if ($osse -like "*$cid*" -or $osse -like "*$bag*") { throw "unrelated hospital received camp/bag events" }
+    Log "   phase 8 OK (camp $($camp.code): donor registered + attended, bag $bag via QR, A+ -> AB+ PRBC compatible (reference), shipment $($mid.shipment.reference) received, trace valid)"
   }
 }
 

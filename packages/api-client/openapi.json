@@ -679,6 +679,149 @@
         "title": "BagOut",
         "type": "object"
       },
+      "BagQr": {
+        "properties": {
+          "disclaimer": {
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "error_correction": {
+            "const": "M",
+            "default": "M",
+            "title": "Error Correction",
+            "type": "string"
+          },
+          "modules": {
+            "description": "Rows of '1' (dark) / '0' (light)",
+            "items": {
+              "type": "string"
+            },
+            "title": "Modules",
+            "type": "array"
+          },
+          "payload": {
+            "title": "Payload",
+            "type": "string"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "size": {
+            "description": "Modules per side (quiet zone not included)",
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "public_id",
+          "payload",
+          "size",
+          "modules",
+          "disclaimer"
+        ],
+        "title": "BagQr",
+        "type": "object"
+      },
+      "BagScanResult": {
+        "description": "What an authorized scanner may see. Never donor or patient identity.",
+        "properties": {
+          "bag": {
+            "$ref": "#/components/schemas/BagOut"
+          },
+          "chain": {
+            "$ref": "#/components/schemas/ChainStatus"
+          },
+          "cold_chain": {
+            "$ref": "#/components/schemas/ScanColdChain"
+          },
+          "disclaimer": {
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "events": {
+            "title": "Events",
+            "type": "integer"
+          },
+          "last_event_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Event At"
+          },
+          "last_event_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Event Type"
+          },
+          "lifecycle_status": {
+            "title": "Lifecycle Status",
+            "type": "string"
+          },
+          "location": {
+            "description": "Facility currently holding the bag",
+            "title": "Location",
+            "type": "string"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "qr_payload": {
+            "title": "Qr Payload",
+            "type": "string"
+          },
+          "shipment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScanShipment"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trace_path": {
+            "title": "Trace Path",
+            "type": "string"
+          },
+          "usable": {
+            "description": "Available and unexpired (still needs human checks)",
+            "title": "Usable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "public_id",
+          "qr_payload",
+          "bag",
+          "lifecycle_status",
+          "usable",
+          "location",
+          "cold_chain",
+          "shipment",
+          "chain",
+          "events",
+          "last_event_type",
+          "last_event_at",
+          "trace_path",
+          "disclaimer"
+        ],
+        "title": "BagScanResult",
+        "type": "object"
+      },
       "BagTrace": {
         "properties": {
           "bag": {
@@ -843,6 +986,617 @@
         "title": "BloodRequestOut",
         "type": "object"
       },
+      "CampCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "capacity": {
+            "maximum": 5000.0,
+            "minimum": 1.0,
+            "title": "Capacity",
+            "type": "integer"
+          },
+          "city": {
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "City",
+            "type": "string"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "maxLength": 254,
+                "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_name": {
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "Contact Name",
+            "type": "string"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "pattern": "^\\+?[0-9][0-9 \\-]{5,18}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "ends_at": {
+            "format": "date-time",
+            "title": "Ends At",
+            "type": "string"
+          },
+          "organizer_facility_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Admins only: the organizing blood bank",
+            "title": "Organizer Facility Id"
+          },
+          "starts_at": {
+            "format": "date-time",
+            "title": "Starts At",
+            "type": "string"
+          },
+          "state": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "State",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 3,
+            "title": "Title",
+            "type": "string"
+          },
+          "venue": {
+            "maxLength": 160,
+            "minLength": 3,
+            "title": "Venue",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "venue",
+          "city",
+          "state",
+          "starts_at",
+          "ends_at",
+          "capacity",
+          "contact_name"
+        ],
+        "title": "CampCreate",
+        "type": "object"
+      },
+      "CampDashboard": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "integer"
+          },
+          "bags_collected": {
+            "title": "Bags Collected",
+            "type": "integer"
+          },
+          "cancelled": {
+            "title": "Cancelled",
+            "type": "integer"
+          },
+          "completed": {
+            "title": "Completed",
+            "type": "integer"
+          },
+          "disclaimer": {
+            "default": "Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "donations_recorded": {
+            "title": "Donations Recorded",
+            "type": "integer"
+          },
+          "next_camps": {
+            "items": {
+              "$ref": "#/components/schemas/CampOut"
+            },
+            "title": "Next Camps",
+            "type": "array"
+          },
+          "scope": {
+            "enum": [
+              "facility",
+              "network"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "total_attended": {
+            "title": "Total Attended",
+            "type": "integer"
+          },
+          "total_capacity": {
+            "title": "Total Capacity",
+            "type": "integer"
+          },
+          "total_registered": {
+            "title": "Total Registered",
+            "type": "integer"
+          },
+          "upcoming": {
+            "title": "Upcoming",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "scope",
+          "upcoming",
+          "active",
+          "completed",
+          "cancelled",
+          "total_capacity",
+          "total_registered",
+          "total_attended",
+          "donations_recorded",
+          "bags_collected",
+          "next_camps"
+        ],
+        "title": "CampDashboard",
+        "type": "object"
+      },
+      "CampList": {
+        "properties": {
+          "camps": {
+            "items": {
+              "$ref": "#/components/schemas/CampOut"
+            },
+            "title": "Camps",
+            "type": "array"
+          },
+          "disclaimer": {
+            "default": "Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "facility",
+              "network"
+            ],
+            "title": "Scope",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope",
+          "camps"
+        ],
+        "title": "CampList",
+        "type": "object"
+      },
+      "CampOut": {
+        "description": "Management view (organizing blood bank or admin).",
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "enum": [
+                "publish",
+                "open-registration",
+                "start",
+                "complete",
+                "cancel"
+              ],
+              "type": "string"
+            },
+            "title": "Allowed Actions",
+            "type": "array"
+          },
+          "cancel_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancel Reason"
+          },
+          "capacity": {
+            "title": "Capacity",
+            "type": "integer"
+          },
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_name": {
+            "title": "Contact Name",
+            "type": "string"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "disclaimer": {
+            "default": "Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "editable": {
+            "title": "Editable",
+            "type": "boolean"
+          },
+          "ends_at": {
+            "format": "date-time",
+            "title": "Ends At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "organizer_facility_id": {
+            "format": "uuid",
+            "title": "Organizer Facility Id",
+            "type": "string"
+          },
+          "organizer_name": {
+            "title": "Organizer Name",
+            "type": "string"
+          },
+          "registered_count": {
+            "title": "Registered Count",
+            "type": "integer"
+          },
+          "registration_open": {
+            "title": "Registration Open",
+            "type": "boolean"
+          },
+          "starts_at": {
+            "format": "date-time",
+            "title": "Starts At",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/CampStats"
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "published",
+              "registration_open",
+              "ongoing",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "venue": {
+            "title": "Venue",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "title",
+          "organizer_facility_id",
+          "organizer_name",
+          "venue",
+          "city",
+          "state",
+          "starts_at",
+          "ends_at",
+          "capacity",
+          "registered_count",
+          "status",
+          "registration_open",
+          "description",
+          "contact_name",
+          "contact_phone",
+          "contact_email",
+          "cancel_reason",
+          "created_at",
+          "updated_at",
+          "allowed_actions",
+          "editable",
+          "stats"
+        ],
+        "title": "CampOut",
+        "type": "object"
+      },
+      "CampStats": {
+        "properties": {
+          "attended": {
+            "title": "Attended",
+            "type": "integer"
+          },
+          "bags_collected": {
+            "title": "Bags Collected",
+            "type": "integer"
+          },
+          "cancelled": {
+            "title": "Cancelled",
+            "type": "integer"
+          },
+          "donations_recorded": {
+            "title": "Donations Recorded",
+            "type": "integer"
+          },
+          "no_show": {
+            "title": "No Show",
+            "type": "integer"
+          },
+          "registered": {
+            "title": "Registered",
+            "type": "integer"
+          },
+          "seats_left": {
+            "title": "Seats Left",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "registered",
+          "attended",
+          "cancelled",
+          "no_show",
+          "donations_recorded",
+          "bags_collected",
+          "seats_left"
+        ],
+        "title": "CampStats",
+        "type": "object"
+      },
+      "CampUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "capacity": {
+            "anyOf": [
+              {
+                "maximum": 5000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "maxLength": 254,
+                "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "pattern": "^\\+?[0-9][0-9 \\-]{5,18}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 3,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "venue": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "minLength": 3,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue"
+          }
+        },
+        "title": "CampUpdate",
+        "type": "object"
+      },
+      "CancelCamp": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "title": "CancelCamp",
+        "type": "object"
+      },
       "CandidateBag": {
         "properties": {
           "blood_group": {
@@ -970,7 +1724,7 @@
             "type": "integer"
           },
           "note": {
-            "default": "Tamper-evident SHA-256 chain stored in the VEYRA database. It is not anchored on a blockchain yet (planned for Phase 8).",
+            "default": "Tamper-evident SHA-256 chain stored in the VEYRA database. It is not anchored on a blockchain (possible future work).",
             "title": "Note",
             "type": "string"
           },
@@ -1264,6 +2018,140 @@
         "title": "ColdChainReport",
         "type": "object"
       },
+      "CompatibilityCheck": {
+        "properties": {
+          "compatible": {
+            "title": "Compatible",
+            "type": "boolean"
+          },
+          "compatible_donors_for_recipient": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Compatible Donors For Recipient",
+            "type": "array"
+          },
+          "compatible_recipients_for_donor": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Compatible Recipients For Donor",
+            "type": "array"
+          },
+          "component": {
+            "enum": [
+              "WHOLE_BLOOD",
+              "PRBC",
+              "PLATELETS",
+              "FFP",
+              "CRYO"
+            ],
+            "title": "Component",
+            "type": "string"
+          },
+          "component_label": {
+            "title": "Component Label",
+            "type": "string"
+          },
+          "disclaimer": {
+            "default": "Informational prototype reference only; final transfusion decisions require authorized clinical confirmation.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "donor_group": {
+            "title": "Donor Group",
+            "type": "string"
+          },
+          "informational_only": {
+            "default": true,
+            "title": "Informational Only",
+            "type": "boolean"
+          },
+          "label": {
+            "default": "Prototype ABO/Rh compatibility reference (simplified, not clinical)",
+            "title": "Label",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "recipient_group": {
+            "title": "Recipient Group",
+            "type": "string"
+          },
+          "requires_clinical_confirmation": {
+            "default": true,
+            "title": "Requires Clinical Confirmation",
+            "type": "boolean"
+          },
+          "result": {
+            "enum": [
+              "compatible",
+              "not_compatible"
+            ],
+            "title": "Result",
+            "type": "string"
+          },
+          "rule": {
+            "title": "Rule",
+            "type": "string"
+          }
+        },
+        "required": [
+          "donor_group",
+          "recipient_group",
+          "component",
+          "component_label",
+          "compatible",
+          "result",
+          "reason",
+          "rule",
+          "compatible_donors_for_recipient",
+          "compatible_recipients_for_donor"
+        ],
+        "title": "CompatibilityCheck",
+        "type": "object"
+      },
+      "CompatibilityMatrix": {
+        "properties": {
+          "blood_groups": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Blood Groups",
+            "type": "array"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentMatrix"
+            },
+            "title": "Components",
+            "type": "array"
+          },
+          "disclaimer": {
+            "default": "Informational prototype reference only; final transfusion decisions require authorized clinical confirmation.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "informational_only": {
+            "default": true,
+            "title": "Informational Only",
+            "type": "boolean"
+          },
+          "label": {
+            "default": "Prototype ABO/Rh compatibility reference (simplified, not clinical)",
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "blood_groups",
+          "components"
+        ],
+        "title": "CompatibilityMatrix",
+        "type": "object"
+      },
       "Component": {
         "enum": [
           "WHOLE_BLOOD",
@@ -1301,6 +2189,50 @@
           "storage"
         ],
         "title": "ComponentInfo",
+        "type": "object"
+      },
+      "ComponentMatrix": {
+        "properties": {
+          "component": {
+            "enum": [
+              "WHOLE_BLOOD",
+              "PRBC",
+              "PLATELETS",
+              "FFP",
+              "CRYO"
+            ],
+            "title": "Component",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "rh_considered": {
+            "title": "Rh Considered",
+            "type": "boolean"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/MatrixRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "rule": {
+            "description": "Plain-language summary of the simplified reference rule",
+            "title": "Rule",
+            "type": "string"
+          }
+        },
+        "required": [
+          "component",
+          "label",
+          "rule",
+          "rh_considered",
+          "rows"
+        ],
+        "title": "ComponentMatrix",
         "type": "object"
       },
       "CourierOut": {
@@ -3074,6 +4006,27 @@
         "title": "LogisticsResult",
         "type": "object"
       },
+      "MatrixRow": {
+        "properties": {
+          "compatible_donors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Compatible Donors",
+            "type": "array"
+          },
+          "recipient_group": {
+            "title": "Recipient Group",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recipient_group",
+          "compatible_donors"
+        ],
+        "title": "MatrixRow",
+        "type": "object"
+      },
       "MeResponse": {
         "properties": {
           "donor": {
@@ -3643,6 +4596,98 @@
         "title": "MyDonations",
         "type": "object"
       },
+      "MyRegistration": {
+        "properties": {
+          "attended_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attended At"
+          },
+          "camp": {
+            "$ref": "#/components/schemas/PublicCampOut"
+          },
+          "can_cancel": {
+            "title": "Can Cancel",
+            "type": "boolean"
+          },
+          "cancelled_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancelled At"
+          },
+          "donation_recorded": {
+            "title": "Donation Recorded",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "registered_at": {
+            "format": "date-time",
+            "title": "Registered At",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "registered",
+              "cancelled",
+              "attended",
+              "no_show"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "registered_at",
+          "cancelled_at",
+          "attended_at",
+          "donation_recorded",
+          "can_cancel",
+          "camp"
+        ],
+        "title": "MyRegistration",
+        "type": "object"
+      },
+      "MyRegistrations": {
+        "properties": {
+          "disclaimer": {
+            "default": "Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "registrations": {
+            "items": {
+              "$ref": "#/components/schemas/MyRegistration"
+            },
+            "title": "Registrations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "registrations"
+        ],
+        "title": "MyRegistrations",
+        "type": "object"
+      },
       "NetworkEdge": {
         "properties": {
           "last_at": {
@@ -4201,6 +5246,180 @@
         "title": "PriorityOut",
         "type": "object"
       },
+      "PublicCampList": {
+        "properties": {
+          "camps": {
+            "items": {
+              "$ref": "#/components/schemas/PublicCampOut"
+            },
+            "title": "Camps",
+            "type": "array"
+          },
+          "disclaimer": {
+            "default": "Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.",
+            "title": "Disclaimer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "camps"
+        ],
+        "title": "PublicCampList",
+        "type": "object"
+      },
+      "PublicCampOut": {
+        "description": "What donors (and hospitals) see: no registrations, no other donors.",
+        "properties": {
+          "capacity": {
+            "title": "Capacity",
+            "type": "integer"
+          },
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_name": {
+            "title": "Contact Name",
+            "type": "string"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "disclaimer": {
+            "default": "Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "ends_at": {
+            "format": "date-time",
+            "title": "Ends At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "my_registration_status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "registered",
+                  "cancelled",
+                  "attended",
+                  "no_show"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "My Registration Status"
+          },
+          "organizer_name": {
+            "title": "Organizer Name",
+            "type": "string"
+          },
+          "registered_count": {
+            "title": "Registered Count",
+            "type": "integer"
+          },
+          "registration_open": {
+            "title": "Registration Open",
+            "type": "boolean"
+          },
+          "seats_left": {
+            "title": "Seats Left",
+            "type": "integer"
+          },
+          "starts_at": {
+            "format": "date-time",
+            "title": "Starts At",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "published",
+              "registration_open",
+              "ongoing",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "venue": {
+            "title": "Venue",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "title",
+          "organizer_name",
+          "venue",
+          "city",
+          "state",
+          "starts_at",
+          "ends_at",
+          "capacity",
+          "registered_count",
+          "seats_left",
+          "status",
+          "registration_open",
+          "description",
+          "contact_name",
+          "contact_phone",
+          "contact_email"
+        ],
+        "title": "PublicCampOut",
+        "type": "object"
+      },
       "ReadinessResponse": {
         "properties": {
           "checks": {
@@ -4436,6 +5655,19 @@
             "title": "Blood Group",
             "type": "string"
           },
+          "camp_registration_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Phase 8: link to an attended camp registration (optional)",
+            "title": "Camp Registration Id"
+          },
           "collected_at": {
             "anyOf": [
               {
@@ -4564,6 +5796,125 @@
           "verification"
         ],
         "title": "RegisterResponse",
+        "type": "object"
+      },
+      "RegistrationList": {
+        "properties": {
+          "camp_id": {
+            "format": "uuid",
+            "title": "Camp Id",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "disclaimer": {
+            "default": "Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "registrations": {
+            "items": {
+              "$ref": "#/components/schemas/RegistrationOut"
+            },
+            "title": "Registrations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "camp_id",
+          "code",
+          "registrations"
+        ],
+        "title": "RegistrationList",
+        "type": "object"
+      },
+      "RegistrationOut": {
+        "description": "Staff view of one registration: identification for the desk, no medical data.",
+        "properties": {
+          "attended_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attended At"
+          },
+          "cancelled_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancelled At"
+          },
+          "donation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Donation Id"
+          },
+          "donor_id": {
+            "format": "uuid",
+            "title": "Donor Id",
+            "type": "string"
+          },
+          "donor_name": {
+            "title": "Donor Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "mobile_masked": {
+            "title": "Mobile Masked",
+            "type": "string"
+          },
+          "registered_at": {
+            "format": "date-time",
+            "title": "Registered At",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "registered",
+              "cancelled",
+              "attended",
+              "no_show"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "donor_id",
+          "donor_name",
+          "mobile_masked",
+          "status",
+          "registered_at",
+          "cancelled_at",
+          "attended_at",
+          "donation_id"
+        ],
+        "title": "RegistrationOut",
         "type": "object"
       },
       "RegistrationReference": {
@@ -4813,6 +6164,116 @@
           "generated_at"
         ],
         "title": "RoutingOverview",
+        "type": "object"
+      },
+      "ScanColdChain": {
+        "properties": {
+          "current_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current C"
+          },
+          "excursion_active": {
+            "title": "Excursion Active",
+            "type": "boolean"
+          },
+          "last_reading_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Reading At"
+          },
+          "monitored": {
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "simulated": {
+            "default": true,
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "unmonitored",
+              "unknown",
+              "normal",
+              "warning",
+              "critical"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "monitored",
+          "status",
+          "excursion_active",
+          "current_c",
+          "last_reading_at"
+        ],
+        "title": "ScanColdChain",
+        "type": "object"
+      },
+      "ScanShipment": {
+        "properties": {
+          "delay_active": {
+            "title": "Delay Active",
+            "type": "boolean"
+          },
+          "destination_name": {
+            "title": "Destination Name",
+            "type": "string"
+          },
+          "eta_at": {
+            "format": "date-time",
+            "title": "Eta At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
+          },
+          "simulated": {
+            "default": true,
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "source_name": {
+            "title": "Source Name",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "status",
+          "source_name",
+          "destination_name",
+          "eta_at",
+          "delay_active"
+        ],
+        "title": "ScanShipment",
         "type": "object"
       },
       "ShipmentBagOut": {
@@ -6808,6 +8269,53 @@
         ]
       }
     },
+    "/api/v1/bags/scan": {
+      "get": {
+        "operationId": "scan_bag_api_v1_bags_scan_get",
+        "parameters": [
+          {
+            "description": "QR content or bag id",
+            "in": "query",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "description": "QR content or bag id",
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Payload",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BagScanResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resolve a scanned bag QR (or typed id) to the caller's scoped bag view",
+        "tags": [
+          "inventory",
+          "trace"
+        ]
+      }
+    },
     "/api/v1/bags/{public_id}": {
       "get": {
         "operationId": "bag_trace_api_v1_bags__public_id__get",
@@ -7000,6 +8508,52 @@
         ]
       }
     },
+    "/api/v1/bags/{public_id}/qr": {
+      "get": {
+        "operationId": "bag_qr_api_v1_bags__public_id__qr_get",
+        "parameters": [
+          {
+            "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "description": "Bag label id, e.g. VYR-7F3K-2QXM",
+              "pattern": "^[A-Za-z0-9-]{3,20}$",
+              "title": "Public Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BagQr"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "The bag label QR (public id only) as a module matrix",
+        "tags": [
+          "inventory",
+          "trace"
+        ]
+      }
+    },
     "/api/v1/bags/{public_id}/telemetry": {
       "get": {
         "operationId": "telemetry_api_v1_bags__public_id__telemetry_get",
@@ -7099,6 +8653,770 @@
         "summary": "Current cold-chain state (simulated)",
         "tags": [
           "telemetry"
+        ]
+      }
+    },
+    "/api/v1/camps": {
+      "get": {
+        "operationId": "list_camps_api_v1_camps_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "planned",
+                    "published",
+                    "registration_open",
+                    "ongoing",
+                    "completed",
+                    "cancelled"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Camps I manage (own bank; admins: network)",
+        "tags": [
+          "camps"
+        ]
+      },
+      "post": {
+        "operationId": "create_camp_api_v1_camps_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create a camp (planned)",
+        "tags": [
+          "camps"
+        ]
+      }
+    },
+    "/api/v1/camps/dashboard": {
+      "get": {
+        "operationId": "camp_dashboard_api_v1_camps_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampDashboard"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Camp dashboard (scoped)",
+        "tags": [
+          "camps"
+        ]
+      }
+    },
+    "/api/v1/camps/me/registrations": {
+      "get": {
+        "operationId": "my_registrations_api_v1_camps_me_registrations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyRegistrations"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My camp registrations",
+        "tags": [
+          "camps"
+        ]
+      }
+    },
+    "/api/v1/camps/public": {
+      "get": {
+        "operationId": "public_camps_api_v1_camps_public_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 80,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "city",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 80,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "City"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "published",
+                    "registration_open",
+                    "ongoing"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicCampList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Published camps (search / filter)",
+        "tags": [
+          "camps"
+        ]
+      }
+    },
+    "/api/v1/camps/public/{camp_id}": {
+      "get": {
+        "operationId": "public_camp_api_v1_camps_public__camp_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "camp_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Camp Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicCampOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Published camp detail",
+        "tags": [
+          "camps"
+        ]
+      }
+    },
+    "/api/v1/camps/{camp_id}": {
+      "get": {
+        "operationId": "get_camp_api_v1_camps__camp_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "camp_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Camp Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Camp management detail + stats",
+        "tags": [
+          "camps"
+        ]
+      },
+      "patch": {
+        "operationId": "update_camp_api_v1_camps__camp_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "camp_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Camp Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Edit a camp (planned / published / registration open)",
+        "tags": [
+          "camps"
+        ]
+      }
+    },
+    "/api/v1/camps/{camp_id}/actions/{action}": {
+      "post": {
+        "operationId": "camp_action_api_v1_camps__camp_id__actions__action__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "camp_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Camp Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "action",
+            "required": true,
+            "schema": {
+              "enum": [
+                "publish",
+                "open-registration",
+                "start",
+                "complete",
+                "cancel"
+              ],
+              "title": "Action",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/CancelCamp"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Lifecycle: publish, open-registration, start, complete, cancel",
+        "tags": [
+          "camps"
+        ]
+      }
+    },
+    "/api/v1/camps/{camp_id}/register": {
+      "post": {
+        "operationId": "register_api_v1_camps__camp_id__register_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "camp_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Camp Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyRegistration"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Donor: register for a camp with open registration",
+        "tags": [
+          "camps"
+        ]
+      }
+    },
+    "/api/v1/camps/{camp_id}/register/cancel": {
+      "post": {
+        "operationId": "cancel_registration_api_v1_camps__camp_id__register_cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "camp_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Camp Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyRegistration"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Donor: cancel my registration",
+        "tags": [
+          "camps"
+        ]
+      }
+    },
+    "/api/v1/camps/{camp_id}/registrations": {
+      "get": {
+        "operationId": "camp_registrations_api_v1_camps__camp_id__registrations_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "camp_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Camp Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Registrations for a camp I manage (no medical data)",
+        "tags": [
+          "camps"
+        ]
+      }
+    },
+    "/api/v1/camps/{camp_id}/registrations/{registration_id}/attend": {
+      "post": {
+        "operationId": "confirm_attendance_api_v1_camps__camp_id__registrations__registration_id__attend_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "camp_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Camp Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "registration_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Registration Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Staff confirm a registered donor attended (not an eligibility decision)",
+        "tags": [
+          "camps"
+        ]
+      }
+    },
+    "/api/v1/compatibility/check": {
+      "get": {
+        "operationId": "check_api_v1_compatibility_check_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "donor_group",
+            "required": true,
+            "schema": {
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-"
+              ],
+              "title": "Donor Group",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "recipient_group",
+            "required": true,
+            "schema": {
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-"
+              ],
+              "title": "Recipient Group",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "component",
+            "required": true,
+            "schema": {
+              "enum": [
+                "WHOLE_BLOOD",
+                "PRBC",
+                "PLATELETS",
+                "FFP",
+                "CRYO"
+              ],
+              "title": "Component",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompatibilityCheck"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Is a donor group compatible with a recipient group for a component? (reference)",
+        "tags": [
+          "compatibility"
+        ]
+      }
+    },
+    "/api/v1/compatibility/matrix": {
+      "get": {
+        "operationId": "matrix_api_v1_compatibility_matrix_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "component",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "WHOLE_BLOOD",
+                    "PRBC",
+                    "PLATELETS",
+                    "FFP",
+                    "CRYO"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Component"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompatibilityMatrix"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "ABO/Rh compatibility reference matrix (informational prototype, not clinical)",
+        "tags": [
+          "compatibility"
         ]
       }
     },

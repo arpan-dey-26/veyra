@@ -106,8 +106,10 @@ export function InventoryOverview({ canDiscard }: { canDiscard: boolean }) {
       }),
     ]).then(([s, b]) => {
       if (!active) return;
-      if (s.data) setSummary(s.data);
-      else setError(toFailure(s.error, s.response).message);
+      if (s.data) {
+        setSummary(s.data);
+        setError(null); // a later refresh recovers from an earlier failure
+      } else setError(toFailure(s.error, s.response).message);
       if (b.data) {
         setBags(b.data.data);
         setTotal(b.data.meta.total);
@@ -129,7 +131,18 @@ export function InventoryOverview({ canDiscard }: { canDiscard: boolean }) {
     reload();
   }
 
-  if (error) return <ErrorState description={error} />;
+  if (error) {
+    return (
+      <ErrorState
+        description={error}
+        action={
+          <Button size="sm" variant="secondary" onClick={reload}>
+            Try again
+          </Button>
+        }
+      />
+    );
+  }
   if (!summary) return <Skeleton className="h-72 w-full" />;
 
   const cell = new Map(summary.rows.map((r) => [`${r.blood_group}|${r.component}`, r]));

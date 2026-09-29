@@ -47,6 +47,21 @@ const ITEMS = [
     body: "Priority scores, pressure bands and bag rankings are explainable prototype rules with their reasons shown. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice, and nothing is dispatched without a person confirming it.",
   },
   {
+    subject: "Blood compatibility matrix",
+    label: "Demo" as const,
+    body: "A simplified ABO/Rh reference for a student prototype. Informational prototype reference only; final transfusion decisions require authorized clinical confirmation. It never approves, allocates or dispatches blood.",
+  },
+  {
+    subject: "Donation camps",
+    label: "Demo" as const,
+    body: "Prototype camp-management workflow; donor eligibility and medical screening remain governed by authorized staff. Registrations hold no medical data and camp contact details are demo data.",
+  },
+  {
+    subject: "Bag QR labels",
+    label: "Demo" as const,
+    body: "QR is a traceability identifier, not an authentication credential or medical authorization. It encodes only the public bag id; camera frames are decoded on the device and never stored or uploaded.",
+  },
+  {
     subject: "Blockchain",
     label: "Demo" as const,
     body: "Integrity records are anchored on a local development chain, not a production blockchain network.",
