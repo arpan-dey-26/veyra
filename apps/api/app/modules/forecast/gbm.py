@@ -1,12 +1,14 @@
 """A small, deterministic gradient-boosted regression-tree model in pure Python.
 
-Squared-error boosting with depth-limited trees. Features are pre-binned into at most
+Squared-error boosting with depth-limited trees. All float reductions use ``math.fsum`` (exact),
+so results are identical across Python versions and platforms. Features are pre-binned into at most
 ``max_bins`` quantile thresholds (histogram splits); there is no row or feature sampling,
 so the same data and parameters always produce the same trees. Serialisable to JSON.
 """
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from itertools import pairwise
 from typing import Any
@@ -63,7 +65,7 @@ class GradientBoostedTrees:
         n_feat = len(X[0])
         thresholds = [_thresholds([row[j] for row in X], p.max_bins) for j in range(n_feat)]
         binned = [[_bin(row[j], thresholds[j]) for j in range(n_feat)] for row in X]
-        self.base = sum(y) / len(y)
+        self.base = math.fsum(y) / len(y)
         pred = [self.base] * len(y)
         self.trees = []
         for _ in range(p.n_estimators):
@@ -82,7 +84,7 @@ class GradientBoostedTrees:
         depth: int,
     ) -> Node:
         p = self.params
-        total = sum(g[i] for i in idx)
+        total = math.fsum(g[i] for i in idx)
         n = len(idx)
         if depth >= p.max_depth or n < 2 * p.min_samples_leaf:
             return {"leaf": total / n}
@@ -123,7 +125,7 @@ class GradientBoostedTrees:
     # ------------------------------------------------------------------ inference
 
     def predict_one(self, row: list[float]) -> float:
-        return self.base + self.params.learning_rate * sum(_eval(t, row) for t in self.trees)
+        return self.base + self.params.learning_rate * math.fsum(_eval(t, row) for t in self.trees)
 
     def predict(self, X: list[list[float]]) -> list[float]:
         return [self.predict_one(r) for r in X]

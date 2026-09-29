@@ -7,6 +7,18 @@ Real Windows bootstrap, 2026-09-29: **`OVERALL: PASS (34/34 steps passed)`**. Th
 
 The last failure was `niceMax(0)` returning 5 instead of 4. The function clamped the value up to the floor and then rounded the floor itself onto the 1/2/2.5/5 ladder. Now, empty or tiny data uses the floor directly, and only larger values are rounded. The test is unchanged.
 
+## Defect found by the new reproducibility gate
+The first Windows run of Phase 4 reached 34/36. The unit test and the bootstrap step `train_forecast --check` both reported "Model artifact is NOT reproducible".
+
+- **Root cause:** a Python version difference, not the OS.
+  - Python 3.12 made built-in `sum()` of floats use compensated summation (`sum([0.1]*10)` is `0.9999999999999999` on 3.11 but `1.0` on 3.12).
+  - `statistics.pstdev` rounding also changed.
+  - The artifact had been built on 3.11 and Windows runs 3.12. The metrics matched to 4 decimals, but tree thresholds differed in the last bits, so the fingerprint differed.
+- **Fix:** every float reduction in the forecast module now uses exact `math.fsum`, with an explicit population standard deviation.
+  - The rebuilt artifact (fingerprint `91c00e7596a926d6`) is byte-identical on Python 3.11, 3.12 and 3.13, verified locally with all three interpreters.
+  - A regression test (`test_reductions_are_exact_across_python_versions`) keeps plain `sum()` out of the GBM.
+  - The gate itself is unchanged.
+
 ## Architecture
 
 ```
@@ -16,7 +28,7 @@ app/modules/forecast/
   gbm.py         pure-Python gradient-boosted regression trees (deterministic, JSON-serialisable)
   training.py    reference dataset → chronological split → baseline vs GBM metrics → artifact
   model.py       artifact loader (cached per process) + recursive multi-day forecaster
-  demand_model_v1.json   committed, versioned model artifact (fingerprint 47213848aae9e96b)
+  demand_model_v1.json   committed, versioned model artifact (fingerprint 91c00e7596a926d6)
   schemas.py / service.py / router.py   scoped read-only API
 app/scripts/train_forecast.py   retrain (or --check reproducibility)
 ```

@@ -9,11 +9,24 @@ from __future__ import annotations
 
 import math
 from datetime import date
-from statistics import fmean, pstdev
 
 WINDOW = 28  # history days required before the first predictable day
 LEVEL_FLOOR = 0.25  # keeps ratios finite for rare groups with near-zero demand
 _DIGITS = 12  # transcendental features rounded: identical across math libraries
+
+# Exact reductions only (math.fsum): built-in sum() of floats changed in Python 3.12
+# (compensated summation) and statistics.pstdev's rounding changed too, which would make
+# the trained trees differ between interpreter versions.
+
+
+def fmean(values: list[float]) -> float:
+    return math.fsum(values) / len(values)
+
+
+def pstdev(values: list[float]) -> float:
+    mu = fmean(values)
+    return math.sqrt(math.fsum((v - mu) * (v - mu) for v in values) / len(values))
+
 
 FEATURES: tuple[str, ...] = (
     "lag1",  # yesterday / level

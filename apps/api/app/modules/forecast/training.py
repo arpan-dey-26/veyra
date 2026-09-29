@@ -101,11 +101,12 @@ def chronological_split(rows: list[Row]) -> Split:
 def metrics(y: list[float], yhat: list[float]) -> dict[str, float]:
     """MAE, RMSE and WAPE. MAPE is omitted: zero-demand days make it undefined."""
     err = [a - b for a, b in zip(y, yhat, strict=True)]
-    total = sum(abs(v) for v in y)
+    total = math.fsum(abs(v) for v in y)
+    abs_err = math.fsum(abs(e) for e in err)
     return {
-        "mae": round(sum(abs(e) for e in err) / len(err), 4),
-        "rmse": round(math.sqrt(sum(e * e for e in err) / len(err)), 4),
-        "wape": round(sum(abs(e) for e in err) / total, 4) if total else 0.0,
+        "mae": round(abs_err / len(err), 4),
+        "rmse": round(math.sqrt(math.fsum(e * e for e in err) / len(err)), 4),
+        "wape": round(abs_err / total, 4) if total else 0.0,
     }
 
 

@@ -96,6 +96,18 @@ def test_features_are_explicit_and_scale_free() -> None:
         feature_row(history[:-1], date(2026, 9, 28), "PRBC")
 
 
+def test_reductions_are_exact_across_python_versions() -> None:
+    """Built-in sum() of floats changed in Python 3.12; training must not depend on it."""
+    from app.modules.forecast.features import fmean as exact_mean
+    from app.modules.forecast.features import pstdev as exact_pstdev
+
+    assert exact_mean([0.1] * 10) == 0.1  # plain sum()/n gives 0.0999… on Python 3.11
+    assert exact_pstdev([0.1] * 10) == 0.0
+    assert exact_pstdev([1.0, 3.0]) == 1.0
+    gbm_source = (ARTIFACT_PATH.parent / "gbm.py").read_text(encoding="utf-8")
+    assert " sum(" not in gbm_source.replace("math.fsum(", "")
+
+
 def test_rows_only_use_the_past_and_the_split_is_chronological() -> None:
     key = series_keys()[0]
     rows = build_rows(key, 2026)

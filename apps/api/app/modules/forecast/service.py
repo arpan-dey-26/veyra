@@ -11,8 +11,8 @@ data. Real inventory appears only in the caller's own facility summary (supply v
 
 from __future__ import annotations
 
+import math
 from datetime import date, timedelta, timezone
-from statistics import fmean
 from uuid import UUID
 
 from app.core.clock import Clock
@@ -20,7 +20,7 @@ from app.core.errors import NotFoundError, PermissionDeniedError
 from app.core.provenance import SourceKind, SourceMeta
 from app.core.rbac import AuthContext, Permission, Role
 from app.modules.facilities.models import Facility
-from app.modules.forecast.features import WINDOW
+from app.modules.forecast.features import WINDOW, fmean
 from app.modules.forecast.model import ForecastPoint, LoadedModel, recursive_forecast
 from app.modules.forecast.schemas import (
     FORECAST_DISCLAIMER,
@@ -180,8 +180,8 @@ class ForecastService:
         facility, facilities = await self._scope(ctx, facility_id)
         history, points = self._series(facilities, blood_group, component, horizon)
         start = self._today() - timedelta(days=WINDOW)
-        hist_mean = fmean(history) if history else 0.0
-        fc_mean = fmean(p.predicted for p in points)
+        hist_mean = fmean([float(v) for v in history]) if history else 0.0
+        fc_mean = fmean([p.predicted for p in points])
         return DemandForecast(
             scope="facility" if facility else "network",
             facility_id=facility.id if facility else None,
@@ -206,7 +206,7 @@ class ForecastService:
             ],
             history_daily_mean=round(hist_mean, 2),
             forecast_daily_mean=round(fc_mean, 2),
-            forecast_total=round(sum(p.predicted for p in points), 1),
+            forecast_total=round(math.fsum(p.predicted for p in points), 1),
             signal=demand_signal(hist_mean, fc_mean),
             model=model_info(self._model),
             source=self._source(),
@@ -225,14 +225,14 @@ class ForecastService:
         for component in FORECAST_COMPONENTS:
             for group in FORECAST_GROUPS:
                 history, points = self._series(facilities, group, component, horizon)
-                hist_mean = fmean(history)
-                fc_mean = fmean(p.predicted for p in points)
+                hist_mean = fmean([float(v) for v in history])
+                fc_mean = fmean([p.predicted for p in points])
                 row = SummaryRow(
                     blood_group=group,
                     component=component,
                     history_daily_mean=round(hist_mean, 2),
                     forecast_daily_mean=round(fc_mean, 2),
-                    forecast_total=round(sum(p.predicted for p in points), 1),
+                    forecast_total=round(math.fsum(p.predicted for p in points), 1),
                     signal=demand_signal(hist_mean, fc_mean),
                 )
                 if facility is not None:

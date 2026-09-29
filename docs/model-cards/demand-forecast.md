@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Artifact | `apps/api/app/modules/forecast/demand_model_v1.json` |
-| Fingerprint | `47213848aae9e96b` (SHA-256 of the serialised trees) |
+| Fingerprint | `91c00e7596a926d6` (SHA-256 of the serialised trees) |
 | Data generator | `synthetic-demand-v1`, seed `2026` |
 | Reproduce | `uv run python -m app.scripts.train_forecast --check` (also a bootstrap gate) |
 
@@ -35,7 +35,7 @@ The data is generated from hand-chosen assumptions. No real patient, donor or ho
 - **Noise:** exact Poisson counts.
 - **Determinism:**
   - Every (series, day) draws from its own SHA-256-seeded RNG, so values are stateless by date.
-  - Transcendental results are rounded to 12 decimals, so Linux and Windows produce identical data and trees.
+  - Transcendental results are rounded to 12 decimals, and every float reduction uses exact `math.fsum`. Built-in `sum()` changed in Python 3.12, and `statistics.pstdev` rounding changed too. The data and trees are therefore byte-identical on Linux and Windows, and on Python 3.11, 3.12 and 3.13.
 
 Reference training universe:
 - profiles: synthetic-hospital-a, synthetic-hospital-b, synthetic-bank-a
@@ -76,7 +76,7 @@ The split is strictly chronological: train up to 2025-08-31 (15444 rows), valida
 - The GBM's gain is modest (about 9% lower MAE), as expected on noisy Poisson counts.
 
 ## Uncertainty
-- Intervals come from empirical quantiles of the validation residuals relative to level: q10 = -1.0282, q90 = 1.2081.
+- Intervals come from empirical quantiles of the validation residuals relative to level: q10 = -1.0282, q90 = 1.2081
 - They are widened by √step and clipped at 0.
 - Nominal coverage is about 80%. They are approximate, not a calibrated guarantee.
 

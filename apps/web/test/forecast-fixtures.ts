@@ -2,7 +2,7 @@ import type { DemandForecast, ForecastSummary, ModelCard } from "@veyra/api-clie
 
 /** Shared, fixed forecast fixtures for web tests (synthetic, deterministic). */
 const SOURCE = { provider: "veyra-demand-gbm@1.0.0", kind: "synthetic", fetched_at: null, note: "Synthetic ML forecast — prototype.", simulated: true } as const;
-const MODEL = { name: "veyra-demand-gbm", version: "1.0.0", fingerprint: "47213848aae9e96b", generator: "synthetic-demand-v1", trained_on: "synthetic", one_step_mae: 1.07, baseline_one_step_mae: 1.17 } as const;
+const MODEL = { name: "veyra-demand-gbm", version: "1.0.0", fingerprint: "91c00e7596a926d6", generator: "synthetic-demand-v1", trained_on: "synthetic", one_step_mae: 1.07, baseline_one_step_mae: 1.17 } as const;
 const GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
 /** ISO day `offset` days after 2026-09-28 (negative = before). */
@@ -69,7 +69,7 @@ export function summaryFixture(scope: "facility" | "network" = "facility", overr
 export const MODEL_CARD: ModelCard = {
   name: "veyra-demand-gbm",
   version: "1.0.0",
-  fingerprint: "47213848aae9e96b",
+  fingerprint: "91c00e7596a926d6",
   generator: "synthetic-demand-v1",
   seed: 2026,
   purpose: "Prototype",
