@@ -35,7 +35,8 @@ vi.mock("@/lib/api", () => ({
 // Capture SSE subscriptions so tests can push simulated live events.
 type Listener = (event: NetworkEvent) => void;
 const listeners: { topics: string[] | "*"; listener: Listener }[] = [];
-vi.mock("@/lib/live", () => ({
+vi.mock("@/lib/live", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/live")>()),
   useLive: () => ({
     status: "live",
     lastEventAt: null,

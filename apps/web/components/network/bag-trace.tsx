@@ -95,7 +95,10 @@ export function BagTraceView({ publicId }: { publicId: string }) {
       active = false;
     };
   }, [publicId, tick]);
-  useLiveRefresh(["request.dispatched", "request.fulfilled", "bag.discarded"], () => setTick((t) => t + 1));
+  useLiveRefresh(
+    ["request.dispatched", "request.fulfilled", "bag.discarded", "temperature.warning", "temperature.critical", "temperature.recovered"],
+    () => setTick((t) => t + 1),
+  );
 
   if (error) {
     return (
