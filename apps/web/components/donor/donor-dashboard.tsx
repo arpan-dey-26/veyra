@@ -141,7 +141,7 @@ export function DonorDashboard() {
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <DonorDonations />
+        <DonorDonations verifiedAt={profile.verified_at} bloodGroupStatus={profile.blood_group_status} />
         <ComingInPhase
           phase={10}
           title="Private eligibility check"

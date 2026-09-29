@@ -6,7 +6,13 @@ VEYRA is a prototype of an intelligent blood-supply network. It connects donors,
 
 ## Current phase
 
-**Phase 2: Core Blood Network** (on top of Phase 1 authentication & RBAC).
+**Phase 3: Dashboards & UX** (on top of the Phase 2 core blood network and Phase 1 auth & RBAC).
+
+- Role dashboards with charts from real API data: donor impact, hospital and blood-bank overviews, admin network overview with system health and an audit summary.
+- **Live Blood Network 2D** (`/network`): a scoped, schematic facility graph updated live over SSE. It is a "Prototype network visualization — not a geographic map."
+- Landing page v1: purpose, workflow, roles, security and privacy principles, what is simulated, and a prototype disclaimer.
+
+Phase 2, still in place:
 
 - Blood-bank donation desk: find a verified donor, record a collection, create labelled bags (`VYR-XXXX-XXXX`, QR payload `veyra:bag:<id>`).
 - Facility inventory by blood group × component, with expiry (72 h warning) and discard.
@@ -17,7 +23,7 @@ VEYRA is a prototype of an intelligent blood-supply network. It connects donors,
 
 Phase 1 (still in place): donor registration with **demo** phone verification (last 4 digits of the mobile, labelled, never presented as OTP), Argon2id passwords, rotating refresh sessions, CSRF protection, permission + scope RBAC, admin facility onboarding and staff invitations.
 
-See the [Phase 2 report](docs/phase-reports/phase-2.md), [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
+See the [Phase 3 report](docs/phase-reports/phase-3.md), [Phase 2 report](docs/phase-reports/phase-2.md), [Phase 1 report](docs/phase-reports/phase-1.md), [Phase 0 report](docs/phase-reports/phase-0.md) and the [architecture](docs/architecture/phase0-architecture.md).
 
 Demo sign-ins after `scripts\bootstrap.cmd` (**DEMO ONLY**, password `veyra-demo-console-2026` for all three):
 

@@ -21,6 +21,7 @@ from app.core.readiness import Check
 from app.core.security import AccessTokenCodec, PasswordHasher
 from app.modules.admin.router import router as admin_router
 from app.modules.bags.router import router as bags_router
+from app.modules.dashboard.router import router as dashboard_router
 from app.modules.donations.router import router as donations_router
 from app.modules.donors.router import router as donors_router
 from app.modules.facilities.router import router as facilities_router
@@ -133,6 +134,7 @@ def create_app(settings: Settings | None = None, *, with_infra: bool = True) -> 
         donations_router,
         requests_router,
         events_router,
+        dashboard_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
     return app

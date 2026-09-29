@@ -389,6 +389,97 @@ class _MemOutbox:
         return [e for e in self._db.outbox if e.published_at is None][:limit]
 
 
+_ON_HAND = ("available", "received")
+
+
+class _MemStats:
+    def __init__(self, db: MemoryDatabase) -> None:
+        self._db = db
+
+    async def request_status_counts(
+        self, *, hospital_id: UUID | None, target_facility_id: UUID | None
+    ) -> dict[str, int]:
+        out: dict[str, int] = {}
+        for r in self._db.requests.values():
+            if hospital_id is not None and r.hospital_id != hospital_id:
+                continue
+            if target_facility_id is not None and r.target_facility_id != target_facility_id:
+                continue
+            out[r.status] = out.get(r.status, 0) + 1
+        return out
+
+    async def requests_since(
+        self, *, facility_id: UUID | None, since: datetime
+    ) -> list[BloodRequest]:
+        rows = [
+            r
+            for r in self._db.requests.values()
+            if r.created_at >= since
+            and (facility_id is None or facility_id in (r.hospital_id, r.target_facility_id))
+        ]
+        return sorted(rows, key=lambda r: r.created_at)
+
+    async def donation_times_since(
+        self, *, facility_id: UUID | None, since: datetime
+    ) -> list[datetime]:
+        return [
+            d.collected_at
+            for d in self._db.donations.values()
+            if d.collected_at >= since
+            and (facility_id is None or d.collection_facility_id == facility_id)
+        ]
+
+    async def bag_events_since(
+        self, *, facility_id: UUID | None, since: datetime, event_types: tuple[str, ...]
+    ) -> list[BagEvent]:
+        rows = [
+            e
+            for e in self._db.bag_events
+            if e.occurred_at >= since
+            and e.event_type in event_types
+            and (facility_id is None or facility_id in (e.from_facility_id, e.to_facility_id))
+        ]
+        return sorted(rows, key=lambda e: e.occurred_at)
+
+    async def on_hand_expiries(self, facility_id: UUID) -> list[datetime]:
+        return [
+            b.expires_at
+            for b in self._db.bags.values()
+            if b.current_facility_id == facility_id and b.status in _ON_HAND
+        ]
+
+    async def bag_status_counts(self) -> dict[str, int]:
+        out: dict[str, int] = {}
+        for b in self._db.bags.values():
+            out[b.status] = out.get(b.status, 0) + 1
+        return out
+
+    async def user_counts(self) -> list[tuple[str, str, int]]:
+        out: dict[tuple[str, str], int] = {}
+        for u in self._db.users.values():
+            out[(u.role, u.status)] = out.get((u.role, u.status), 0) + 1
+        return [(role, status, n) for (role, status), n in sorted(out.items())]
+
+    async def active_facilities(self) -> list[Facility]:
+        return sorted(
+            (f for f in self._db.facilities.values() if f.status == "active"),
+            key=lambda f: f.name,
+        )
+
+    async def recent_outbox(self, *, limit: int) -> list[OutboxEvent]:
+        return sorted(self._db.outbox, key=lambda e: e.id, reverse=True)[:limit]
+
+    async def recent_audit(self, *, limit: int) -> list[AuditLog]:
+        return sorted(self._db.audit, key=lambda a: a.created_at, reverse=True)[:limit]
+
+    async def audit_action_counts_since(self, since: datetime) -> dict[str, int]:
+        out: dict[str, int] = {}
+        for a in self._db.audit:
+            if a.created_at >= since:
+                out[a.action] = out.get(a.action, 0) + 1
+        return out
+
+
 class MemoryUnitOfWork:
     def __init__(self, db: MemoryDatabase) -> None:
         self.users = _MemUsers(db)
@@ -402,6 +493,7 @@ class MemoryUnitOfWork:
         self.bags = _MemBags(db)
         self.requests = _MemRequests(db)
         self.outbox = _MemOutbox(db)
+        self.stats = _MemStats(db)
 
     async def commit(self) -> None:
         return None

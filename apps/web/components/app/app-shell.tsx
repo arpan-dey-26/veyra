@@ -12,6 +12,15 @@ import { cn } from "@/lib/cn";
 import { homeFor, isRole, ROLE_LABEL } from "@/lib/roles";
 import { useSession } from "@/lib/session";
 
+/** Top-level destinations per role. The API enforces access; this only hides dead links. */
+function navFor(role: string, home: string): { href: string; label: string }[] {
+  const items = [{ href: home, label: "Overview" }];
+  if (role === "HOSPITAL" || role === "BLOOD_BANK" || role === "ADMIN") {
+    items.push({ href: "/network", label: "Live network" });
+  }
+  return items;
+}
+
 /** Authenticated frame: guards the route (UX only; the API enforces access) and shows the user. */
 export function AppShell({ children }: { children: ReactNode }) {
   const { status, me, signOut } = useSession();
@@ -53,15 +62,19 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Wordmark />
             </Link>
             <nav aria-label="App" className="hidden items-center gap-1 text-sm sm:flex">
-              <Link
-                href={home}
-                className={cn(
-                  "rounded-pill px-3 py-1.5",
-                  pathname === home ? "bg-surface-sunken text-ink" : "text-ink-muted hover:text-ink",
-                )}
-              >
-                Overview
-              </Link>
+              {navFor(role, home).map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={pathname === item.href ? "page" : undefined}
+                  className={cn(
+                    "rounded-pill px-3 py-1.5",
+                    pathname === item.href ? "bg-surface-sunken text-ink" : "text-ink-muted hover:text-ink",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
             </nav>
           </div>
           <div className="flex items-center gap-3">
@@ -84,6 +97,24 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Button>
           </div>
         </div>
+        <nav
+          aria-label="App (mobile)"
+          className="mx-auto flex max-w-(--layout-max) gap-1 overflow-x-auto px-(--gutter) pb-2 text-sm sm:hidden"
+        >
+          {navFor(role, home).map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={pathname === item.href ? "page" : undefined}
+              className={cn(
+                "shrink-0 rounded-pill px-3 py-1.5",
+                pathname === item.href ? "bg-surface-sunken text-ink" : "text-ink-muted",
+              )}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
       </header>
       <main id="main" className="veyra-rise mx-auto max-w-(--layout-max) px-(--gutter) py-8 sm:py-10">
         {children}

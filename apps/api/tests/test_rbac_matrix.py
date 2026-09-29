@@ -177,6 +177,25 @@ MATRIX: list[tuple[str, str, dict[str, object] | None, dict[str, int]]] = [
         None,
         {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 403, "ADMIN": 403},
     ),
+    # ---------------------------------------------------------------- Phase 3
+    (
+        "GET",
+        "/api/v1/dashboard/facility",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        "/api/v1/dashboard/admin",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 403, "ADMIN": 200},
+    ),
+    (
+        "GET",
+        "/api/v1/network/graph",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
     (
         "GET",
         "/api/v1/stream?once=true",

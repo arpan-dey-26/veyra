@@ -61,6 +61,9 @@ class Settings(BaseSettings):
 
     # Blood network (Phase 2). Prototype defaults; verify against current national guidelines.
     min_donation_interval_days: int = Field(default=90, ge=1)
+    # Dashboards bucket "today" / per-day series in this fixed offset (India, UTC+05:30).
+    # A fixed offset avoids a tz database dependency on Windows.
+    report_utc_offset_minutes: int = Field(default=330, ge=-720, le=840)
     # Simulated partner blood banks (DEMO). None = enabled exactly when not in production.
     enable_mock_blood_banks: bool | None = None
     outbox_relay_interval_seconds: float = Field(default=0.5, gt=0)

@@ -4,7 +4,7 @@ from app.core.config import PRODUCT_NAME, PRODUCT_TAGLINE, Settings
 from app.core.readiness import Check, run_checks
 from app.modules.system.schemas import DemoDisclosure, MetaResponse, ReadinessResponse
 
-CURRENT_PHASE = "1 — Authentication & RBAC"
+CURRENT_PHASE = "3 — Dashboards & UX"
 
 
 class SystemService:
@@ -35,6 +35,15 @@ class SystemService:
                     label="Demo",
                     detail="Demo verification only. The last 4 digits of your mobile number are "
                     "used for prototype verification instead of a real OTP.",
+                )
+            )
+        if self._settings.mock_blood_banks_enabled:
+            disclosures.append(
+                DemoDisclosure(
+                    component="blood_banks",
+                    label="Simulated",
+                    detail="Blood banks marked Simulated are mock providers with generated "
+                    "availability. No real blood bank is contacted.",
                 )
             )
         return MetaResponse(

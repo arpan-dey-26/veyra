@@ -32,6 +32,193 @@
         "title": "AcceptInviteRequest",
         "type": "object"
       },
+      "ActivityItem": {
+        "description": "One network event (from the outbox). Carries no donor identity or health data.",
+        "properties": {
+          "blood_group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blood Group"
+          },
+          "component": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Component"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "topic": {
+            "title": "Topic",
+            "type": "string"
+          },
+          "units": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Units"
+          },
+          "urgency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Urgency"
+          }
+        },
+        "required": [
+          "event_id",
+          "topic",
+          "created_at"
+        ],
+        "title": "ActivityItem",
+        "type": "object"
+      },
+      "AdminDashboard": {
+        "properties": {
+          "activity": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityItem"
+            },
+            "title": "Activity",
+            "type": "array"
+          },
+          "audit": {
+            "$ref": "#/components/schemas/AuditSummary"
+          },
+          "bags_by_status": {
+            "items": {
+              "$ref": "#/components/schemas/StatusCount"
+            },
+            "title": "Bags By Status",
+            "type": "array"
+          },
+          "donations_by_day": {
+            "items": {
+              "$ref": "#/components/schemas/DayCount"
+            },
+            "title": "Donations By Day",
+            "type": "array"
+          },
+          "facilities": {
+            "$ref": "#/components/schemas/FacilityTotals"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "movements": {
+            "items": {
+              "$ref": "#/components/schemas/MovementDay"
+            },
+            "title": "Movements",
+            "type": "array"
+          },
+          "requests_by_status": {
+            "items": {
+              "$ref": "#/components/schemas/StatusCount"
+            },
+            "title": "Requests By Status",
+            "type": "array"
+          },
+          "users": {
+            "items": {
+              "$ref": "#/components/schemas/RoleCount"
+            },
+            "title": "Users",
+            "type": "array"
+          },
+          "users_total": {
+            "title": "Users Total",
+            "type": "integer"
+          },
+          "utc_offset_minutes": {
+            "title": "Utc Offset Minutes",
+            "type": "integer"
+          },
+          "window_days": {
+            "title": "Window Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "generated_at",
+          "window_days",
+          "utc_offset_minutes",
+          "users",
+          "users_total",
+          "facilities",
+          "requests_by_status",
+          "bags_by_status",
+          "donations_by_day",
+          "movements",
+          "audit",
+          "activity"
+        ],
+        "title": "AdminDashboard",
+        "type": "object"
+      },
       "AllocatedBag": {
         "properties": {
           "blood_group": {
@@ -64,6 +251,65 @@
           "status"
         ],
         "title": "AllocatedBag",
+        "type": "object"
+      },
+      "AuditItem": {
+        "description": "Audit summary row: no IP, no meta, no actor id (those stay in the audit table).",
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "actor_type": {
+            "title": "Actor Type",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "resource": {
+            "title": "Resource",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "resource",
+          "actor_type",
+          "created_at"
+        ],
+        "title": "AuditItem",
+        "type": "object"
+      },
+      "AuditSummary": {
+        "properties": {
+          "last_24h": {
+            "title": "Last 24H",
+            "type": "integer"
+          },
+          "recent": {
+            "items": {
+              "$ref": "#/components/schemas/AuditItem"
+            },
+            "title": "Recent",
+            "type": "array"
+          },
+          "top_actions": {
+            "items": {
+              "$ref": "#/components/schemas/StatusCount"
+            },
+            "title": "Top Actions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "last_24h",
+          "top_actions",
+          "recent"
+        ],
+        "title": "AuditSummary",
         "type": "object"
       },
       "AvailabilityItem": {
@@ -732,6 +978,25 @@
         "title": "CreatedInvite",
         "type": "object"
       },
+      "DayCount": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "day": {
+            "format": "date",
+            "title": "Day",
+            "type": "string"
+          }
+        },
+        "required": [
+          "day",
+          "count"
+        ],
+        "title": "DayCount",
+        "type": "object"
+      },
       "DemoDisclosure": {
         "properties": {
           "component": {
@@ -852,6 +1117,38 @@
           "bags"
         ],
         "title": "DonationOut",
+        "type": "object"
+      },
+      "DonationSummary": {
+        "properties": {
+          "applicable": {
+            "description": "False for hospitals (they don't collect donations)",
+            "title": "Applicable",
+            "type": "boolean"
+          },
+          "by_day": {
+            "items": {
+              "$ref": "#/components/schemas/DayCount"
+            },
+            "title": "By Day",
+            "type": "array"
+          },
+          "today": {
+            "title": "Today",
+            "type": "integer"
+          },
+          "window_total": {
+            "title": "Window Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "applicable",
+          "today",
+          "window_total",
+          "by_day"
+        ],
+        "title": "DonationSummary",
         "type": "object"
       },
       "DonorLookupRequest": {
@@ -1050,6 +1347,118 @@
         "title": "DonorSummary",
         "type": "object"
       },
+      "ExpiryBucket": {
+        "properties": {
+          "bucket": {
+            "enum": [
+              "expired",
+              "lt_1d",
+              "d1_3",
+              "d3_7",
+              "d7_30",
+              "gt_30d"
+            ],
+            "title": "Bucket",
+            "type": "string"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bucket",
+          "label",
+          "count"
+        ],
+        "title": "ExpiryBucket",
+        "type": "object"
+      },
+      "FacilityDashboard": {
+        "properties": {
+          "activity": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityItem"
+            },
+            "title": "Activity",
+            "type": "array"
+          },
+          "donations": {
+            "$ref": "#/components/schemas/DonationSummary"
+          },
+          "expiry": {
+            "items": {
+              "$ref": "#/components/schemas/ExpiryBucket"
+            },
+            "title": "Expiry",
+            "type": "array"
+          },
+          "facility_id": {
+            "format": "uuid",
+            "title": "Facility Id",
+            "type": "string"
+          },
+          "facility_name": {
+            "title": "Facility Name",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "HOSPITAL",
+              "BLOOD_BANK"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "movements": {
+            "items": {
+              "$ref": "#/components/schemas/MovementDay"
+            },
+            "title": "Movements",
+            "type": "array"
+          },
+          "on_hand": {
+            "title": "On Hand",
+            "type": "integer"
+          },
+          "requests": {
+            "$ref": "#/components/schemas/RequestSummary"
+          },
+          "utc_offset_minutes": {
+            "title": "Utc Offset Minutes",
+            "type": "integer"
+          },
+          "window_days": {
+            "title": "Window Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "facility_id",
+          "facility_name",
+          "kind",
+          "generated_at",
+          "window_days",
+          "utc_offset_minutes",
+          "requests",
+          "donations",
+          "movements",
+          "on_hand",
+          "expiry",
+          "activity"
+        ],
+        "title": "FacilityDashboard",
+        "type": "object"
+      },
       "FacilityOut": {
         "properties": {
           "address": {
@@ -1164,6 +1573,29 @@
           "is_simulated"
         ],
         "title": "FacilitySummary",
+        "type": "object"
+      },
+      "FacilityTotals": {
+        "properties": {
+          "blood_banks": {
+            "title": "Blood Banks",
+            "type": "integer"
+          },
+          "hospitals": {
+            "title": "Hospitals",
+            "type": "integer"
+          },
+          "simulated": {
+            "title": "Simulated",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "blood_banks",
+          "hospitals",
+          "simulated"
+        ],
+        "title": "FacilityTotals",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -1517,6 +1949,32 @@
         "title": "MetaResponse",
         "type": "object"
       },
+      "MovementDay": {
+        "properties": {
+          "day": {
+            "format": "date",
+            "title": "Day",
+            "type": "string"
+          },
+          "dispatched": {
+            "description": "Bags dispatched from or to this facility that day",
+            "title": "Dispatched",
+            "type": "integer"
+          },
+          "received": {
+            "description": "Bags confirmed received from or at this facility",
+            "title": "Received",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "dispatched",
+          "received"
+        ],
+        "title": "MovementDay",
+        "type": "object"
+      },
       "MyDonation": {
         "description": "A donor's view of their own donation: where it was given and how it was used,\nnever which hospital or patient received it.",
         "properties": {
@@ -1631,6 +2089,135 @@
           "interval_days"
         ],
         "title": "MyDonations",
+        "type": "object"
+      },
+      "NetworkEdge": {
+        "properties": {
+          "last_at": {
+            "format": "date-time",
+            "title": "Last At",
+            "type": "string"
+          },
+          "last_status": {
+            "title": "Last Status",
+            "type": "string"
+          },
+          "open": {
+            "title": "Open",
+            "type": "integer"
+          },
+          "requests": {
+            "title": "Requests",
+            "type": "integer"
+          },
+          "source": {
+            "description": "Hospital node id",
+            "title": "Source",
+            "type": "string"
+          },
+          "target": {
+            "description": "Blood bank node id",
+            "title": "Target",
+            "type": "string"
+          },
+          "units": {
+            "title": "Units",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "requests",
+          "open",
+          "units",
+          "last_status",
+          "last_at"
+        ],
+        "title": "NetworkEdge",
+        "type": "object"
+      },
+      "NetworkGraph": {
+        "properties": {
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/NetworkEdge"
+            },
+            "title": "Edges",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/NetworkNode"
+            },
+            "title": "Nodes",
+            "type": "array"
+          },
+          "note": {
+            "default": "Prototype network visualization \u2014 not a geographic map.",
+            "title": "Note",
+            "type": "string"
+          },
+          "window_days": {
+            "title": "Window Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "generated_at",
+          "window_days",
+          "nodes",
+          "edges"
+        ],
+        "title": "NetworkGraph",
+        "type": "object"
+      },
+      "NetworkNode": {
+        "properties": {
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "id": {
+            "description": "Facility UUID, or 'mock:<ref>' for a simulated partner bank",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_self": {
+            "title": "Is Self",
+            "type": "boolean"
+          },
+          "kind": {
+            "enum": [
+              "HOSPITAL",
+              "BLOOD_BANK"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "simulated": {
+            "title": "Simulated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "city",
+          "simulated",
+          "is_self"
+        ],
+        "title": "NetworkNode",
         "type": "object"
       },
       "PageMeta": {
@@ -1990,6 +2577,47 @@
         "title": "RejectRequest",
         "type": "object"
       },
+      "RequestSummary": {
+        "properties": {
+          "by_status": {
+            "items": {
+              "$ref": "#/components/schemas/StatusCount"
+            },
+            "title": "By Status",
+            "type": "array"
+          },
+          "direction": {
+            "enum": [
+              "outgoing",
+              "incoming"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "emergency_open": {
+            "title": "Emergency Open",
+            "type": "integer"
+          },
+          "open": {
+            "description": "pending + acknowledged + dispatched",
+            "title": "Open",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "direction",
+          "total",
+          "open",
+          "emergency_open",
+          "by_status"
+        ],
+        "title": "RequestSummary",
+        "type": "object"
+      },
       "RespondRequest": {
         "additionalProperties": false,
         "properties": {
@@ -2007,6 +2635,39 @@
           }
         },
         "title": "RespondRequest",
+        "type": "object"
+      },
+      "RoleCount": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "integer"
+          },
+          "disabled": {
+            "title": "Disabled",
+            "type": "integer"
+          },
+          "pending_verification": {
+            "title": "Pending Verification",
+            "type": "integer"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "role",
+          "active",
+          "pending_verification",
+          "disabled",
+          "total"
+        ],
+        "title": "RoleCount",
         "type": "object"
       },
       "SourceKind": {
@@ -2066,6 +2727,24 @@
           "simulated"
         ],
         "title": "SourceMeta",
+        "type": "object"
+      },
+      "StatusCount": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "count"
+        ],
+        "title": "StatusCount",
         "type": "object"
       },
       "UpdateDonorProfileRequest": {
@@ -3005,6 +3684,48 @@
         ]
       }
     },
+    "/api/v1/dashboard/admin": {
+      "get": {
+        "operationId": "admin_dashboard_api_v1_dashboard_admin_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDashboard"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Network-wide counts for administrators (no donor data, no audit details)",
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/dashboard/facility": {
+      "get": {
+        "operationId": "facility_dashboard_api_v1_dashboard_facility_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FacilityDashboard"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My facility's dashboard aggregates (hospital or blood bank)",
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
     "/api/v1/donations": {
       "get": {
         "operationId": "list_donations_api_v1_donations_get",
@@ -3479,6 +4200,27 @@
         "summary": "Which blood banks can supply this (banded, never exact stock)",
         "tags": [
           "requests"
+        ]
+      }
+    },
+    "/api/v1/network/graph": {
+      "get": {
+        "operationId": "network_graph_api_v1_network_graph_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NetworkGraph"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Scoped facility graph for the live network visualization",
+        "tags": [
+          "dashboard"
         ]
       }
     },

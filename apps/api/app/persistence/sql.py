@@ -413,6 +413,87 @@ class SqlOutboxRepository(_Repo):
         return list(rows)
 
 
+_ON_HAND = ("available", "received")
+
+
+class SqlStatsRepository(_Repo):
+    async def request_status_counts(
+        self, *, hospital_id: UUID | None, target_facility_id: UUID | None
+    ) -> dict[str, int]:
+        q = select(BloodRequest.status, func.count()).group_by(BloodRequest.status)
+        if hospital_id is not None:
+            q = q.where(BloodRequest.hospital_id == hospital_id)
+        if target_facility_id is not None:
+            q = q.where(BloodRequest.target_facility_id == target_facility_id)
+        return {status: int(n) for status, n in (await self._s.execute(q)).all()}
+
+    async def requests_since(
+        self, *, facility_id: UUID | None, since: datetime
+    ) -> list[BloodRequest]:
+        q = select(BloodRequest).where(BloodRequest.created_at >= since)
+        if facility_id is not None:
+            q = q.where(
+                (BloodRequest.hospital_id == facility_id)
+                | (BloodRequest.target_facility_id == facility_id)
+            )
+        return list(await self._s.scalars(q.order_by(BloodRequest.created_at)))
+
+    async def donation_times_since(
+        self, *, facility_id: UUID | None, since: datetime
+    ) -> list[datetime]:
+        q = select(Donation.collected_at).where(Donation.collected_at >= since)
+        if facility_id is not None:
+            q = q.where(Donation.collection_facility_id == facility_id)
+        return list(await self._s.scalars(q))
+
+    async def bag_events_since(
+        self, *, facility_id: UUID | None, since: datetime, event_types: tuple[str, ...]
+    ) -> list[BagEvent]:
+        q = select(BagEvent).where(
+            BagEvent.occurred_at >= since, BagEvent.event_type.in_(event_types)
+        )
+        if facility_id is not None:
+            q = q.where(
+                (BagEvent.from_facility_id == facility_id)
+                | (BagEvent.to_facility_id == facility_id)
+            )
+        return list(await self._s.scalars(q.order_by(BagEvent.occurred_at)))
+
+    async def on_hand_expiries(self, facility_id: UUID) -> list[datetime]:
+        q = select(BloodBag.expires_at).where(
+            BloodBag.current_facility_id == facility_id, BloodBag.status.in_(_ON_HAND)
+        )
+        return list(await self._s.scalars(q))
+
+    async def bag_status_counts(self) -> dict[str, int]:
+        q = select(BloodBag.status, func.count()).group_by(BloodBag.status)
+        return {status: int(n) for status, n in (await self._s.execute(q)).all()}
+
+    async def user_counts(self) -> list[tuple[str, str, int]]:
+        q = select(User.role, User.status, func.count()).group_by(User.role, User.status)
+        return [(role, status, int(n)) for role, status, n in (await self._s.execute(q)).all()]
+
+    async def active_facilities(self) -> list[Facility]:
+        q = select(Facility).where(Facility.status == "active").order_by(Facility.name)
+        return list(await self._s.scalars(q))
+
+    async def recent_outbox(self, *, limit: int) -> list[OutboxEvent]:
+        q = select(OutboxEvent).order_by(OutboxEvent.id.desc()).limit(limit)
+        return list(await self._s.scalars(q))
+
+    async def recent_audit(self, *, limit: int) -> list[AuditLog]:
+        q = select(AuditLog).order_by(AuditLog.created_at.desc(), AuditLog.id.desc()).limit(limit)
+        return list(await self._s.scalars(q))
+
+    async def audit_action_counts_since(self, since: datetime) -> dict[str, int]:
+        q = (
+            select(AuditLog.action, func.count())
+            .where(AuditLog.created_at >= since)
+            .group_by(AuditLog.action)
+        )
+        return {action: int(n) for action, n in (await self._s.execute(q)).all()}
+
+
 class SqlUnitOfWork:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
@@ -427,6 +508,7 @@ class SqlUnitOfWork:
         self.bags = SqlBagRepository(session)
         self.requests = SqlRequestRepository(session)
         self.outbox = SqlOutboxRepository(session)
+        self.stats = SqlStatsRepository(session)
 
     async def commit(self) -> None:
         try:

@@ -368,6 +368,11 @@ class RequestService:
         return {
             "request_id": str(req.id),
             "reference": req.reference,
+            # Facility ids only (the event's own audience), so live views can animate
+            # the hospital -> bank edge. Never donor or patient data.
+            "hospital_id": str(req.hospital_id),
+            "target_facility_id": str(req.target_facility_id) if req.target_facility_id else None,
+            "target_ref": req.target_external_ref,
             "status": req.status,
             "blood_group": req.blood_group,
             "component": req.component,

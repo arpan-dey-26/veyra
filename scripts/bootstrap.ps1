@@ -292,6 +292,31 @@ if ($SkipDocker) {
     if ($sse.Content -notlike "*event: request.fulfilled*" -or $sse.Content -notlike "*$($req.id)*") { throw "SSE replay missing events" }
     Log "   network journey OK (request $($req.reference), bag $bagId)"
   }
+  Step "e2e: phase 3 dashboards + live network graph (scoped, via web proxy)" {
+    $base = "http://localhost:3000/api/v1"
+    $pw = "veyra-demo-console-2026"
+    $bank = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $hosp = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $adm = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    Invoke-Api Post "$base/auth/login" @{ email = "bank@veyra.demo"; password = $pw } $bank | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "hospital@veyra.demo"; password = $pw } $hosp | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "admin@veyra.demo"; password = $pw } $adm | Out-Null
+    $bd = Invoke-Api Get "$base/dashboard/facility" $null $bank
+    if ($bd.kind -ne "BLOOD_BANK" -or @($bd.expiry).Count -ne 6 -or @($bd.movements).Count -ne 14) { throw "blood bank dashboard shape" }
+    $hd = Invoke-Api Get "$base/dashboard/facility" $null $hosp
+    if ($hd.kind -ne "HOSPITAL" -or $hd.donations.applicable) { throw "hospital dashboard shape" }
+    $ad = Invoke-Api Get "$base/dashboard/admin" $null $adm
+    if ($ad.users_total -lt 3) { throw "admin dashboard counts" }
+    foreach ($row in @($ad.audit.recent)) { if ($row.PSObject.Properties.Name -contains "ip") { throw "audit summary leaks ip" } }
+    $g = Invoke-Api Get "$base/network/graph" $null $hosp
+    if ($g.note -notlike "*not a geographic map*") { throw "network graph not labelled" }
+    if (@($g.nodes | Where-Object { $_.kind -eq "HOSPITAL" -and -not $_.is_self }).Count -ne 0) { throw "hospital sees other hospitals" }
+    $denied = $false
+    try { Invoke-Api Get "$base/dashboard/admin" $null $hosp | Out-Null } catch { if ("$_" -like "*-> 403*") { $denied = $true } else { throw } }
+    if (-not $denied) { throw "hospital could read the admin dashboard" }
+    Assert-Http "http://localhost:3000/" "What is real, and what is simulated"
+    Log "   dashboards OK (bank on hand $($bd.on_hand), hospital open $($hd.requests.open), graph $(@($g.nodes).Count) nodes)"
+  }
 }
 
 # ---------------------------------------------------------------- summary

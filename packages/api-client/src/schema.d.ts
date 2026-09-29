@@ -244,6 +244,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/dashboard/admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Network-wide counts for administrators (no donor data, no audit details) */
+        get: operations["admin_dashboard_api_v1_dashboard_admin_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboard/facility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My facility's dashboard aggregates (hospital or blood bank) */
+        get: operations["facility_dashboard_api_v1_dashboard_facility_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/donations": {
         parameters: {
             query?: never;
@@ -394,6 +428,23 @@ export interface paths {
         };
         /** Which blood banks can supply this (banded, never exact stock) */
         get: operations["availability_api_v1_network_availability_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/network/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Scoped facility graph for the live network visualization */
+        get: operations["network_graph_api_v1_network_graph_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -588,6 +639,63 @@ export interface components {
             /** Token */
             token: string;
         };
+        /**
+         * ActivityItem
+         * @description One network event (from the outbox). Carries no donor identity or health data.
+         */
+        ActivityItem: {
+            /** Blood Group */
+            blood_group?: string | null;
+            /** Component */
+            component?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Event Id */
+            event_id: string;
+            /** Reason */
+            reason?: string | null;
+            /** Reference */
+            reference?: string | null;
+            /** Status */
+            status?: string | null;
+            /** Topic */
+            topic: string;
+            /** Units */
+            units?: number | null;
+            /** Urgency */
+            urgency?: string | null;
+        };
+        /** AdminDashboard */
+        AdminDashboard: {
+            /** Activity */
+            activity: components["schemas"]["ActivityItem"][];
+            audit: components["schemas"]["AuditSummary"];
+            /** Bags By Status */
+            bags_by_status: components["schemas"]["StatusCount"][];
+            /** Donations By Day */
+            donations_by_day: components["schemas"]["DayCount"][];
+            facilities: components["schemas"]["FacilityTotals"];
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Movements */
+            movements: components["schemas"]["MovementDay"][];
+            /** Requests By Status */
+            requests_by_status: components["schemas"]["StatusCount"][];
+            /** Users */
+            users: components["schemas"]["RoleCount"][];
+            /** Users Total */
+            users_total: number;
+            /** Utc Offset Minutes */
+            utc_offset_minutes: number;
+            /** Window Days */
+            window_days: number;
+        };
         /** AllocatedBag */
         AllocatedBag: {
             /** Blood Group */
@@ -603,6 +711,32 @@ export interface components {
             public_id: string;
             /** Status */
             status: string;
+        };
+        /**
+         * AuditItem
+         * @description Audit summary row: no IP, no meta, no actor id (those stay in the audit table).
+         */
+        AuditItem: {
+            /** Action */
+            action: string;
+            /** Actor Type */
+            actor_type: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Resource */
+            resource: string;
+        };
+        /** AuditSummary */
+        AuditSummary: {
+            /** Last 24H */
+            last_24h: number;
+            /** Recent */
+            recent: components["schemas"]["AuditItem"][];
+            /** Top Actions */
+            top_actions: components["schemas"]["StatusCount"][];
         };
         /** AvailabilityItem */
         AvailabilityItem: {
@@ -888,6 +1022,16 @@ export interface components {
              */
             status: "pending" | "accepted" | "expired" | "revoked";
         };
+        /** DayCount */
+        DayCount: {
+            /** Count */
+            count: number;
+            /**
+             * Day
+             * Format: date
+             */
+            day: string;
+        };
         /** DemoDisclosure */
         DemoDisclosure: {
             /** Component */
@@ -939,6 +1083,20 @@ export interface components {
             status: string;
             /** Volume Ml */
             volume_ml: number;
+        };
+        /** DonationSummary */
+        DonationSummary: {
+            /**
+             * Applicable
+             * @description False for hospitals (they don't collect donations)
+             */
+            applicable: boolean;
+            /** By Day */
+            by_day: components["schemas"]["DayCount"][];
+            /** Today */
+            today: number;
+            /** Window Total */
+            window_total: number;
         };
         /** DonorLookupRequest */
         DonorLookupRequest: {
@@ -1031,6 +1189,52 @@ export interface components {
             /** State */
             state: string;
         };
+        /** ExpiryBucket */
+        ExpiryBucket: {
+            /**
+             * Bucket
+             * @enum {string}
+             */
+            bucket: "expired" | "lt_1d" | "d1_3" | "d3_7" | "d7_30" | "gt_30d";
+            /** Count */
+            count: number;
+            /** Label */
+            label: string;
+        };
+        /** FacilityDashboard */
+        FacilityDashboard: {
+            /** Activity */
+            activity: components["schemas"]["ActivityItem"][];
+            donations: components["schemas"]["DonationSummary"];
+            /** Expiry */
+            expiry: components["schemas"]["ExpiryBucket"][];
+            /**
+             * Facility Id
+             * Format: uuid
+             */
+            facility_id: string;
+            /** Facility Name */
+            facility_name: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "HOSPITAL" | "BLOOD_BANK";
+            /** Movements */
+            movements: components["schemas"]["MovementDay"][];
+            /** On Hand */
+            on_hand: number;
+            requests: components["schemas"]["RequestSummary"];
+            /** Utc Offset Minutes */
+            utc_offset_minutes: number;
+            /** Window Days */
+            window_days: number;
+        };
         /** FacilityOut */
         FacilityOut: {
             /** Address */
@@ -1081,6 +1285,15 @@ export interface components {
             state: string;
             /** Type */
             type: string;
+        };
+        /** FacilityTotals */
+        FacilityTotals: {
+            /** Blood Banks */
+            blood_banks: number;
+            /** Hospitals */
+            hospitals: number;
+            /** Simulated */
+            simulated: number;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -1254,6 +1467,24 @@ export interface components {
             /** Version */
             version: string;
         };
+        /** MovementDay */
+        MovementDay: {
+            /**
+             * Day
+             * Format: date
+             */
+            day: string;
+            /**
+             * Dispatched
+             * @description Bags dispatched from or to this facility that day
+             */
+            dispatched: number;
+            /**
+             * Received
+             * @description Bags confirmed received from or at this facility
+             */
+            received: number;
+        };
         /**
          * MyDonation
          * @description A donor's view of their own donation: where it was given and how it was used,
@@ -1299,6 +1530,72 @@ export interface components {
             interval_days: number;
             /** Last Donation At */
             last_donation_at: string | null;
+        };
+        /** NetworkEdge */
+        NetworkEdge: {
+            /**
+             * Last At
+             * Format: date-time
+             */
+            last_at: string;
+            /** Last Status */
+            last_status: string;
+            /** Open */
+            open: number;
+            /** Requests */
+            requests: number;
+            /**
+             * Source
+             * @description Hospital node id
+             */
+            source: string;
+            /**
+             * Target
+             * @description Blood bank node id
+             */
+            target: string;
+            /** Units */
+            units: number;
+        };
+        /** NetworkGraph */
+        NetworkGraph: {
+            /** Edges */
+            edges: components["schemas"]["NetworkEdge"][];
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Nodes */
+            nodes: components["schemas"]["NetworkNode"][];
+            /**
+             * Note
+             * @default Prototype network visualization — not a geographic map.
+             */
+            note: string;
+            /** Window Days */
+            window_days: number;
+        };
+        /** NetworkNode */
+        NetworkNode: {
+            /** City */
+            city: string;
+            /**
+             * Id
+             * @description Facility UUID, or 'mock:<ref>' for a simulated partner bank
+             */
+            id: string;
+            /** Is Self */
+            is_self: boolean;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "HOSPITAL" | "BLOOD_BANK";
+            /** Name */
+            name: string;
+            /** Simulated */
+            simulated: boolean;
         };
         /** PageMeta */
         PageMeta: {
@@ -1433,10 +1730,42 @@ export interface components {
             /** Note */
             note: string;
         };
+        /** RequestSummary */
+        RequestSummary: {
+            /** By Status */
+            by_status: components["schemas"]["StatusCount"][];
+            /**
+             * Direction
+             * @enum {string}
+             */
+            direction: "outgoing" | "incoming";
+            /** Emergency Open */
+            emergency_open: number;
+            /**
+             * Open
+             * @description pending + acknowledged + dispatched
+             */
+            open: number;
+            /** Total */
+            total: number;
+        };
         /** RespondRequest */
         RespondRequest: {
             /** Note */
             note?: string | null;
+        };
+        /** RoleCount */
+        RoleCount: {
+            /** Active */
+            active: number;
+            /** Disabled */
+            disabled: number;
+            /** Pending Verification */
+            pending_verification: number;
+            /** Role */
+            role: string;
+            /** Total */
+            total: number;
         };
         /**
          * SourceKind
@@ -1461,6 +1790,13 @@ export interface components {
             provider: string;
             /** Simulated */
             readonly simulated: boolean;
+        };
+        /** StatusCount */
+        StatusCount: {
+            /** Count */
+            count: number;
+            /** Status */
+            status: string;
         };
         /**
          * UpdateDonorProfileRequest
@@ -2056,6 +2392,46 @@ export interface operations {
             };
         };
     };
+    admin_dashboard_api_v1_dashboard_admin_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDashboard"];
+                };
+            };
+        };
+    };
+    facility_dashboard_api_v1_dashboard_facility_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacilityDashboard"];
+                };
+            };
+        };
+    };
     list_donations_api_v1_donations_get: {
         parameters: {
             query?: {
@@ -2351,6 +2727,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    network_graph_api_v1_network_graph_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NetworkGraph"];
                 };
             };
         };

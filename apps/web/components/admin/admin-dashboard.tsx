@@ -10,6 +10,7 @@ import type {
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import { PageHeader, StatTile } from "@/components/app/page-header";
+import { AdminOverview } from "@/components/dashboard/admin-overview";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardLabel } from "@/components/ui/card";
@@ -90,10 +91,13 @@ export function AdminDashboard() {
     <>
       <PageHeader
         eyebrow="Administration"
-        title="Network accounts"
-        description="Onboard hospitals and blood banks, invite their staff, and review accounts. Admins never see donor health data."
+        title="Network overview"
+        description="Network health, activity and accounts. Onboard hospitals and blood banks and invite their staff. Admins never see donor health data."
       />
-      <div className="grid gap-4 sm:grid-cols-3">
+      <AdminOverview />
+
+      <h2 className="mt-10 text-lg font-medium">Accounts &amp; facilities</h2>
+      <div className="mt-3 grid gap-4 sm:grid-cols-3">
         <StatTile label="Accounts" value={roleFilter ? "—" : snapshot.usersTotal} note={roleFilter ? "Filter active" : undefined} />
         <StatTile label="Hospitals" value={hospitals} />
         <StatTile label="Blood banks" value={banks} />

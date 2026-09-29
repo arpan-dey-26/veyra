@@ -2,6 +2,26 @@
 /* Tokens are imported UNLAYERED so they always win over Tailwind's layered theme defaults. */
 @import "@veyra/design-tokens/tokens.css";
 
+/*
+ * Chart series colors (Phase 3). Only for charts with two series; single-series charts use
+ * --color-vital. Validated (dataviz validate_palette.js): light vs #ffffff and dark vs
+ * #181413, both PASS (CVD ΔE ≥ 24, contrast ≥ 3:1). Dark steps are selected, not flipped.
+ */
+:root {
+  --viz-1: #2a78d6;
+  --viz-2: #eb6834;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --viz-1: #3987e5;
+    --viz-2: #d95926;
+  }
+}
+:root[data-theme="dark"] {
+  --viz-1: #3987e5;
+  --viz-2: #d95926;
+}
+
 /* Expose VEYRA tokens as Tailwind utilities (bg-surface, text-ink, text-vital, shadow-2, ...). */
 @theme inline {
   --color-surface: var(--color-surface);
@@ -25,6 +45,8 @@
   --color-simulated: var(--color-simulated);
   --color-simulated-soft: var(--color-simulated-soft);
   --color-focus: var(--color-focus);
+  --color-viz-1: var(--viz-1);
+  --color-viz-2: var(--viz-2);
 
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);

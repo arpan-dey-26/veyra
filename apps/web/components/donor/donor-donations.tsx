@@ -3,6 +3,7 @@
 import type { MyDonations } from "@veyra/api-client";
 import { useEffect, useState } from "react";
 
+import { StatTile } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardLabel } from "@/components/ui/card";
 import { EmptyState, Skeleton } from "@/components/ui/states";
@@ -10,7 +11,23 @@ import { api } from "@/lib/api";
 import { formatDate } from "@/lib/network";
 
 /** The donor's own history: impact without ever naming the receiving hospital or patient. */
-export function DonorDonations() {
+/** Impact tiles from the donor's own history (counts only). */
+export function donorImpact(data: MyDonations): { donations: number; sent: number; inStock: number; components: number } {
+  return {
+    donations: data.donations.length,
+    sent: data.donations.reduce((n, d) => n + d.bags_sent_to_hospitals, 0),
+    inStock: data.donations.reduce((n, d) => n + d.bags_in_stock, 0),
+    components: data.donations.reduce((n, d) => n + d.bags_total, 0),
+  };
+}
+
+export function DonorDonations({
+  verifiedAt,
+  bloodGroupStatus,
+}: {
+  verifiedAt?: string | null;
+  bloodGroupStatus?: string;
+} = {}) {
   const [data, setData] = useState<MyDonations | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -26,10 +43,33 @@ export function DonorDonations() {
     };
   }, []);
 
-  if (failed) return null;
+  if (failed) {
+    return (
+      <Card>
+        <CardLabel>Donations</CardLabel>
+        <p className="mt-2 text-sm text-ink-muted">Your donation history couldn&apos;t be loaded. Refresh to try again.</p>
+      </Card>
+    );
+  }
   if (!data) return <Skeleton className="h-40 w-full" />;
+  const impact = donorImpact(data);
 
   return (
+    <div className="flex flex-col gap-4 md:col-span-2">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4" data-testid="donor-impact">
+      <StatTile label="Donations" value={impact.donations} note={impact.components > 0 ? `${impact.components} bags produced` : "None recorded yet"} />
+      <StatTile label="Sent to hospitals" value={impact.sent} note="Bags dispatched from your donations" />
+      <StatTile
+        label="Next eligible"
+        value={data.eligible_now ? "Now" : data.eligible_from ? formatDate(data.eligible_from) : "—"}
+        note={`Minimum ${data.interval_days}-day interval (prototype default)`}
+      />
+      <StatTile
+        label="Verification"
+        value={verifiedAt ? "Verified" : "Pending"}
+        note={bloodGroupStatus === "confirmed" ? "Blood group confirmed by a blood bank" : "Blood group self-declared"}
+      />
+    </div>
     <Card>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -81,5 +121,6 @@ export function DonorDonations() {
         </ol>
       )}
     </Card>
+    </div>
   );
 }

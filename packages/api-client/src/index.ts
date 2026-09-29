@@ -43,6 +43,17 @@ export type BloodRequestOut = Schemas["BloodRequestOut"];
 export type AllocatedBag = Schemas["AllocatedBag"];
 export type BloodComponent = CreateBloodRequest["component"];
 export type BloodGroup = CreateBloodRequest["blood_group"];
+// Phase 3: dashboards & live network
+export type FacilityDashboard = Schemas["FacilityDashboard"];
+export type AdminDashboard = Schemas["AdminDashboard"];
+export type ActivityItem = Schemas["ActivityItem"];
+export type StatusCount = Schemas["StatusCount"];
+export type DayCount = Schemas["DayCount"];
+export type MovementDay = Schemas["MovementDay"];
+export type ExpiryBucket = Schemas["ExpiryBucket"];
+export type NetworkGraph = Schemas["NetworkGraph"];
+export type NetworkNode = Schemas["NetworkNode"];
+export type NetworkEdge = Schemas["NetworkEdge"];
 
 /** A live event from `GET /api/v1/stream` (Server-Sent Events, fed by the outbox). */
 export interface NetworkEvent {
