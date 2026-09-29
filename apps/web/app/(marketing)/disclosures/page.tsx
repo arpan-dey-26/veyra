@@ -32,6 +32,16 @@ const ITEMS = [
     body: "Cold-chain telemetry comes from a software simulator: simulated device ids, RFID tags, battery and readings, with prototype thresholds. There are no physical IoT devices. This is simulated IoT telemetry for a student engineering prototype and is not a certified medical monitoring system.",
   },
   {
+    subject: "Routing and ETAs",
+    label: "Simulated" as const,
+    body: "Estimated travel times are deterministic schematic simulations (no GPS, maps or traffic data), labelled “Simulated routing — prototype”.",
+  },
+  {
+    subject: "Operational recommendations",
+    label: "Demo" as const,
+    body: "Priority scores, pressure bands and bag rankings are explainable prototype rules with their reasons shown. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice, and nothing is dispatched without a person confirming it.",
+  },
+  {
     subject: "Blockchain",
     label: "Demo" as const,
     body: "Integrity records are anchored on a local development chain, not a production blockchain network.",

@@ -32,6 +32,41 @@
         "title": "AcceptInviteRequest",
         "type": "object"
       },
+      "ActiveRoute": {
+        "properties": {
+          "dispatched_at": {
+            "format": "date-time",
+            "title": "Dispatched At",
+            "type": "string"
+          },
+          "expected_at": {
+            "format": "date-time",
+            "title": "Expected At",
+            "type": "string"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "route": {
+            "$ref": "#/components/schemas/RouteOut"
+          }
+        },
+        "required": [
+          "request_id",
+          "reference",
+          "dispatched_at",
+          "expected_at",
+          "route"
+        ],
+        "title": "ActiveRoute",
+        "type": "object"
+      },
       "ActivityItem": {
         "description": "One network event (from the outbox). Carries no donor identity or health data.",
         "properties": {
@@ -217,6 +252,123 @@
           "activity"
         ],
         "title": "AdminDashboard",
+        "type": "object"
+      },
+      "AlertOut": {
+        "properties": {
+          "at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "facility_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Facility Name"
+          },
+          "kind": {
+            "enum": [
+              "emergency_request",
+              "cold_chain",
+              "pressure",
+              "expiring",
+              "device_stale"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "ref": {
+            "description": "Request id, bag public id, or group/component",
+            "title": "Ref",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "warning",
+              "attention"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "severity",
+          "title",
+          "detail",
+          "ref"
+        ],
+        "title": "AlertOut",
+        "type": "object"
+      },
+      "AlertsOut": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/AlertOut"
+            },
+            "title": "Alerts",
+            "type": "array"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Counts",
+            "type": "object"
+          },
+          "disclaimer": {
+            "default": "Operational recommendation \u2014 prototype. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "label": {
+            "default": "Operational recommendation \u2014 prototype",
+            "title": "Label",
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "facility",
+              "network"
+            ],
+            "title": "Scope",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope",
+          "alerts",
+          "counts",
+          "generated_at"
+        ],
+        "title": "AlertsOut",
         "type": "object"
       },
       "AllocatedBag": {
@@ -691,6 +843,115 @@
         "title": "BloodRequestOut",
         "type": "object"
       },
+      "CandidateBag": {
+        "properties": {
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "cold_chain_state": {
+            "enum": [
+              "unmonitored",
+              "normal",
+              "warning",
+              "critical",
+              "stale"
+            ],
+            "title": "Cold Chain State",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "current_facility_id": {
+            "format": "uuid",
+            "title": "Current Facility Id",
+            "type": "string"
+          },
+          "current_facility_name": {
+            "title": "Current Facility Name",
+            "type": "string"
+          },
+          "deprioritized": {
+            "title": "Deprioritized",
+            "type": "boolean"
+          },
+          "device_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Id"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "expires_in_hours": {
+            "title": "Expires In Hours",
+            "type": "number"
+          },
+          "fefo_position": {
+            "title": "Fefo Position",
+            "type": "integer"
+          },
+          "latest_temperature_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Temperature C"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "rank": {
+            "title": "Rank",
+            "type": "integer"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ReasonOut"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "recommended": {
+            "title": "Recommended",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "rank",
+          "public_id",
+          "blood_group",
+          "component",
+          "expires_at",
+          "expires_in_hours",
+          "fefo_position",
+          "cold_chain_state",
+          "device_id",
+          "latest_temperature_c",
+          "current_facility_id",
+          "current_facility_name",
+          "recommended",
+          "deprioritized",
+          "reasons"
+        ],
+        "title": "CandidateBag",
+        "type": "object"
+      },
       "ChainStatus": {
         "properties": {
           "head_hash": {
@@ -724,6 +985,37 @@
           "head_hash"
         ],
         "title": "ChainStatus",
+        "type": "object"
+      },
+      "ChangePriority": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "description": "A reason code (no free text, so no personal details reach the audit log)",
+            "enum": [
+              "escalated_by_requesting_team",
+              "situation_resolved",
+              "entered_in_error",
+              "other"
+            ],
+            "title": "Reason",
+            "type": "string"
+          },
+          "urgency": {
+            "enum": [
+              "routine",
+              "urgent",
+              "emergency"
+            ],
+            "title": "Urgency",
+            "type": "string"
+          }
+        },
+        "required": [
+          "urgency",
+          "reason"
+        ],
+        "title": "ChangePriority",
         "type": "object"
       },
       "ColdChainEvent": {
@@ -1937,6 +2229,71 @@
         "title": "FacilityOut",
         "type": "object"
       },
+      "FacilityPressure": {
+        "properties": {
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Counts",
+            "type": "object"
+          },
+          "disclaimer": {
+            "default": "Operational recommendation \u2014 prototype. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "facility_id": {
+            "format": "uuid",
+            "title": "Facility Id",
+            "type": "string"
+          },
+          "facility_name": {
+            "title": "Facility Name",
+            "type": "string"
+          },
+          "facility_type": {
+            "title": "Facility Type",
+            "type": "string"
+          },
+          "forecast_label": {
+            "default": "Synthetic forecast input \u2014 prototype",
+            "title": "Forecast Label",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "horizon_days": {
+            "title": "Horizon Days",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/PressureRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          }
+        },
+        "required": [
+          "facility_id",
+          "facility_name",
+          "facility_type",
+          "horizon_days",
+          "rows",
+          "counts",
+          "generated_at",
+          "source"
+        ],
+        "title": "FacilityPressure",
+        "type": "object"
+      },
       "FacilitySummary": {
         "properties": {
           "city": {
@@ -2121,6 +2478,43 @@
           "source"
         ],
         "title": "ForecastSummary",
+        "type": "object"
+      },
+      "FulfilRequest": {
+        "additionalProperties": false,
+        "description": "Dispatch body. ``bag_public_ids`` is optional (Phase 6): omit it for strict FEFO.",
+        "properties": {
+          "bag_public_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Bags the blood bank confirmed (e.g. from the operational recommendation). Each must be an available, unexpired, matching bag held by this bank.",
+            "title": "Bag Public Ids"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "title": "FulfilRequest",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -3086,6 +3480,166 @@
         "title": "NetworkNode",
         "type": "object"
       },
+      "OpsRequest": {
+        "properties": {
+          "age_minutes": {
+            "title": "Age Minutes",
+            "type": "integer"
+          },
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "hospital_id": {
+            "format": "uuid",
+            "title": "Hospital Id",
+            "type": "string"
+          },
+          "hospital_name": {
+            "title": "Hospital Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "needed_by": {
+            "format": "date-time",
+            "title": "Needed By",
+            "type": "string"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/PriorityOut"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
+          },
+          "requested_at": {
+            "format": "date-time",
+            "title": "Requested At",
+            "type": "string"
+          },
+          "route": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RouteOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Simulated ETA while dispatched"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "target_facility_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Facility Id"
+          },
+          "target_name": {
+            "title": "Target Name",
+            "type": "string"
+          },
+          "units": {
+            "title": "Units",
+            "type": "integer"
+          },
+          "urgency": {
+            "title": "Urgency",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reference",
+          "hospital_id",
+          "hospital_name",
+          "target_facility_id",
+          "target_name",
+          "provider",
+          "blood_group",
+          "component",
+          "units",
+          "urgency",
+          "status",
+          "requested_at",
+          "needed_by",
+          "age_minutes",
+          "priority"
+        ],
+        "title": "OpsRequest",
+        "type": "object"
+      },
+      "OpsRequestList": {
+        "properties": {
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "open, emergency_open, dispatched, expected_units, received_units_7d",
+            "title": "Counts",
+            "type": "object"
+          },
+          "disclaimer": {
+            "default": "Operational recommendation \u2014 prototype. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "label": {
+            "default": "Operational recommendation \u2014 prototype",
+            "title": "Label",
+            "type": "string"
+          },
+          "requests": {
+            "items": {
+              "$ref": "#/components/schemas/OpsRequest"
+            },
+            "title": "Requests",
+            "type": "array"
+          },
+          "scope": {
+            "enum": [
+              "facility",
+              "network"
+            ],
+            "title": "Scope",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope",
+          "requests",
+          "counts",
+          "generated_at"
+        ],
+        "title": "OpsRequestList",
+        "type": "object"
+      },
       "PageMeta": {
         "properties": {
           "limit": {
@@ -3209,6 +3763,152 @@
         "title": "Page[UserOut]",
         "type": "object"
       },
+      "PressureRow": {
+        "properties": {
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "coverage_days": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coverage Days"
+          },
+          "forecast_daily_mean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecast Daily Mean"
+          },
+          "free_stock": {
+            "title": "Free Stock",
+            "type": "integer"
+          },
+          "level": {
+            "enum": [
+              "normal",
+              "watch",
+              "elevated"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "open_units": {
+            "title": "Open Units",
+            "type": "integer"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ReasonOut"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "stock": {
+            "title": "Stock",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "blood_group",
+          "component",
+          "level",
+          "stock",
+          "open_units",
+          "free_stock",
+          "forecast_daily_mean",
+          "coverage_days",
+          "reasons"
+        ],
+        "title": "PressureRow",
+        "type": "object"
+      },
+      "PriorityOut": {
+        "properties": {
+          "action_code": {
+            "title": "Action Code",
+            "type": "string"
+          },
+          "band": {
+            "enum": [
+              "immediate",
+              "high",
+              "standard"
+            ],
+            "title": "Band",
+            "type": "string"
+          },
+          "computed_at": {
+            "format": "date-time",
+            "title": "Computed At",
+            "type": "string"
+          },
+          "disclaimer": {
+            "default": "Operational recommendation \u2014 prototype. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "label": {
+            "default": "Operational recommendation \u2014 prototype",
+            "title": "Label",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ReasonOut"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "recommendation": {
+            "title": "Recommendation",
+            "type": "string"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "score": {
+            "description": "Operational priority score, not a clinical score",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Score",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "request_id",
+          "reference",
+          "score",
+          "band",
+          "recommendation",
+          "action_code",
+          "reasons",
+          "computed_at"
+        ],
+        "title": "PriorityOut",
+        "type": "object"
+      },
       "ReadinessResponse": {
         "properties": {
           "checks": {
@@ -3275,6 +3975,155 @@
           "status"
         ],
         "title": "ReadingOut",
+        "type": "object"
+      },
+      "ReasonOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "points": {
+            "description": "Contribution to the operational priority score (0 = info)",
+            "title": "Points",
+            "type": "integer"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "tone": {
+            "enum": [
+              "info",
+              "positive",
+              "attention",
+              "warning"
+            ],
+            "title": "Tone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "text",
+          "points",
+          "tone"
+        ],
+        "title": "ReasonOut",
+        "type": "object"
+      },
+      "Recommendation": {
+        "properties": {
+          "blood_group": {
+            "title": "Blood Group",
+            "type": "string"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/CandidateBag"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "compatibility_rule": {
+            "title": "Compatibility Rule",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "disclaimer": {
+            "default": "Operational recommendation \u2014 prototype. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "fefo_default_bag_ids": {
+            "description": "What a plain dispatch (no bag selection) would pick: strict FEFO",
+            "items": {
+              "type": "string"
+            },
+            "title": "Fefo Default Bag Ids",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "human_confirmation": {
+            "title": "Human Confirmation",
+            "type": "string"
+          },
+          "label": {
+            "default": "Operational recommendation \u2014 prototype",
+            "title": "Label",
+            "type": "string"
+          },
+          "pressure": {
+            "$ref": "#/components/schemas/PressureRow"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/PriorityOut"
+          },
+          "recommendation": {
+            "title": "Recommendation",
+            "type": "string"
+          },
+          "recommended_bag_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Recommended Bag Ids",
+            "type": "array"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "route": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RouteOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "units": {
+            "title": "Units",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "request_id",
+          "reference",
+          "status",
+          "units",
+          "blood_group",
+          "component",
+          "recommendation",
+          "recommended_bag_ids",
+          "fefo_default_bag_ids",
+          "candidates",
+          "compatibility_rule",
+          "priority",
+          "pressure",
+          "route",
+          "human_confirmation",
+          "generated_at"
+        ],
+        "title": "Recommendation",
         "type": "object"
       },
       "RecordDonationRequest": {
@@ -3523,25 +4372,6 @@
         "title": "RequestSummary",
         "type": "object"
       },
-      "RespondRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "note": {
-            "anyOf": [
-              {
-                "maxLength": 500,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Note"
-          }
-        },
-        "title": "RespondRequest",
-        "type": "object"
-      },
       "RoleCount": {
         "properties": {
           "active": {
@@ -3573,6 +4403,124 @@
           "total"
         ],
         "title": "RoleCount",
+        "type": "object"
+      },
+      "RouteOut": {
+        "properties": {
+          "destination_facility_id": {
+            "format": "uuid",
+            "title": "Destination Facility Id",
+            "type": "string"
+          },
+          "destination_name": {
+            "title": "Destination Name",
+            "type": "string"
+          },
+          "distance_km": {
+            "title": "Distance Km",
+            "type": "number"
+          },
+          "eta_minutes": {
+            "title": "Eta Minutes",
+            "type": "integer"
+          },
+          "handover_minutes": {
+            "title": "Handover Minutes",
+            "type": "integer"
+          },
+          "label": {
+            "default": "Simulated routing \u2014 prototype",
+            "title": "Label",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ReasonOut"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceMeta"
+          },
+          "source_facility_id": {
+            "format": "uuid",
+            "title": "Source Facility Id",
+            "type": "string"
+          },
+          "source_name": {
+            "title": "Source Name",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "clear",
+              "slow",
+              "delayed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "travel_minutes": {
+            "title": "Travel Minutes",
+            "type": "integer"
+          },
+          "urgency": {
+            "title": "Urgency",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_facility_id",
+          "source_name",
+          "destination_facility_id",
+          "destination_name",
+          "urgency",
+          "distance_km",
+          "travel_minutes",
+          "handover_minutes",
+          "eta_minutes",
+          "status",
+          "reasons",
+          "source"
+        ],
+        "title": "RouteOut",
+        "type": "object"
+      },
+      "RoutingOverview": {
+        "properties": {
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "label": {
+            "default": "Simulated routing \u2014 prototype",
+            "title": "Label",
+            "type": "string"
+          },
+          "routes": {
+            "items": {
+              "$ref": "#/components/schemas/ActiveRoute"
+            },
+            "title": "Routes",
+            "type": "array"
+          },
+          "scope": {
+            "enum": [
+              "facility",
+              "network"
+            ],
+            "title": "Scope",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope",
+          "routes",
+          "generated_at"
+        ],
+        "title": "RoutingOverview",
         "type": "object"
       },
       "SimulatorResult": {
@@ -5872,6 +6820,317 @@
         ]
       }
     },
+    "/api/v1/operations/alerts": {
+      "get": {
+        "operationId": "alerts_api_v1_operations_alerts_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Emergency requests, cold-chain, expiry and pressure alerts in scope",
+        "tags": [
+          "operations"
+        ]
+      }
+    },
+    "/api/v1/operations/facilities/{facility_id}/pressure": {
+      "get": {
+        "operationId": "facility_pressure_api_v1_operations_facilities__facility_id__pressure_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "facility_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Facility Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FacilityPressure"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stock vs open requests vs synthetic forecast, per group and component",
+        "tags": [
+          "operations"
+        ]
+      }
+    },
+    "/api/v1/operations/requests": {
+      "get": {
+        "operationId": "list_requests_api_v1_operations_requests_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpsRequestList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Operational request queue with explainable priority (prototype)",
+        "tags": [
+          "operations"
+        ]
+      }
+    },
+    "/api/v1/operations/requests/{request_id}/priority": {
+      "get": {
+        "operationId": "get_priority_api_v1_operations_requests__request_id__priority_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriorityOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Operational priority score, band, action and reasons (not a clinical score)",
+        "tags": [
+          "operations"
+        ]
+      },
+      "post": {
+        "operationId": "change_priority_api_v1_operations_requests__request_id__priority_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePriority"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriorityOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "The requesting hospital changes its open request's priority (audited)",
+        "tags": [
+          "operations"
+        ]
+      }
+    },
+    "/api/v1/operations/requests/{request_id}/recommendations": {
+      "get": {
+        "operationId": "recommendations_api_v1_operations_requests__request_id__recommendations_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Recommendation"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ranked candidate bags for a request (never dispatches anything)",
+        "tags": [
+          "operations"
+        ]
+      }
+    },
+    "/api/v1/operations/routing": {
+      "get": {
+        "operationId": "routing_overview_api_v1_operations_routing_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutingOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Simulated ETAs for dispatched requests in scope (prototype)",
+        "tags": [
+          "operations"
+        ]
+      }
+    },
+    "/api/v1/operations/routing/estimate": {
+      "get": {
+        "operationId": "route_estimate_api_v1_operations_routing_estimate_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "source_facility_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Facility Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "destination_facility_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Destination Facility Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "urgency",
+            "required": false,
+            "schema": {
+              "default": "routine",
+              "enum": [
+                "routine",
+                "urgent",
+                "emergency"
+              ],
+              "title": "Urgency",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Simulated route estimate between two facilities (no GPS or traffic data)",
+        "tags": [
+          "operations"
+        ]
+      }
+    },
     "/api/v1/reference/registration": {
       "get": {
         "operationId": "registration_reference_api_v1_reference_registration_get",
@@ -6143,7 +7402,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RespondRequest"
+                "$ref": "#/components/schemas/FulfilRequest"
               }
             }
           },
@@ -6171,7 +7430,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Dispatch bags (first-expiry-first-out) against a request",
+        "summary": "Dispatch bags against a request (FEFO, or the bags the bank confirmed)",
         "tags": [
           "requests"
         ]

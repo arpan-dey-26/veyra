@@ -71,6 +71,20 @@ export type ColdChainThresholds = Schemas["ThresholdsOut"];
 export type MonitoredList = Schemas["MonitoredList"];
 export type MonitoredBag = Schemas["MonitoredBag"];
 export type SimulatorResult = Schemas["SimulatorResult"];
+// Phase 6: operational intelligence (prototype; not clinical decisions)
+export type OpsReason = Schemas["ReasonOut"];
+export type OpsPriority = Schemas["PriorityOut"];
+export type OpsRequest = Schemas["OpsRequest"];
+export type OpsRequestList = Schemas["OpsRequestList"];
+export type OpsRecommendation = Schemas["Recommendation"];
+export type OpsCandidateBag = Schemas["CandidateBag"];
+export type OpsPressureRow = Schemas["PressureRow"];
+export type OpsFacilityPressure = Schemas["FacilityPressure"];
+export type OpsRoute = Schemas["RouteOut"];
+export type OpsRoutingOverview = Schemas["RoutingOverview"];
+export type OpsAlert = Schemas["AlertOut"];
+export type OpsAlerts = Schemas["AlertsOut"];
+export type ChangePriorityBody = Schemas["ChangePriority"];
 
 /** A live event from `GET /api/v1/stream` (Server-Sent Events, fed by the outbox). */
 export interface NetworkEvent {

@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { PageHeader, StatTile } from "@/components/app/page-header";
 import { AdminOverview } from "@/components/dashboard/admin-overview";
 import { AdminForecast } from "@/components/forecast/forecast-panel";
+import { AdminOperations } from "@/components/operations/operations";
 import { AdminColdChain } from "@/components/telemetry/cold-chain";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -104,6 +105,10 @@ export function AdminDashboard() {
 
       <div className="mt-6">
         <AdminColdChain />
+      </div>
+
+      <div className="mt-10">
+        <AdminOperations />
       </div>
 
       <h2 className="mt-10 text-lg font-medium">Accounts &amp; facilities</h2>

@@ -572,6 +572,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Emergency requests, cold-chain, expiry and pressure alerts in scope */
+        get: operations["alerts_api_v1_operations_alerts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/facilities/{facility_id}/pressure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stock vs open requests vs synthetic forecast, per group and component */
+        get: operations["facility_pressure_api_v1_operations_facilities__facility_id__pressure_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Operational request queue with explainable priority (prototype) */
+        get: operations["list_requests_api_v1_operations_requests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/requests/{request_id}/priority": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Operational priority score, band, action and reasons (not a clinical score) */
+        get: operations["get_priority_api_v1_operations_requests__request_id__priority_get"];
+        put?: never;
+        /** The requesting hospital changes its open request's priority (audited) */
+        post: operations["change_priority_api_v1_operations_requests__request_id__priority_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/requests/{request_id}/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ranked candidate bags for a request (never dispatches anything) */
+        get: operations["recommendations_api_v1_operations_requests__request_id__recommendations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/routing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Simulated ETAs for dispatched requests in scope (prototype) */
+        get: operations["routing_overview_api_v1_operations_routing_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/routing/estimate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Simulated route estimate between two facilities (no GPS or traffic data) */
+        get: operations["route_estimate_api_v1_operations_routing_estimate_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/reference/registration": {
         parameters: {
             query?: never;
@@ -650,7 +770,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Dispatch bags (first-expiry-first-out) against a request */
+        /** Dispatch bags against a request (FEFO, or the bags the bank confirmed) */
         post: operations["fulfil_request_api_v1_requests__request_id__fulfil_post"];
         delete?: never;
         options?: never;
@@ -892,6 +1012,27 @@ export interface components {
             /** Token */
             token: string;
         };
+        /** ActiveRoute */
+        ActiveRoute: {
+            /**
+             * Dispatched At
+             * Format: date-time
+             */
+            dispatched_at: string;
+            /**
+             * Expected At
+             * Format: date-time
+             */
+            expected_at: string;
+            /** Reference */
+            reference: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            route: components["schemas"]["RouteOut"];
+        };
         /**
          * ActivityItem
          * @description One network event (from the outbox). Carries no donor identity or health data.
@@ -948,6 +1089,61 @@ export interface components {
             utc_offset_minutes: number;
             /** Window Days */
             window_days: number;
+        };
+        /** AlertOut */
+        AlertOut: {
+            /** At */
+            at?: string | null;
+            /** Detail */
+            detail: string;
+            /** Facility Name */
+            facility_name?: string | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "emergency_request" | "cold_chain" | "pressure" | "expiring" | "device_stale";
+            /**
+             * Ref
+             * @description Request id, bag public id, or group/component
+             */
+            ref: string;
+            /**
+             * Severity
+             * @enum {string}
+             */
+            severity: "warning" | "attention";
+            /** Title */
+            title: string;
+        };
+        /** AlertsOut */
+        AlertsOut: {
+            /** Alerts */
+            alerts: components["schemas"]["AlertOut"][];
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+            /**
+             * Disclaimer
+             * @default Operational recommendation — prototype. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice.
+             */
+            disclaimer: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /**
+             * Label
+             * @default Operational recommendation — prototype
+             */
+            label: string;
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "facility" | "network";
         };
         /** AllocatedBag */
         AllocatedBag: {
@@ -1150,6 +1346,48 @@ export interface components {
             /** Urgency */
             urgency: string;
         };
+        /** CandidateBag */
+        CandidateBag: {
+            /** Blood Group */
+            blood_group: string;
+            /**
+             * Cold Chain State
+             * @enum {string}
+             */
+            cold_chain_state: "unmonitored" | "normal" | "warning" | "critical" | "stale";
+            /** Component */
+            component: string;
+            /**
+             * Current Facility Id
+             * Format: uuid
+             */
+            current_facility_id: string;
+            /** Current Facility Name */
+            current_facility_name: string;
+            /** Deprioritized */
+            deprioritized: boolean;
+            /** Device Id */
+            device_id: string | null;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Expires In Hours */
+            expires_in_hours: number;
+            /** Fefo Position */
+            fefo_position: number;
+            /** Latest Temperature C */
+            latest_temperature_c: number | null;
+            /** Public Id */
+            public_id: string;
+            /** Rank */
+            rank: number;
+            /** Reasons */
+            reasons: components["schemas"]["ReasonOut"][];
+            /** Recommended */
+            recommended: boolean;
+        };
         /** ChainStatus */
         ChainStatus: {
             /** Head Hash */
@@ -1163,6 +1401,20 @@ export interface components {
             note: string;
             /** Valid */
             valid: boolean;
+        };
+        /** ChangePriority */
+        ChangePriority: {
+            /**
+             * Reason
+             * @description A reason code (no free text, so no personal details reach the audit log)
+             * @enum {string}
+             */
+            reason: "escalated_by_requesting_team" | "situation_resolved" | "entered_in_error" | "other";
+            /**
+             * Urgency
+             * @enum {string}
+             */
+            urgency: "routine" | "urgent" | "emergency";
         };
         /** ColdChainEvent */
         ColdChainEvent: {
@@ -1691,6 +1943,42 @@ export interface components {
             /** Type */
             type: string;
         };
+        /** FacilityPressure */
+        FacilityPressure: {
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+            /**
+             * Disclaimer
+             * @default Operational recommendation — prototype. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice.
+             */
+            disclaimer: string;
+            /**
+             * Facility Id
+             * Format: uuid
+             */
+            facility_id: string;
+            /** Facility Name */
+            facility_name: string;
+            /** Facility Type */
+            facility_type: string;
+            /**
+             * Forecast Label
+             * @default Synthetic forecast input — prototype
+             */
+            forecast_label: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Horizon Days */
+            horizon_days: number;
+            /** Rows */
+            rows: components["schemas"]["PressureRow"][];
+            source: components["schemas"]["SourceMeta"];
+        };
         /** FacilitySummary */
         FacilitySummary: {
             /** City */
@@ -1776,6 +2064,19 @@ export interface components {
                 [key: string]: number;
             };
             source: components["schemas"]["SourceMeta"];
+        };
+        /**
+         * FulfilRequest
+         * @description Dispatch body. ``bag_public_ids`` is optional (Phase 6): omit it for strict FEFO.
+         */
+        FulfilRequest: {
+            /**
+             * Bag Public Ids
+             * @description Bags the blood bank confirmed (e.g. from the operational recommendation). Each must be an available, unexpired, matching bag held by this bank.
+             */
+            bag_public_ids?: string[] | null;
+            /** Note */
+            note?: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -2224,6 +2525,86 @@ export interface components {
             /** Simulated */
             simulated: boolean;
         };
+        /** OpsRequest */
+        OpsRequest: {
+            /** Age Minutes */
+            age_minutes: number;
+            /** Blood Group */
+            blood_group: string;
+            /** Component */
+            component: string;
+            /**
+             * Hospital Id
+             * Format: uuid
+             */
+            hospital_id: string;
+            /** Hospital Name */
+            hospital_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Needed By
+             * Format: date-time
+             */
+            needed_by: string;
+            priority: components["schemas"]["PriorityOut"];
+            /** Provider */
+            provider: string;
+            /** Reference */
+            reference: string;
+            /**
+             * Requested At
+             * Format: date-time
+             */
+            requested_at: string;
+            /** @description Simulated ETA while dispatched */
+            route?: components["schemas"]["RouteOut"] | null;
+            /** Status */
+            status: string;
+            /** Target Facility Id */
+            target_facility_id: string | null;
+            /** Target Name */
+            target_name: string;
+            /** Units */
+            units: number;
+            /** Urgency */
+            urgency: string;
+        };
+        /** OpsRequestList */
+        OpsRequestList: {
+            /**
+             * Counts
+             * @description open, emergency_open, dispatched, expected_units, received_units_7d
+             */
+            counts: {
+                [key: string]: number;
+            };
+            /**
+             * Disclaimer
+             * @default Operational recommendation — prototype. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice.
+             */
+            disclaimer: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /**
+             * Label
+             * @default Operational recommendation — prototype
+             */
+            label: string;
+            /** Requests */
+            requests: components["schemas"]["OpsRequest"][];
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "facility" | "network";
+        };
         /** PageMeta */
         PageMeta: {
             /** Limit */
@@ -2263,6 +2644,71 @@ export interface components {
             data: components["schemas"]["UserOut"][];
             meta: components["schemas"]["PageMeta"];
         };
+        /** PressureRow */
+        PressureRow: {
+            /** Blood Group */
+            blood_group: string;
+            /** Component */
+            component: string;
+            /** Coverage Days */
+            coverage_days: number | null;
+            /** Forecast Daily Mean */
+            forecast_daily_mean: number | null;
+            /** Free Stock */
+            free_stock: number;
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "normal" | "watch" | "elevated";
+            /** Open Units */
+            open_units: number;
+            /** Reasons */
+            reasons: components["schemas"]["ReasonOut"][];
+            /** Stock */
+            stock: number;
+        };
+        /** PriorityOut */
+        PriorityOut: {
+            /** Action Code */
+            action_code: string;
+            /**
+             * Band
+             * @enum {string}
+             */
+            band: "immediate" | "high" | "standard";
+            /**
+             * Computed At
+             * Format: date-time
+             */
+            computed_at: string;
+            /**
+             * Disclaimer
+             * @default Operational recommendation — prototype. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice.
+             */
+            disclaimer: string;
+            /**
+             * Label
+             * @default Operational recommendation — prototype
+             */
+            label: string;
+            /** Reasons */
+            reasons: components["schemas"]["ReasonOut"][];
+            /** Recommendation */
+            recommendation: string;
+            /** Reference */
+            reference: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /**
+             * Score
+             * @description Operational priority score, not a clinical score
+             */
+            score: number;
+        };
         /** ReadinessResponse */
         ReadinessResponse: {
             /** Checks */
@@ -2293,6 +2739,74 @@ export interface components {
             status: "normal" | "warning" | "critical";
             /** Temperature C */
             temperature_c: number;
+        };
+        /** ReasonOut */
+        ReasonOut: {
+            /** Code */
+            code: string;
+            /**
+             * Points
+             * @description Contribution to the operational priority score (0 = info)
+             */
+            points: number;
+            /** Text */
+            text: string;
+            /**
+             * Tone
+             * @enum {string}
+             */
+            tone: "info" | "positive" | "attention" | "warning";
+        };
+        /** Recommendation */
+        Recommendation: {
+            /** Blood Group */
+            blood_group: string;
+            /** Candidates */
+            candidates: components["schemas"]["CandidateBag"][];
+            /** Compatibility Rule */
+            compatibility_rule: string;
+            /** Component */
+            component: string;
+            /**
+             * Disclaimer
+             * @default Operational recommendation — prototype. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice.
+             */
+            disclaimer: string;
+            /**
+             * Fefo Default Bag Ids
+             * @description What a plain dispatch (no bag selection) would pick: strict FEFO
+             */
+            fefo_default_bag_ids: string[];
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Human Confirmation */
+            human_confirmation: string;
+            /**
+             * Label
+             * @default Operational recommendation — prototype
+             */
+            label: string;
+            pressure: components["schemas"]["PressureRow"];
+            priority: components["schemas"]["PriorityOut"];
+            /** Recommendation */
+            recommendation: string;
+            /** Recommended Bag Ids */
+            recommended_bag_ids: string[];
+            /** Reference */
+            reference: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            route: components["schemas"]["RouteOut"] | null;
+            /** Status */
+            status: string;
+            /** Units */
+            units: number;
         };
         /** RecordDonationRequest */
         RecordDonationRequest: {
@@ -2395,11 +2909,6 @@ export interface components {
             /** Total */
             total: number;
         };
-        /** RespondRequest */
-        RespondRequest: {
-            /** Note */
-            note?: string | null;
-        };
         /** RoleCount */
         RoleCount: {
             /** Active */
@@ -2412,6 +2921,66 @@ export interface components {
             role: string;
             /** Total */
             total: number;
+        };
+        /** RouteOut */
+        RouteOut: {
+            /**
+             * Destination Facility Id
+             * Format: uuid
+             */
+            destination_facility_id: string;
+            /** Destination Name */
+            destination_name: string;
+            /** Distance Km */
+            distance_km: number;
+            /** Eta Minutes */
+            eta_minutes: number;
+            /** Handover Minutes */
+            handover_minutes: number;
+            /**
+             * Label
+             * @default Simulated routing — prototype
+             */
+            label: string;
+            /** Reasons */
+            reasons: components["schemas"]["ReasonOut"][];
+            source: components["schemas"]["SourceMeta"];
+            /**
+             * Source Facility Id
+             * Format: uuid
+             */
+            source_facility_id: string;
+            /** Source Name */
+            source_name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "clear" | "slow" | "delayed";
+            /** Travel Minutes */
+            travel_minutes: number;
+            /** Urgency */
+            urgency: string;
+        };
+        /** RoutingOverview */
+        RoutingOverview: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /**
+             * Label
+             * @default Simulated routing — prototype
+             */
+            label: string;
+            /** Routes */
+            routes: components["schemas"]["ActiveRoute"][];
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "facility" | "network";
         };
         /** SimulatorResult */
         SimulatorResult: {
@@ -3746,6 +4315,227 @@ export interface operations {
             };
         };
     };
+    alerts_api_v1_operations_alerts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertsOut"];
+                };
+            };
+        };
+    };
+    facility_pressure_api_v1_operations_facilities__facility_id__pressure_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                facility_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacilityPressure"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_requests_api_v1_operations_requests_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OpsRequestList"];
+                };
+            };
+        };
+    };
+    get_priority_api_v1_operations_requests__request_id__priority_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PriorityOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    change_priority_api_v1_operations_requests__request_id__priority_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePriority"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PriorityOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recommendations_api_v1_operations_requests__request_id__recommendations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Recommendation"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    routing_overview_api_v1_operations_routing_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutingOverview"];
+                };
+            };
+        };
+    };
+    route_estimate_api_v1_operations_routing_estimate_get: {
+        parameters: {
+            query: {
+                source_facility_id: string;
+                destination_facility_id: string;
+                urgency?: "routine" | "urgent" | "emergency";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RouteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     registration_reference_api_v1_reference_registration_get: {
         parameters: {
             query?: never;
@@ -3915,7 +4705,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RespondRequest"];
+                "application/json": components["schemas"]["FulfilRequest"];
             };
         };
         responses: {

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ComingInPhase, PageHeader } from "@/components/app/page-header";
 import { FacilityOverview } from "@/components/dashboard/facility-overview";
 import { ForecastPanel } from "@/components/forecast/forecast-panel";
+import { OperationsWorkspace } from "@/components/operations/operations";
 import { SmartBagMonitor } from "@/components/telemetry/cold-chain";
 import { TraceSearch } from "@/components/network/bag-trace";
 import { DonationDesk } from "@/components/network/donation-desk";
@@ -26,8 +27,7 @@ import { toFailure } from "@/lib/problem";
 
 const UPCOMING = {
   HOSPITAL: [
-    { phase: 6, title: "Emergency assistant", description: "Critical stock triggers sourcing across the network, with you in control." },
-    { phase: 7, title: "Transport routing", description: "Courier assignment and live ETAs for dispatched bags." },
+    { phase: 7, title: "Transport routing", description: "Courier assignment and tracked transport for dispatched bags." },
   ],
   BLOOD_BANK: [
     { phase: 5, title: "Donor outreach", description: "Invite eligible donors of the groups you are short of." },
@@ -38,6 +38,7 @@ const UPCOMING = {
 const TABS = {
   HOSPITAL: [
     { id: "overview", label: "Overview" },
+    { id: "operations", label: "Operations" },
     { id: "request", label: "Request blood" },
     { id: "requests", label: "My requests" },
     { id: "forecast", label: "Forecast" },
@@ -46,6 +47,7 @@ const TABS = {
   ],
   BLOOD_BANK: [
     { id: "overview", label: "Overview" },
+    { id: "operations", label: "Operations" },
     { id: "inventory", label: "Inventory" },
     { id: "coldchain", label: "Cold chain" },
     { id: "donations", label: "Donation desk" },
@@ -95,7 +97,7 @@ export function FacilityDashboard({ kind }: { kind: "HOSPITAL" | "BLOOD_BANK" })
           <span className="font-mono text-xs text-ink-subtle">Reg. {facility.registration_number}</span>
         )}
       </Card>
-      <FacilityWorkspace kind={kind} />
+      <FacilityWorkspace kind={kind} facilityId={facility.id} />
       <div className="mt-10 grid gap-4 md:grid-cols-3">
         {UPCOMING[kind].map((m) => (
           <ComingInPhase key={m.title} {...m} />
@@ -105,7 +107,7 @@ export function FacilityDashboard({ kind }: { kind: "HOSPITAL" | "BLOOD_BANK" })
   );
 }
 
-function FacilityWorkspace({ kind }: { kind: "HOSPITAL" | "BLOOD_BANK" }) {
+function FacilityWorkspace({ kind, facilityId }: { kind: "HOSPITAL" | "BLOOD_BANK"; facilityId: string }) {
   const tabs = TABS[kind];
   const [tab, setTab] = useState<TabId>(tabs[0].id);
   const [created, setCreated] = useState<{ id: string; reference: string } | null>(null);
@@ -147,6 +149,7 @@ function FacilityWorkspace({ kind }: { kind: "HOSPITAL" | "BLOOD_BANK" }) {
             }}
           />
         )}
+        {tab === "operations" && <OperationsWorkspace kind={kind} facilityId={facilityId} />}
         {tab === "forecast" && <ForecastPanel kind={kind} />}
         {tab === "inventory" && <InventoryOverview canDiscard />}
         {tab === "coldchain" && <SmartBagMonitor />}

@@ -50,6 +50,10 @@ class Permission(StrEnum):
     DONATION_RECORD = "donation:record:own_facility"
     # Phase 5: drive the SIMULATED telemetry of bags the facility currently holds (demo only)
     TELEMETRY_SIMULATE = "telemetry:simulate:own_facility"
+    # Phase 6: operational views (own requests / own facility; admins use NETWORK_READ)
+    OPERATIONS_READ = "operations:read:scoped"
+    # Phase 6: bag allocation recommendations for requests targeted at the caller's bank
+    ALLOCATION_RECOMMEND = "allocation:recommend:own_facility"
     TRANSPORT_READ = "transport:read"
     # Admin
     USER_READ = "user:read"
@@ -84,6 +88,7 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.EMERGENCY_CREATE,
             _P.BAG_RECEIVE,
             _P.TELEMETRY_SIMULATE,
+            _P.OPERATIONS_READ,
             _P.BAG_TRACE_READ,
             _P.NETWORK_AVAILABILITY_READ,
             _P.EVENTS_SUBSCRIBE,
@@ -103,6 +108,8 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             _P.BAG_TRACE_READ,
             _P.DONATION_RECORD,
             _P.TELEMETRY_SIMULATE,
+            _P.OPERATIONS_READ,
+            _P.ALLOCATION_RECOMMEND,
             _P.TRANSPORT_READ,
             _P.EVENTS_SUBSCRIBE,
             _P.NOTIFICATION_READ_SELF,

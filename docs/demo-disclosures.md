@@ -15,7 +15,8 @@ VEYRA is a prototype. This file is the canonical list of what is **not** real. T
 | ZK eligibility | Demo | Technical prototype. **Not a medical certification or clinical decision system.** |
 | Staff invitations | Demo | No email is sent. The admin sees a one-time invitation link (shown once, labelled "Demo delivery") to share with the invitee. |
 | Demo accounts | Demo | `admin@veyra.demo`, `bank@veyra.demo`, `hospital@veyra.demo` (password `veyra-demo-console-2026`) are created by `app.scripts.seed_demo`, flagged `is_demo`; the script refuses to run in production. |
-| Routing / ETAs | Simulated (until a real routing provider is configured) | Straight-line estimates, labelled "Estimated". |
+| Routing / ETAs | Simulated | Deterministic schematic estimates (distance band by city/state, simulated speed and route status), labelled "Simulated routing — prototype". **No GPS, maps or traffic data.** |
+| Operational recommendations | Prototype | Explainable, rule-based priority, pressure and bag-ranking with structured reasons. This is an operational engineering prototype. Recommendations are not clinical decisions or medical advice. Nothing is dispatched without a person confirming it. |
 | AI assistant | Demo (in mock mode) | With no LLM key it runs a deterministic offline mode, labelled as such. |
 
 ## Enforcement

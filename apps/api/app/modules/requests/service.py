@@ -7,6 +7,7 @@ Mock provider (SIMULATED):      acknowledged → cancelled   (nothing is ever di
 
 from __future__ import annotations
 
+import builtins
 import secrets
 from datetime import UTC, timedelta
 from typing import Literal
@@ -20,6 +21,11 @@ from app.core.rbac import AuthContext, Role
 from app.modules.audit.service import record
 from app.modules.bags.domain import BagEventType
 from app.modules.bags.service import BagService, append_event, require_facility
+from app.modules.operations.service import (
+    OperationsService,
+    on_request_created,
+    on_request_dispatched,
+)
 from app.modules.outbox.service import emit
 from app.modules.requests.models import BloodRequest, RequestAllocation
 from app.modules.requests.schemas import (
@@ -56,6 +62,10 @@ class IdempotencyMismatchError(AppError):
     )
 
 
+class BagNotEligibleError(AppError):
+    status, code, title = 409, "bag_not_eligible", "A selected bag can't serve this request"
+
+
 class ProviderUnavailableError(AppError):
     status, code, title = 422, "provider_unavailable", "This provider is not enabled"
 
@@ -70,12 +80,18 @@ def _fingerprint(b: CreateBloodRequest) -> tuple[object, ...]:
 
 class RequestService:
     def __init__(
-        self, uow: UnitOfWork, clock: Clock, providers: dict[str, BloodBankProvider]
+        self,
+        uow: UnitOfWork,
+        clock: Clock,
+        providers: dict[str, BloodBankProvider],
+        *,
+        ops: OperationsService | None = None,
     ) -> None:
         self._uow = uow
         self._clock = clock
         self._providers = providers
         self._bags = BagService(uow, clock)
+        self._ops = ops  # Phase 6 operational events (emergency alerts, ETA, pressure)
 
     def _provider(self, name: str) -> BloodBankProvider:
         provider = self._providers.get(name)
@@ -266,6 +282,8 @@ class RequestService:
             actor_id=ctx.user_id,
             meta={"provider": req.provider, "units": req.units, "urgency": req.urgency},
         )
+        if self._ops is not None:
+            await on_request_created(self._ops, req)
         await self._uow.commit()
         return await self._out(req), True
 
@@ -316,24 +334,54 @@ class RequestService:
         req = await self._own_incoming(ctx, request_id)
         return await self._transition(ctx, req, {"pending"}, "rejected", "request.rejected", note)
 
-    async def fulfil(self, ctx: AuthContext, request_id: UUID, note: str | None) -> BloodRequestOut:
+    async def fulfil(
+        self,
+        ctx: AuthContext,
+        request_id: UUID,
+        note: str | None,
+        *,
+        bag_public_ids: builtins.list[str] | None = None,
+    ) -> BloodRequestOut:
         req = await self._own_incoming(ctx, request_id)
         bank_id = require_facility(ctx)
         if req.status != "pending":
             raise InvalidRequestStateError(f"A '{req.status}' request can't be fulfilled.")
         now = self._clock.now()
-        bags = await self._uow.bags.usable_fefo(
-            bank_id,
-            blood_group=req.blood_group,
-            component=req.component,
-            now=now,
-            limit=req.units,
-        )
-        if len(bags) < req.units:
-            raise InsufficientStockError(
-                f"{len(bags)} of {req.units} usable {req.blood_group} {req.component} units "
-                "are in stock."
+        if bag_public_ids is None:
+            bags = await self._uow.bags.usable_fefo(
+                bank_id,
+                blood_group=req.blood_group,
+                component=req.component,
+                now=now,
+                limit=req.units,
             )
+            if len(bags) < req.units:
+                raise InsufficientStockError(
+                    f"{len(bags)} of {req.units} usable {req.blood_group} {req.component} units "
+                    "are in stock."
+                )
+        else:
+            # Human-confirmed selection (e.g. the Phase 6 recommendation). Same rules as FEFO:
+            # every bag must be usable, matching and held here; rows are locked the same way.
+            if len(bag_public_ids) != req.units:
+                raise BagNotEligibleError(
+                    f"Select exactly {req.units} bag(s); {len(bag_public_ids)} given."
+                )
+            usable = await self._uow.bags.usable_fefo(
+                bank_id,
+                blood_group=req.blood_group,
+                component=req.component,
+                now=now,
+                limit=500,
+            )
+            by_id = {b.public_id: b for b in usable}
+            missing = [p for p in bag_public_ids if p not in by_id]
+            if missing:
+                raise BagNotEligibleError(
+                    f"{', '.join(missing)} is not an available, unexpired {req.blood_group} "
+                    f"{req.component} bag held by this blood bank."
+                )
+            bags = [by_id[p] for p in bag_public_ids]
         for bag in bags:
             await append_event(
                 self._uow,
@@ -357,8 +405,16 @@ class RequestService:
             audience=[bank_id],
             payload={"reason": "request_dispatched", "bags_removed": len(bags)},
         )
+        if self._ops is not None:
+            await on_request_dispatched(self._ops, req, len(bags))
         return await self._transition(
-            ctx, req, {"pending"}, "dispatched", "request.dispatched", note
+            ctx,
+            req,
+            {"pending"},
+            "dispatched",
+            "request.dispatched",
+            note,
+            meta={"selection": "fefo" if bag_public_ids is None else "confirmed_bags"},
         )
 
     # ------------------------------------------------------------------ shared
@@ -388,6 +444,8 @@ class RequestService:
         to: Literal["cancelled", "rejected", "dispatched", "fulfilled"],
         topic: str,
         note: str | None,
+        *,
+        meta: dict[str, object] | None = None,
     ) -> BloodRequestOut:
         if req.status not in allowed:
             raise InvalidRequestStateError(f"A '{req.status}' request can't become '{to}'.")
@@ -414,6 +472,7 @@ class RequestService:
             resource="blood_request",
             resource_id=req.id,
             actor_id=ctx.user_id,
+            meta=meta,
         )
         await self._uow.commit()
         return await self._out(req)

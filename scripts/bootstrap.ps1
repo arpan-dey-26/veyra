@@ -459,6 +459,123 @@ if ($SkipDocker) {
     if (-not $denied) { throw "donor could read bag telemetry" }
     Log "   cold chain OK (bag $bagId, device $($dev.device_id), peak $($sum.max_c) C, $(@($series.readings).Count) simulated readings)"
   }
+  Step "e2e: phase 6 emergency operations (priority, recommendation, confirmed dispatch, scoped)" {
+    $base = "http://localhost:3000/api/v1"
+    $pw = "veyra-demo-console-2026"
+    function Csrf($sess) { ($sess.Cookies.GetCookies("http://localhost:3000") | Where-Object Name -eq "veyra_csrf").Value }
+    function Status-Of([scriptblock]$Call) {
+      try { & $Call | Out-Null; return 200 } catch { if ("$_" -match "-> (\d{3})") { return [int]$Matches[1] } else { throw } }
+    }
+    $bank = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $hosp = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $adm = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    Invoke-Api Post "$base/auth/login" @{ email = "bank@veyra.demo"; password = $pw } $bank | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "hospital@veyra.demo"; password = $pw } $hosp | Out-Null
+    Invoke-Api Post "$base/auth/login" @{ email = "admin@veyra.demo"; password = $pw } $adm | Out-Null
+    $bf = Invoke-Api Get "$base/facilities/me" $null $bank
+    $hf = Invoke-Api Get "$base/facilities/me" $null $hosp
+    $head = 0
+    while ($true) {
+      $page = (Invoke-WebRequest -Uri "$base/stream?once=true&after=$head" -WebSession $adm -UseBasicParsing).Content
+      $ids = @([regex]::Matches($page, "(?m)^id: (\d+)") | ForEach-Object { [int64]$_.Groups[1].Value })
+      if ($ids.Count -eq 0) { break }
+      $head = ($ids | Measure-Object -Maximum).Maximum
+    }
+    # An unrelated hospital (onboarded once through the normal admin + invite flow, then reused).
+    $other = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $otherEmail = "ops-e2e-unrelated@example.in"
+    $otherPw = "unrelated-hospital-smoke-2026"
+    try { Invoke-Api Post "$base/auth/login" @{ email = $otherEmail; password = $otherPw } $other | Out-Null } catch {
+      $tag0 = [Guid]::NewGuid().ToString("N").Substring(0, 6)
+      $fac = Invoke-Api Post "$base/admin/facilities" @{ type = "HOSPITAL"; name = "E2E Unrelated Hospital $tag0"; registration_number = "E2E-OPS-$tag0";
+        address = "9 Smoke Lane"; city = "Howrah"; state = "West Bengal"; pin_code = "711101" } $adm @{ "X-CSRF-Token" = (Csrf $adm) }
+      $inv = Invoke-Api Post "$base/admin/facilities/$($fac.id)/invites" @{ email = $otherEmail } $adm @{ "X-CSRF-Token" = (Csrf $adm) }
+      $token = $inv.accept_path.Split("/")[-1]
+      Invoke-Api Post "$base/auth/invites/accept" @{ token = $token; full_name = "Ops Smoke Coordinator"; mobile = "9123400099"; password = $otherPw } $other | Out-Null
+    }
+    # Two fresh donations of AB- PRBC; the first bag gets a SIMULATED critical excursion.
+    $bags = @()
+    foreach ($n in 1..2) {
+      $d = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+      $tag = [Guid]::NewGuid().ToString("N").Substring(0, 8)
+      $mobile = "9" + ([UInt64]("0x" + [Guid]::NewGuid().ToString("N").Substring(0, 15)) % 1000000000).ToString("000000000")
+      $reg = Invoke-Api Post "$base/auth/register" @{ full_name = "Ops Smoke"; email = "ops-$tag@example.in"; mobile = $mobile;
+        blood_group = "AB-"; address = "1 Smoke Street"; city = "Kolkata"; state = "West Bengal"; pin_code = "700001";
+        password = "smoke-test-passphrase" } $d
+      Invoke-Api Post "$base/auth/verify" @{ challenge_id = $reg.verification.challenge_id; code = $mobile.Substring(6) } $d | Out-Null
+      $found = Invoke-Api Post "$base/donors/lookup" @{ mobile = $mobile } $bank @{ "X-CSRF-Token" = (Csrf $bank) }
+      $don = Invoke-Api Post "$base/donations" @{ donor_id = $found.donor_id; blood_group = "AB-"; volume_ml = 450; components = @("PRBC") } $bank @{ "X-CSRF-Token" = (Csrf $bank) }
+      $bags += @($don.bags)[0].public_id
+      $donor = $d
+    }
+    $hot = $bags[0]
+    $h = @{ "X-CSRF-Token" = (Csrf $bank) }
+    Invoke-Api Post "$base/simulator/bags/$hot/attach" $null $bank $h | Out-Null
+    Invoke-Api Post "$base/simulator/bags/$hot/excursion" $null $bank $h | Out-Null
+    Invoke-Api Post "$base/simulator/bags/$hot/tick" @{ count = 3 } $bank $h | Out-Null
+    # Hospital: an emergency request.
+    $req = Invoke-Api Post "$base/requests" @{ provider = "internal"; target_ref = $bf.id; blood_group = "AB-"; component = "PRBC"; units = 1;
+      urgency = "emergency"; needed_by = (Get-Date).ToUniversalTime().AddHours(2).ToString("yyyy-MM-ddTHH:mm:ssZ") } $hosp @{ "X-CSRF-Token" = (Csrf $hosp) }
+    # Blood bank: operations view -> emergency request, priority reasons.
+    Assert-Http "http://localhost:3000/blood-bank" ""
+    $queue = Invoke-Api Get "$base/operations/requests" $null $bank
+    $item = @($queue.requests) | Where-Object { $_.id -eq $req.id }
+    if (-not $item -or $item.urgency -ne "emergency") { throw "emergency request missing from the operations queue" }
+    if (@($item.priority.reasons | ForEach-Object { $_.text }) -notcontains "Emergency request") { throw "priority reasons missing" }
+    if ($queue.disclaimer -notlike "*Recommendations are not clinical decisions or medical advice*") { throw "ops disclaimer missing" }
+    $prio = Invoke-Api Get "$base/operations/requests/$($req.id)/priority" $null $bank
+    if (@("immediate", "high") -notcontains $prio.band -or $prio.label -notlike "Operational recommendation*prototype") { throw "priority band/label: $($prio.band) $($prio.label)" }
+    # Recommendation: candidates, ranking reasons, cold-chain state; nothing dispatched yet.
+    $rec = Invoke-Api Get "$base/operations/requests/$($req.id)/recommendations" $null $bank
+    $hotCand = @($rec.candidates) | Where-Object { $_.public_id -eq $hot }
+    if (-not $hotCand -or $hotCand.cold_chain_state -ne "critical" -or -not $hotCand.deprioritized) { throw "critical bag not deprioritised" }
+    if (@($hotCand.reasons | ForEach-Object { $_.code }) -notcontains "cold_chain_critical") { throw "deprioritisation not explained" }
+    if (@($rec.recommended_bag_ids).Count -ne 1 -or @($rec.recommended_bag_ids) -contains $hot) { throw "unexpected recommendation: $($rec.recommended_bag_ids)" }
+    foreach ($c in @($rec.candidates)) { if ($c.current_facility_id -ne $bf.id -or -not $c.reasons) { throw "candidate scope/reasons" } }
+    if ($rec.human_confirmation -notlike "*Nothing is dispatched automatically*") { throw "human confirmation note missing" }
+    if ((Invoke-Api Get "$base/requests/$($req.id)" $null $bank).status -ne "pending") { throw "recommendation dispatched something" }
+    # Forecast pressure + simulated routing.
+    $pressure = Invoke-Api Get "$base/operations/facilities/$($bf.id)/pressure" $null $bank
+    $row = @($pressure.rows) | Where-Object { $_.blood_group -eq "AB-" -and $_.component -eq "PRBC" }
+    if (-not $row -or $row.open_units -lt 1 -or $pressure.source.kind -ne "synthetic") { throw "pressure row" }
+    if (@("normal", "watch", "elevated") -notcontains $row.level) { throw "pressure level" }
+    if (-not $rec.route -or $rec.route.source.kind -ne "simulated" -or $rec.route.eta_minutes -le 0) { throw "simulated route" }
+    $est = Invoke-Api Get "$base/operations/routing/estimate?source_facility_id=$($bf.id)&destination_facility_id=$($hf.id)&urgency=emergency" $null $bank
+    if ($est.distance_km -ne $rec.route.distance_km) { throw "routing not deterministic" }
+    # Explicit, human-confirmed dispatch through the existing workflow.
+    $ful = Invoke-Api Post "$base/requests/$($req.id)/fulfil" @{ bag_public_ids = @($rec.recommended_bag_ids) } $bank @{ "X-CSRF-Token" = (Csrf $bank) }
+    if ($ful.status -ne "dispatched" -or (@($ful.bags)[0].public_id) -ne @($rec.recommended_bag_ids)[0]) { throw "confirmed dispatch" }
+    # SSE (Last-Event-ID replay through the web proxy), scoped.
+    $sse = (Invoke-WebRequest -Uri "$base/stream?once=true" -Headers @{ "Last-Event-ID" = "$head" } -WebSession $bank -UseBasicParsing).Content
+    foreach ($t in @("request.operational_alert", "allocation.recommendation_updated", "routing.updated", "cold_chain.operational_alert")) {
+      if ($sse -notlike "*event: $t*") { throw "bank SSE missing $t" }
+    }
+    $hsse = (Invoke-WebRequest -Uri "$base/stream?once=true" -Headers @{ "Last-Event-ID" = "$head" } -WebSession $hosp -UseBasicParsing).Content
+    if ($hsse -notlike "*event: routing.updated*" -or $hsse -like "*allocation.recommendation_updated*") { throw "hospital SSE scope" }
+    $osse = (Invoke-WebRequest -Uri "$base/stream?once=true&after=$head" -WebSession $other -UseBasicParsing).Content
+    if ($osse -like "*$($req.id)*") { throw "unrelated hospital received the request's events" }
+    # Audit: the state changes are recorded (summary has no ip/meta).
+    $ad = Invoke-Api Get "$base/dashboard/admin" $null $adm
+    $actions = @($ad.audit.recent | ForEach-Object { $_.action })
+    foreach ($a in @("blood_request.created", "blood_request.dispatched", "telemetry.readings_generated")) { if ($actions -notcontains $a) { throw "audit missing $a" } }
+    # Hospital sees its own result (with a simulated ETA), then confirms receipt.
+    $mine = Invoke-Api Get "$base/operations/requests" $null $hosp
+    $own = @($mine.requests) | Where-Object { $_.id -eq $req.id }
+    if (-not $own -or $own.status -ne "dispatched" -or $own.route.eta_minutes -le 0) { throw "hospital view of its request" }
+    if (@($own.priority.reasons | ForEach-Object { $_.text }) -match "\d+ units without") { throw "exact bank stock leaked to hospital" }
+    Invoke-Api Post "$base/requests/$($req.id)/receive" $null $hosp @{ "X-CSRF-Token" = (Csrf $hosp) } | Out-Null
+    # Unrelated facility: 404. Donor: 403.
+    foreach ($path in @("operations/requests/$($req.id)/priority", "requests/$($req.id)", "operations/facilities/$($bf.id)/pressure")) {
+      $code = Status-Of { Invoke-Api Get "$base/$path" $null $other }
+      if ($code -ne 404) { throw "unrelated hospital got $code for $path" }
+    }
+    if ((Status-Of { Invoke-Api Get "$base/operations/requests/$($req.id)/recommendations" $null $hosp }) -ne 403) { throw "hospital read bag recommendations" }
+    if ((Status-Of { Invoke-Api Get "$base/operations/requests" $null $donor }) -ne 403) { throw "donor read operations" }
+    if ((Status-Of { Invoke-Api Get "$base/operations/alerts" $null $donor }) -ne 403) { throw "donor read alerts" }
+    # Cleanup by a person, not the engine: the bank discards the simulated-excursion bag.
+    Invoke-Api Post "$base/bags/$hot/discard" @{ reason = "other"; note = "E2E cleanup after simulated cold-chain excursion" } $bank @{ "X-CSRF-Token" = (Csrf $bank) } | Out-Null
+    Log "   operations OK (request $($req.reference) band $($prio.band) score $($prio.score); dispatched $(@($rec.recommended_bag_ids)[0]), skipped critical $hot; ETA $($rec.route.eta_minutes) min simulated)"
+  }
 }
 
 # ---------------------------------------------------------------- summary

@@ -11,13 +11,15 @@ from app.core.pagination import MAX_PAGE_SIZE, Page, PageMeta
 from app.core.rbac import AuthContext, Permission
 from app.modules.bags.domain import Component
 from app.modules.donations.schemas import BloodGroup
+from app.modules.forecast.model import default_model
 from app.modules.identity.deps import csrf_protect, get_clock, require
+from app.modules.operations.service import OperationsService
 from app.modules.requests.schemas import (
     AvailabilityResponse,
     BloodRequestOut,
     CreateBloodRequest,
+    FulfilRequest,
     RejectRequest,
-    RespondRequest,
 )
 from app.modules.requests.service import RequestService
 from app.persistence.deps import get_uow
@@ -50,8 +52,12 @@ def get_request_service(
     uow: UnitOfWork = Depends(get_uow),
     clock: Clock = Depends(get_clock),
     providers: dict[str, BloodBankProvider] = Depends(get_bloodbank_providers),
+    settings: Settings = Depends(get_settings),
 ) -> RequestService:
-    return RequestService(uow, clock, providers)
+    ops = OperationsService(
+        uow, clock, default_model(), utc_offset_minutes=settings.report_utc_offset_minutes
+    )
+    return RequestService(uow, clock, providers, ops=ops)
 
 
 @router.get(
@@ -124,15 +130,15 @@ async def get_request(
     "/requests/{request_id}/fulfil",
     response_model=BloodRequestOut,
     dependencies=[Depends(csrf_protect)],
-    summary="Dispatch bags (first-expiry-first-out) against a request",
+    summary="Dispatch bags against a request (FEFO, or the bags the bank confirmed)",
 )
 async def fulfil_request(
     request_id: UUID,
-    body: RespondRequest,
+    body: FulfilRequest,
     ctx: AuthContext = Depends(require(Permission.BLOOD_REQUEST_RESPOND)),
     service: RequestService = Depends(get_request_service),
 ) -> BloodRequestOut:
-    return await service.fulfil(ctx, request_id, body.note)
+    return await service.fulfil(ctx, request_id, body.note, bag_public_ids=body.bag_public_ids)
 
 
 @router.post(

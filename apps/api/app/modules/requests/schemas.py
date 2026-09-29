@@ -65,6 +65,28 @@ class RespondRequest(BaseModel):
         return (v.clean_text(value) or None) if value is not None else None
 
 
+class FulfilRequest(RespondRequest):
+    """Dispatch body. ``bag_public_ids`` is optional (Phase 6): omit it for strict FEFO."""
+
+    bag_public_ids: list[str] | None = Field(
+        default=None,
+        min_length=1,
+        max_length=20,
+        description="Bags the blood bank confirmed (e.g. from the operational recommendation). "
+        "Each must be an available, unexpired, matching bag held by this bank.",
+    )
+
+    @field_validator("bag_public_ids")
+    @classmethod
+    def _ids(cls, value: list[str] | None) -> list[str] | None:
+        if value is None:
+            return None
+        cleaned = [x.strip().upper() for x in value]
+        if len(set(cleaned)) != len(cleaned):
+            raise ValueError("Each bag may be selected only once")
+        return cleaned
+
+
 class RejectRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

@@ -38,6 +38,13 @@ export const TOPICS = [
   "temperature.warning",
   "temperature.critical",
   "temperature.recovered",
+  // Phase 6: operational intelligence (prototype)
+  "request.priority_changed",
+  "request.operational_alert",
+  "allocation.recommendation_updated",
+  "routing.updated",
+  "forecast.pressure_changed",
+  "cold_chain.operational_alert",
 ] as const;
 
 /**

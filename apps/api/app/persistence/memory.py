@@ -281,6 +281,29 @@ class _MemBags:
         rows.sort(key=lambda b: (b.expires_at, b.id))
         return rows[:limit]
 
+    async def list_usable(
+        self,
+        facility_id: UUID,
+        *,
+        now: datetime,
+        blood_group: str | None = None,
+        component: str | None = None,
+        expires_before: datetime | None = None,
+        limit: int,
+    ) -> list[BloodBag]:
+        rows = [
+            b
+            for b in self._db.bags.values()
+            if b.current_facility_id == facility_id
+            and b.status == "available"
+            and b.expires_at > now
+            and (blood_group is None or b.blood_group == blood_group)
+            and (component is None or b.component == component)
+            and (expires_before is None or b.expires_at <= expires_before)
+        ]
+        rows.sort(key=lambda b: (b.expires_at, b.id))
+        return rows[:limit]
+
     async def count_usable_by_facility(
         self, *, blood_group: str, component: str, now: datetime
     ) -> dict[UUID, int]:

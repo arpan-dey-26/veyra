@@ -294,3 +294,28 @@ def model_card(model: LoadedModel) -> ModelCard:
             f"Components limited to {', '.join(FORECAST_COMPONENTS)}.",
         ],
     )
+
+
+def facility_daily_mean(
+    model: LoadedModel,
+    facility: Facility,
+    group: str,
+    component: str,
+    today: date,
+    horizon: int = 7,
+) -> float | None:
+    """Mean synthetic daily demand over ``horizon`` days for one facility series.
+
+    ``None`` when the model does not cover that group/component (Phase 6 then falls back to
+    real stock vs open requests only).
+    """
+    if component not in FORECAST_COMPONENTS or group not in FORECAST_GROUPS:
+        return None
+    start = today - timedelta(days=WINDOW)
+    hist = generate(
+        SeriesKey(str(facility.id), facility.type, group, component), start, WINDOW, model.seed
+    )
+    points = recursive_forecast(
+        model.gbm, [float(v) for v in hist], today, component, horizon, model.q10, model.q90
+    )
+    return fmean([p.predicted for p in points])

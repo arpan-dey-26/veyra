@@ -509,6 +509,27 @@ async def take_reading(
             audience=audience,
             payload=payload | extra,
         )
+    concern = next(
+        (t for t in transitions if t in ("temperature.warning", "temperature.critical")), None
+    )
+    if concern is not None and bag.status in ("available", "in_transit"):
+        # Phase 6: the bag is flagged (never discarded) in allocation recommendations.
+        await emit(
+            uow,
+            clock,
+            topic="cold_chain.operational_alert",
+            aggregate_type="bag",
+            aggregate_id=bag.public_id,
+            audience=audience,
+            payload=payload
+            | {
+                "blood_group": bag.blood_group,
+                "component": bag.component,
+                "bag_status": bag.status,
+                "action": "Deprioritised in allocation recommendations; review before dispatch",
+                "label": "Operational recommendation — prototype",
+            },
+        )
     await emit(
         uow,
         clock,

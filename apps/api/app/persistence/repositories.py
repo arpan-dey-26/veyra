@@ -109,6 +109,19 @@ class BagRepository(Protocol):
     async def usable_fefo(
         self, facility_id: UUID, *, blood_group: str, component: str, now: datetime, limit: int
     ) -> list[BloodBag]: ...
+    async def list_usable(
+        self,
+        facility_id: UUID,
+        *,
+        now: datetime,
+        blood_group: str | None = None,
+        component: str | None = None,
+        expires_before: datetime | None = None,
+        limit: int,
+    ) -> list[BloodBag]:
+        """Read-only FEFO listing (no row locks): for recommendations and attention lists."""
+        ...
+
     async def count_usable_by_facility(
         self, *, blood_group: str, component: str, now: datetime
     ) -> dict[UUID, int]: ...

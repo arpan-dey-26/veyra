@@ -297,6 +297,32 @@ class SqlBagRepository(_Repo):
         )
         return list(rows)
 
+    async def list_usable(
+        self,
+        facility_id: UUID,
+        *,
+        now: datetime,
+        blood_group: str | None = None,
+        component: str | None = None,
+        expires_before: datetime | None = None,
+        limit: int,
+    ) -> list[BloodBag]:
+        conds = [
+            BloodBag.current_facility_id == facility_id,
+            BloodBag.status == "available",
+            BloodBag.expires_at > now,
+        ]
+        if blood_group is not None:
+            conds.append(BloodBag.blood_group == blood_group)
+        if component is not None:
+            conds.append(BloodBag.component == component)
+        if expires_before is not None:
+            conds.append(BloodBag.expires_at <= expires_before)
+        rows = await self._s.scalars(
+            select(BloodBag).where(*conds).order_by(BloodBag.expires_at, BloodBag.id).limit(limit)
+        )
+        return list(rows)
+
     async def count_usable_by_facility(
         self, *, blood_group: str, component: str, now: datetime
     ) -> dict[UUID, int]:

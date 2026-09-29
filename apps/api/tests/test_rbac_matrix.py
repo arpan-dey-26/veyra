@@ -1,4 +1,4 @@
-"""RBAC matrix: every Phase 1-5 endpoint x every role (+ anonymous) → expected status.
+"""RBAC matrix: every Phase 1-6 endpoint x every role (+ anonymous) → expected status.
 
 This is the contract for the security boundary. Adding an endpoint means adding a row.
 """
@@ -281,6 +281,56 @@ MATRIX: list[tuple[str, str, dict[str, object] | None, dict[str, int]]] = [
         f"/api/v1/simulator/bags/{_BAG}/tick",
         {"count": 1},
         {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    # Phase 6: operational intelligence (prototype)
+    (
+        "GET",
+        "/api/v1/operations/requests",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    (
+        "GET",
+        f"/api/v1/operations/requests/{_UUID}/priority",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "POST",
+        f"/api/v1/operations/requests/{_UUID}/priority",
+        {"urgency": "emergency", "reason": "other"},
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 403, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        f"/api/v1/operations/requests/{_UUID}/recommendations",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 403, "BLOOD_BANK": 404, "ADMIN": 403},
+    ),
+    (
+        "GET",
+        f"/api/v1/operations/facilities/{_UUID}/pressure",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "GET",
+        "/api/v1/operations/routing",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
+    ),
+    (
+        "GET",
+        f"/api/v1/operations/routing/estimate?source_facility_id={_UUID}"
+        f"&destination_facility_id={_UUID}",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 404, "BLOOD_BANK": 404, "ADMIN": 404},
+    ),
+    (
+        "GET",
+        "/api/v1/operations/alerts",
+        None,
+        {"ANON": 401, "DONOR": 403, "HOSPITAL": 200, "BLOOD_BANK": 200, "ADMIN": 200},
     ),
     (
         "GET",
